@@ -18,7 +18,7 @@
 				
 				<path v-for="shape in shapes" :d="getPath(shape.points, true)" stroke="white" fill="black" />
 				
-				<path :d="currentPath" stroke="black" fill="none" stroke-width="2" />
+				<path :d="currentPath" stroke="black" fill="none" stroke-width="1" />
 				
 				<template v-for="guide in guides" >
 					<anchor v-bind:point="guide.p1" v-bind:type="2" />
@@ -167,18 +167,20 @@
 
 		Vue.component('anchor', {
   			props: ['point', 'type'],
-  			template: '<rect :x="point.x - midSize" :y="point.y - midSize" :width="size" :height="size" :fill="color" :opacity="opacity" />',
+  			template: '<circle :cx="point.x" :cy="point.y" :r="size" :stroke="strokeColor" stroke-width="1" :fill="fillColor" />',
   			computed: {
-  				size: function() { return this.point.isMouseOver ? 8 : 6 },
-  				midSize: function() { return this.size / 2.0; },
-  				opacity: function() { return this.point.isMouseOver ? 0.8 : 1; },
-  				color: function() {
-  					if (this.type == AnchorType.startPoint) 
-  						return "#0055ff";
-  					else if (this.type == AnchorType.guide)
+  				size: function() { return this.point.isMouseOver ? 5 : 3 },
+  				strokeColor: function() {  
+					if (this.type == AnchorType.guide)
   						return "#ff0000";
   					else
-  						return "#999999";
+  						return "transparent";
+  				},
+  				fillColor: function() {
+  					if (this.type == AnchorType.startPoint) 
+  						return "#318be7";
+  					else
+  						return "transparent";
   				}
   			}
 		});

@@ -16,7 +16,7 @@
 				v-on:mousemove="move($event)"
 				v-on:keyup.z.ctrl="cancel" tabindex="0">
 				
-				<path v-for="shape in shapes" :d="getPath(shape, true)" stroke="white" fill="black" />
+				<path v-for="shape in shapes" :d="getPath(shape.points, true)" stroke="white" fill="black" />
 				
 				<path :d="currentPath" stroke="black" fill="none" stroke-width="2" />
 				
@@ -57,6 +57,13 @@
 			constructor(p1,p2) {
 				this.p1 = p1;
 				this.p2 = p2;
+			}
+		}
+
+		class Shape {
+			constructor(points) {
+				this.points = points;
+				this.guides = getGuides(points);
 			}
 		}
 
@@ -185,7 +192,6 @@
 			currentPoint: new Point(),
 			currentShape: [],
 			shapes: [],
-			guides: []
 		  },
 		  computed: {
 			showStartPoint: function () {
@@ -199,6 +205,9 @@
 			},
 			currentPath: function () {
 				return this.getPath(this.currentShape.concat(this.currentPoint));
+			},
+			guides: function () {
+				return this.shapes.map(s => s.guides).flat();
 			}
 		  },
 		  methods: {
@@ -225,8 +234,7 @@
 				return this.showStartPoint && point.getSqDistanceFrom(this.currentShape[0]) < this.snapThreshold;
 			},
 			closeCurrentShape: function () {
-				this.shapes.push(this.currentShape);
-				this.guides = this.guides.concat(getGuides(this.currentShape));
+				this.shapes.push(new Shape(this.currentShape));
 				this.currentShape = [];
 			},
 			getSnappedPosition: function (mouseEvent, updateUI) {

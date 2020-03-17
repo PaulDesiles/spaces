@@ -6,15 +6,15 @@
 		<meta name="description" content="Vue.js svg editor">
 		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 		<style>
-			#console {
-				background: #bbb;
-				padding: 10px;
-			}
+			svg:focus { outline: none; }
 		</style>
 	</head>
 	<body>
 		<div id="app">
-			<svg id="svgCanvas" width="400" height="400" v-on:click="clic($event)" v-on:mousemove="move($event)">
+			<svg id="svgCanvas" width="400" height="400" 
+				v-on:click="clic($event)"
+				v-on:mousemove="move($event)"
+				v-on:keyup.z.ctrl="cancel" tabindex="0">
 				
 				<path v-for="shape in shapes" :d="getPath(shape, true)" stroke="white" fill="black" />
 				
@@ -270,6 +270,12 @@
 				else
 					this.currentShape.push(snappedPoint);
 			},
+			cancel: function () {
+				if (this.startPoint !== undefined)
+					this.currentShape.pop();
+				else
+					this.shapes.pop();
+			}
 		  }
 		})
 	</script>

@@ -1,7 +1,9 @@
 <template>
 	<div id="container">
-		<svg id="viewer" xmlns="http://www.w3.org/2000/svg">
-			<slot></slot>
+		<svg id="viewer" ref="viewer" xmlns="http://www.w3.org/2000/svg">
+			<g ref="viewerContent">
+				<slot></slot>
+			</g>
 		</svg>
 		<div id="scrollContainer">
 			<div id="hScrollContainer">
@@ -89,6 +91,13 @@
 				window.removeEventListener('mousemove', this.move, false);
 				window.removeEventListener('mouseup', this.move, false);
 				window.removeEventListener('mouseleave', this.move, false);
+			},
+			pointToSvg(domPoint) {
+				let p = this.$refs.viewer.createSVGPoint();
+				p.x = domPoint.x;
+				p.y = domPoint.y;
+				let transformed = p.matrixTransform(this.$refs.viewerContent.getScreenCTM().inverse());
+				return {x: transformed.x, y: transformed.y};
 			}
 		},
 		mounted: function(){
@@ -105,7 +114,7 @@
 				center: true,
 				onZoom: function(){
 					that.zoom = that.pz.getZoom();
-					
+
 					let pan = that.pz.getPan();
 					that.x = Math.max(0, pan.x);
 					that.y = Math.max(0, pan.y);

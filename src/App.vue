@@ -1,7 +1,8 @@
 <template>
   <div id="app">
-    <SvgViewport >
-      <g v-on:click="clic($event)"
+    <SvgViewport ref="svgViewport">
+      <g ref="mainGroup"
+          v-on:click="clic($event)"
           v-on:mousemove="move($event)"
           v-on:keyup.z.ctrl="cancel">
         <rect x="0" y="0" width="1000" height="600" fill="white" border="black" border-width="1" />
@@ -59,10 +60,13 @@ export default {
   },
   methods: {
     getPosition: function (event) {
-      return new Geo.Point( 
-        event.layerX,
-        event.layerY
-      );
+      // let rect = this.$refs.svgViewport.getBoundingClientRect();
+      let p = {
+        x: event.pageX, // - rect.left,
+        y: event.pageY //- rect.top
+      };
+      let newP = this.$refs.svgViewport.pointToSvg(p);
+      return new Geo.Point(newP.x, newP.y);
     },
     getPath: function (shape, closeShape) {
       let path = "";

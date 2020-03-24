@@ -7,7 +7,7 @@
           v-on:keyup.z.ctrl="cancel">
         <rect x="0" y="0" :width="xmax" :height="ymax" fill="white" border="#000" border-width="1" />
 
-        <line v-for="guide in projectedGuides" :x1="guide.x1" :y1="guide.y1" :x2="guide.x2" :y2="guide.y2" stroke-width="1" stroke="#999" />
+        <line v-for="guide in projectedGuides" :x1="guide.x1" :y1="guide.y1" :x2="guide.x2" :y2="guide.y2" stroke-width="1" :stroke="guide.color" />
 
         <path v-for="shape in shapes" :d="getPath(shape.points, true)" stroke-width="0" fill="black" />
         
@@ -91,7 +91,8 @@ export default {
           x1: lineBounds[0].x,
           y1: lineBounds[0].y,
           x2: lineBounds[1].x,
-          y2: lineBounds[1].y
+          y2: lineBounds[1].y,
+          color: (g.isMouseOver ? "#318be7" : "#aaa")
         }
       });
     }
@@ -151,6 +152,28 @@ export default {
         
         if (updateUI)
           nearestPoint.isMouseOver = true;
+      }
+      else {
+        let nearestGuide;
+        this.guides.forEach(g => {
+          if (updateUI)
+            g.isMouseOver = false;
+
+          let p = g.getProjection(snappedPoint);
+          let d = p.getSqDistanceFrom(snappedPoint);
+          if (d < nearestDistance) {
+            nearestDistance = d;
+            nearestPoint = p;
+            nearestGuide = g;
+          }
+        });
+
+        if (nearestPoint != null) {
+          snappedPoint = nearestPoint;
+        
+          if (updateUI)
+            nearestGuide.isMouseOver = true;
+        }
       }
 
       return snappedPoint;

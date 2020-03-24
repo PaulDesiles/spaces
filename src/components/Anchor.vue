@@ -7,23 +7,23 @@
 
   var blue = "#318be7";
   var grey = "#aaa";
-  var t = "transparent";
+  var transp = "transparent";
   class AnchorTypeProperties {
     constructor(size, color, plain, sizeOnHover, colorOnHover) {
       this.size = size;
-      this.stroke = plain ? t : color;
-      this.fill = plain ? color : t;
+      this.stroke = plain ? transp : color;
+      this.fill = plain ? color : transp;
 
       this.sizeOnHover = sizeOnHover || size;
-      this.strokeOnHover = plain ? t : (colorOnHover || color);
-      this.fillOnHover = plain ? (colorOnHover || color) : t;
+      this.strokeOnHover = plain ? transp : (colorOnHover || color);
+      this.fillOnHover = plain ? (colorOnHover || color) : transp;
     }
   }
 
   let props = new Map();
   props.set(AnchorType.cursor, new AnchorTypeProperties(5, blue, false));
   props.set(AnchorType.startPoint, new AnchorTypeProperties(5, blue, true, 7));
-  props.set(AnchorType.guide, new AnchorTypeProperties(3, grey, true, 3, t));
+  props.set(AnchorType.guide, new AnchorTypeProperties(3, grey, true, 3, transp));
 
   export default {
     name: 'Anchor',

@@ -33,11 +33,29 @@ export class Segment {
 		// the line function is (y = a * x + b) 
         // with a = dx / dy
         // and b = y - a * x
-        let a = (p2.y - p1.y)/(p2.x - p1.x);
+        this.dx = p2.x - p1.x;
+        this.dy = p2.y - p1.y;
+        let a = this.dy / this.dx;
         let b = p1.y - a * p1.x; 
         this.y = x => a * x + b;
         this.x = y => (y - b) / a;
+
+        //pre-calc for projection
+        this.squaredLength = this.dx * this.dx + this.dy * this.dy;
+
+		this.isMouseOver = false;
+
 	}
+
+	//https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+	getProjection(p) {
+		let t = ((p.x - this.p1.x) * this.dx + (p.y - this.p1.y) * this.dy) / this.squaredLength;
+		return new Point(
+			this.p1.x + t * this.dx,
+            this.p1.y + t * this.dy 
+        );
+	}
+
 }
 
 export class Shape {

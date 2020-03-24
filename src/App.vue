@@ -14,11 +14,13 @@
         <path :d="currentPath" stroke="black" fill="none" stroke-width="1" />
         
         <template v-for="guide in guides" >
-          <anchor v-bind:point="guide.p1" v-bind:type="2" />
-          <anchor v-bind:point="guide.p2" v-bind:type="2"/>
+          <anchor v-bind:point="guide.p1" v-bind:type="3" />
+          <anchor v-bind:point="guide.p2" v-bind:type="3"/>
         </template>
 
-        <anchor v-if="showStartPoint" v-bind:point="startPoint" v-bind:type="1" />
+        <anchor v-if="showStartPoint" v-bind:point="startPoint" v-bind:type="2" />
+
+        <anchor v-bind:point="currentPoint" v-bind:type="1" />
       </g>
     </SvgViewport>
   </div>

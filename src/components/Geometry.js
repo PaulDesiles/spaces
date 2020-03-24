@@ -140,5 +140,5 @@ function getIntersection(u, v) {
 	return new Point(x1 + (x2-x1) * a, y1 + (y2-y1) * a);
 }
 
-export const AnchorType = { startPoint:1, guide:2 };
+export const AnchorType = { cursor:1, startPoint:2, guide:3 };
 Object.freeze(AnchorType);

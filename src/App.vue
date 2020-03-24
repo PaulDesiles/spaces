@@ -5,9 +5,11 @@
           v-on:click="clic($event)"
           v-on:mousemove="move($event)"
           v-on:keyup.z.ctrl="cancel">
-        <rect x="0" y="0" width="1000" height="600" fill="white" border="black" border-width="1" />
+        <rect x="0" y="0" :width="xmax" :height="ymax" fill="white" border="#000" border-width="1" />
 
-        <path v-for="shape in shapes" :d="getPath(shape.points, true)" stroke="white" fill="black" />
+        <line v-for="guide in projectedGuides" :x1="guide.x1" :y1="guide.y1" :x2="guide.x2" :y2="guide.y2" stroke-width="1" stroke="#999" />
+
+        <path v-for="shape in shapes" :d="getPath(shape.points, true)" stroke-width="0" fill="black" />
         
         <path :d="currentPath" stroke="black" fill="none" stroke-width="1" />
         
@@ -36,6 +38,8 @@ export default {
   data: function() {
     return {
       snapThreshold: 20,
+      xmax: 1000,
+      ymax: 600,
       currentPoint: new Geo.Point(),
       currentShape: [],
       shapes: [],
@@ -56,6 +60,38 @@ export default {
     },
     guides: function () {
       return this.shapes.map(s => s.guides).flat();
+    },
+    projectedGuides: function () {
+      return this.guides.map(g => {
+        //compute the guide's function intersections with frame borders
+        let intersections = [
+          {x: 0, y: g.y(0)}, //i_xmin
+          {x: g.x(0), y: 0}, //i_ymin
+          {x: this.xmax, y: g.y(this.xmax)}, //i_xmax
+          {x: g.x(this.ymax), y: this.ymax} //i_ymax
+        ];
+
+        //line 'bounds' are the intersections that are still inside the frame
+        let lineBounds = [];
+        intersections.forEach(p => 
+        {
+          if (lineBounds.length < 2
+            && p.x >= 0 
+            && p.x <= this.xmax
+            && p.y >= 0 
+            && p.y <= this.ymax)
+          {
+            lineBounds.push(p);
+          }
+        });
+
+        return { 
+          x1: lineBounds[0].x,
+          y1: lineBounds[0].y,
+          x2: lineBounds[1].x,
+          y2: lineBounds[1].y
+        }
+      });
     }
   },
   methods: {
@@ -95,7 +131,7 @@ export default {
         .flat();
 
       if (this.showStartPoint)
-        allAnchors.push(this.startPoint);
+        allAnchors.unshift(this.startPoint);
 
       allAnchors.forEach(a => {
         if (updateUI)
@@ -125,7 +161,7 @@ export default {
       if (this.showStartPoint && snappedPoint == this.startPoint)
         this.closeCurrentShape();
       else
-        this.currentShape.push(snappedPoint);
+        this.currentShape.push(snappedPoint.clone());
     },
     cancel: function () {
       if (this.startPoint !== undefined)

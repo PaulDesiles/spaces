@@ -9,7 +9,7 @@
     name: 'Anchor',
     props: ['point', 'type'],
     computed: {
-      size: function() { return this.point.isMouseOver ? 5 : 3 },
+      size: function() { return (this.point.isMouseOver ? 5 : 3) + (this.type == AnchorType.startPoint ? 2 : 0) },
       strokeColor: function() {  
       if (this.type == AnchorType.guide)
           return "#ff0000";

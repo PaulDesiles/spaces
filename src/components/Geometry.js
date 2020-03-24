@@ -19,12 +19,24 @@ export class Point {
 		let dy = p2.y - this.y;
 		return Math.sqrt(dx * dx + dy * dy);
 	}
+
+	clone() {
+		return new Point(this.x, this.y);
+	}
 }
 
 export class Segment {
 	constructor(p1,p2) {
 		this.p1 = p1;
 		this.p2 = p2;
+
+		// the line function is (y = a * x + b) 
+        // with a = dx / dy
+        // and b = y - a * x
+        let a = (p2.y - p1.y)/(p2.x - p1.x);
+        let b = p1.y - a * p1.x; 
+        this.y = x => a * x + b;
+        this.x = y => (y - b) / a;
 	}
 }
 

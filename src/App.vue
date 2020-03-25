@@ -150,8 +150,13 @@ export default {
       if (nearestPoint != null) {
         snappedPoint = nearestPoint;
         
-        if (updateUI)
+        if (updateUI) {
           nearestPoint.isMouseOver = true;
+
+          this.guides
+            .filter(g => g.isMouseOver)
+            .forEach(g => { g.isMouseOver = false; });
+        }
       }
       else {
         let nearestGuide;

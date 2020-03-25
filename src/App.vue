@@ -7,15 +7,18 @@
           v-on:keyup.z.ctrl="cancel">
         <rect x="0" y="0" :width="xmax" :height="ymax" fill="white" border="#000" border-width="1" />
 
-        <line v-for="guide in projectedGuides" :x1="guide.x1" :y1="guide.y1" :x2="guide.x2" :y2="guide.y2" stroke-width="1" :stroke="guide.color" />
+        <template v-for="guide in projectedGuides" >
+          <line :x1="guide.x1" :y1="guide.y1" :x2="guide.x2" :y2="guide.y2" stroke-width="1" :stroke="guide.color" />  
+        </template>
+        
 
         <path v-for="shape in shapes" :d="getPath(shape.points, true)" stroke-width="0" fill="black" />
         
         <path :d="currentPath" stroke="black" fill="none" stroke-width="1" />
         
-        <template v-for="guide in guides" >
-          <anchor v-bind:point="guide.p1" v-bind:type="3" />
-          <anchor v-bind:point="guide.p2" v-bind:type="3"/>
+        <template v-for="guide in guides" v-if="!guide.hidePoints" >
+          <anchor v-bind:point="guide.A" v-bind:type="3" />
+          <anchor v-bind:point="guide.B" v-bind:type="3"/>
         </template>
 
         <anchor v-if="showStartPoint" v-bind:point="startPoint" v-bind:type="2" />
@@ -130,7 +133,8 @@ export default {
       let nearestPoint;
       let nearestDistance = this.snapThreshold;
       let allAnchors = this.guides
-        .map(g => [g.p1, g.p2])
+        .filter(g => !g.hidePoints)
+        .map(g => [g.A, g.B])
         .flat();
 
       if (this.showStartPoint)

@@ -14,9 +14,9 @@ export class Point {
 		this.isMouseOver = false;
 	}
 
-	getSqDistanceFrom(p2) {
-		let dx = p2.x - this.x;
-		let dy = p2.y - this.y;
+	getSqDistanceFrom(p) {
+		let dx = p.x - this.x;
+		let dy = p.y - this.y;
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
@@ -26,17 +26,24 @@ export class Point {
 }
 
 export class Segment {
-	constructor(p1,p2) {
-		this.p1 = p1;
-		this.p2 = p2;
+	constructor(A,B) {
+		this.A = A;
+		this.B = B;
+	}
+}
+
+export class Guide extends Segment {
+	constructor(A,B,hidePoints) {
+		super(A,B);
+		this.hidePoints = hidePoints;
 
 		// the line function is (y = a * x + b) 
         // with a = dx / dy
         // and b = y - a * x
-        this.dx = p2.x - p1.x;
-        this.dy = p2.y - p1.y;
+        this.dx = B.x - A.x;
+        this.dy = B.y - A.y;
         let a = this.dy / this.dx;
-        let b = p1.y - a * p1.x; 
+        let b = A.y - a * A.x; 
         this.y = x => a * x + b;
         this.x = y => (y - b) / a;
 
@@ -49,10 +56,10 @@ export class Segment {
 
 	//https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
 	getProjection(p) {
-		let t = ((p.x - this.p1.x) * this.dx + (p.y - this.p1.y) * this.dy) / this.squaredLength;
+		let t = ((p.x - this.A.x) * this.dx + (p.y - this.A.y) * this.dy) / this.squaredLength;
 		return new Point(
-			this.p1.x + t * this.dx,
-            this.p1.y + t * this.dy 
+			this.A.x + t * this.dx,
+            this.A.y + t * this.dy 
         );
 	}
 
@@ -83,13 +90,17 @@ function isFormClockwiseOriented(points) {
 
 function getGuides(points) {
 
-	let guides = [];
+	let stickedGuides = []; // guides in contact with the form
+	let spacedGuides = []; // guides spaces from the form
 	let clockwise = isFormClockwiseOriented(points);
 
 	let getCycled = (array, i) => array[i % array.length];
 
 	for (let i=0; i < points.length; i++) {
-		guides.push(
+		stickedGuides.push(
+			new Guide(getCycled(points, i), getCycled(points, i+1), true));
+
+		spacedGuides.push(
 			getGuideForBCSegment(
 				getCycled(points, i),
 				getCycled(points, i+1),
@@ -101,15 +112,17 @@ function getGuides(points) {
 	}
 
 	//if the corner is concave, get intersection between guides
-	for (let i=0; i < guides.length; i++) {
-		let current = getCycled(guides, i);
-		let next = getCycled(guides, i+1);
+	for (let i=0; i < spacedGuides.length; i++) {
+		let current = getCycled(spacedGuides, i);
+		let next = getCycled(spacedGuides, i+1);
 
-		if (clockwise != isFormClockwiseOriented([current.p1, current.p2, next.p1, next.p2]))
-			current.p2 = next.p1 = getIntersection(current, next);
+		if (clockwise != isFormClockwiseOriented([current.A, current.B, next.A, next.B]))
+			current.B = next.A = getIntersection(current.A, current.B, next.A, next.B);
 	}
 
-	return guides;
+	return spacedGuides
+		.map(g => new Guide(g.A, g.B, false))
+		.concat(stickedGuides);
 }
 
 function getGuideForBCSegment(A, B, C, D, isFormClockwise) {
@@ -118,12 +131,12 @@ function getGuideForBCSegment(A, B, C, D, isFormClockwise) {
 
 	// compute this line's intersections with the form's previous and next segment
 	// to get guide's key points
-	let I = getIntersection(new Segment(A,B), movedBCSegment);
-	let J = getIntersection(new Segment(C,D), movedBCSegment);
+	let I = getIntersection(A,B, movedBCSegment.A, movedBCSegment.B);
+	let J = getIntersection(C,D, movedBCSegment.A, movedBCSegment.B);
 
 	//TODO : optimize if the corner is concave by not computing a point that will be changed later...
 
-	return new Segment(I,J);
+	return new Segment(I, J);
 }
 
 function moveSegmentOutside(A, B, distance, isFormClockwise) {
@@ -141,21 +154,12 @@ function moveSegmentOutside(A, B, distance, isFormClockwise) {
     return new Segment(
     	new Point(sizeFactor * x + A.x, sizeFactor + A.y),
     	new Point(sizeFactor * x + B.x, sizeFactor + B.y)
- 	);
+	);
 }
 
-function getIntersection(u, v) {
-	let x1 = u.p1.x;
-	let x2 = u.p2.x;
-	let x3 = v.p1.x;
-	let x4 = v.p2.x;
-	let y1 = u.p1.y;
-	let y2 = u.p2.y;
-	let y3 = v.p1.y;
-	let y4 = v.p2.y;
-
-    let a = ((y4-y3)*(x1-x3)-(x4-x3)*(y1-y3)) / ((x4-x3)*(y2-y1)-(y4-y3)*(x2-x1));
-	return new Point(x1 + (x2-x1) * a, y1 + (y2-y1) * a);
+function getIntersection(A, B, C, D) {
+    let a = ((D.y-C.y)*(A.x-C.x)-(D.x-C.x)*(A.y-C.y)) / ((D.x-C.x)*(B.y-A.y)-(D.y-C.y)*(B.x-A.x));
+	return new Point(A.x + (B.x-A.x) * a, A.y + (B.y-A.y) * a);
 }
 
 export const AnchorType = { cursor:1, startPoint:2, guide:3 };

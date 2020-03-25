@@ -17,19 +17,20 @@
 					border-width="1"
 				/>
 
-				<template v-for="guide in projectedGuides">
-					<line
-						:x1="guide.x1"
-						:y1="guide.y1"
-						:x2="guide.x2"
-						:y2="guide.y2"
-						stroke-width="1"
-						:stroke="guide.color"
-					/>
-				</template>
+				<line
+					v-for="guide in projectedGuides"
+					:key="guide.id"
+					:x1="guide.x1"
+					:y1="guide.y1"
+					:x2="guide.x2"
+					:y2="guide.y2"
+					stroke-width="1"
+					:stroke="guide.color"
+				/>
 
 				<path
 					v-for="shape in shapes"
+					:key="shape.id"
 					:d="getPath(shape.points, true)"
 					stroke-width="0"
 					fill="black"
@@ -42,23 +43,20 @@
 					stroke-width="1"
 				/>
 
-				<template v-for="guide in guides" v-if="!guide.hidePoints">
-					<anchor :point="guide.A" :type="3" />
-					<anchor :point="guide.B" :type="3" />
-				</template>
+				<Anchor v-for="p in visibleGuidesPoints" :point="p" :type="3" />
 
-				<anchor v-if="showStartPoint" :point="startPoint" :type="2" />
+				<Anchor v-if="showStartPoint" :point="startPoint" :type="2" />
 
-				<anchor :point="currentPoint" :type="1" />
+				<Anchor :point="currentPoint" :type="1" />
 			</g>
 		</SvgViewport>
 	</div>
 </template>
 
 <script>
-import SvgViewport from './components/SvgViewport.vue'
-import Anchor from './components/Anchor.vue'
-import * as Geo from './components/Geometry.js'
+import SvgViewport from './components/SvgViewport.vue';
+import Anchor from './components/Anchor.vue';
+import * as Geo from './components/Geometry.js';
 
 export default {
 	name: 'App',
@@ -117,6 +115,7 @@ export default {
 				});
 
 				return {
+					id: g.id,
 					x1: lineBounds[0].x,
 					y1: lineBounds[0].y,
 					x2: lineBounds[1].x,
@@ -124,6 +123,12 @@ export default {
 					color: (g.isMouseOver ? '#318be7' : '#aaa')
 				};
 			});
+		},
+		visibleGuidesPoints() {
+			return this.guides
+				.filter(g => !g.hidePoints)
+				.map(g => [g.A, g.B])
+				.flat();
 		}
 	},
 	methods: {
@@ -157,10 +162,7 @@ export default {
 			let snappedPoint = this.getPosition(mouseEvent);
 			let nearestPoint;
 			let nearestDistance = this.snapThreshold;
-			const allAnchors = this.guides
-				.filter(g => !g.hidePoints)
-				.map(g => [g.A, g.B])
-				.flat();
+			const allAnchors = this.visibleGuidesPoints;
 
 			if (this.showStartPoint) {
 				allAnchors.unshift(this.startPoint);

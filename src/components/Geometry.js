@@ -1,4 +1,5 @@
 const formsGap = 10;
+let idCount = 0;
 
 export class Point {
 	constructor(x, y) {
@@ -34,6 +35,7 @@ export class Segment {
 export class Guide extends Segment {
 	constructor(A, B, hidePoints) {
 		super(A, B);
+		this.id = idCount++;
 		this.hidePoints = hidePoints;
 
 		// The line function is (y = a * x + b)
@@ -64,6 +66,7 @@ export class Guide extends Segment {
 
 export class Shape {
 	constructor(points) {
+		this.id = idCount++;
 		this.points = points;
 		this.guides = getGuides(points);
 	}

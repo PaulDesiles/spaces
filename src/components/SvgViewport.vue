@@ -11,7 +11,7 @@
 					ref="hScrollBar"
 					class="scrollBar"
 					:style="hBarStyle"
-					@mousedown.stop="hang()"
+					@mousedown.stop="hang($event)"
 				/>
 			</div>
 			<div id="vScrollContainer">
@@ -19,7 +19,7 @@
 					ref="vScrollBar"
 					class="scrollBar"
 					:style="vBarStyle"
-					@mousedown.stop="hang()"
+					@mousedown.stop="hang($event)"
 				/>
 			</div>
 		</div>

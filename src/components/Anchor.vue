@@ -6,11 +6,11 @@
 		:stroke="strokeColor"
 		stroke-width="1"
 		:fill="fillColor"
-    />
+	/>
 </template>
 
 <script>
-import {AnchorType,Point} from './Geometry.js';
+import {AnchorType, Point} from './Geometry.js';
 
 const blue = '#318be7';
 const grey = '#aaa';
@@ -67,5 +67,5 @@ export default {
 			return props.get(this.type).fill;
 		}
 	}
-}
+};
 </script>

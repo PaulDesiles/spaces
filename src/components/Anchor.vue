@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import {AnchorType, Point} from './Geometry.js';
+import {AnchorType, Point} from './Geometry2.js';
 
 const blue = '#318be7';
 const grey = '#aaa';

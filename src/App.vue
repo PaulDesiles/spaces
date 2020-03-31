@@ -154,14 +154,12 @@ export default {
 			this.currentShapePoints = [];
 			this.checkForDuplicates();
 		},
-		getSnappedPosition(mousePosition, updateUI) {
+		getSnappedPosition(mousePosition) {
 			let snappedPoint = mousePosition;
 			let nearestPoint;
 			let nearestDistance = this.snapThreshold * this.snapThreshold;
 
-			if (updateUI) {
-				this.hoveredElement = undefined;
-			}
+			this.hoveredElement = undefined;
 
 			const searchNearestPoint = function (p) {
 				const d = p.getSquaredDistanceTo(snappedPoint);
@@ -191,17 +189,11 @@ export default {
 
 				if (nearestPoint !== undefined) {
 					snappedPoint = nearestPoint;
-
-					if (updateUI) {
-						this.hoveredElement = nearestGuide;
-					}
+					this.hoveredElement = nearestGuide;
 				}
 			} else {
 				snappedPoint = nearestPoint;
-
-				if (updateUI) {
-					this.hoveredElement = nearestPoint;
-				}
+				this.hoveredElement = nearestPoint;
 			}
 
 			return snappedPoint;
@@ -214,14 +206,25 @@ export default {
 		},
 		move(event) {
 			this.mousePosition = this.getPosition(event);
-			this.currentPoint = this.getSnappedPosition(this.mousePosition, true);
+			this.currentPoint = this.getSnappedPosition(this.mousePosition);
 		},
 		clic(event) {
-			const snappedPoint = this.getSnappedPosition(this.getPosition(event), false);
+			const snappedPoint = this.getSnappedPosition(this.getPosition(event));
+
 			if (this.showStartPoint && snappedPoint === this.startPoint) {
 				this.closeCurrentShape();
 			} else {
-				this.currentShapePoints.push(snappedPoint);
+				let newPoint = snappedPoint;
+				if (!(newPoint instanceof Intersection)) {
+					newPoint = new Intersection(snappedPoint.x, snappedPoint.y);
+					if (this.hoveredElement instanceof Line) {
+						newPoint.crossingLines.push(this.hoveredElement);
+						// Warning : the line is not yet aknowledge of this link
+						// it will be at shape creation
+					}
+				}
+
+				this.currentShapePoints.push(newPoint);
 			}
 		},
 		cancel() {

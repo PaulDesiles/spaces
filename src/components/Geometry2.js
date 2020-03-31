@@ -106,13 +106,7 @@ export class Line {
 let shapeCount = 0;
 export class Shape {
 	constructor(points) {
-		this.points = points.map(p => {
-			if (p instanceof Intersection) {
-				return p;
-			}
-
-			return new Intersection(p.x, p.y);
-		});
+		this.points = points;
 		if (!isFormClockwiseOriented(this.points)) {
 			this.points = this.points.reverse();
 		}

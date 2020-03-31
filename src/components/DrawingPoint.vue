@@ -16,20 +16,20 @@ const blue = '#318be7';
 const grey = '#aaa';
 const transp = 'transparent';
 class PointTypeProperties {
-	constructor(size, color, plain, sizeOnHover, colorOnHover) {
+	constructor(size, color, filled, sizeOnHover, colorOnHover) {
 		this.size = size;
-		this.stroke = plain ? transp : color;
-		this.fill = plain ? color : transp;
+		this.stroke = filled ? transp : color;
+		this.fill = filled ? color : transp;
 
 		this.sizeOnHover = sizeOnHover || size;
-		this.strokeOnHover = plain ? transp : (colorOnHover || color);
-		this.fillOnHover = plain ? (colorOnHover || color) : transp;
+		this.strokeOnHover = filled ? transp : (colorOnHover || color);
+		this.fillOnHover = filled ? (colorOnHover || color) : transp;
 	}
 }
 
 const props = new Map();
 props.set(PointType.cursor, new PointTypeProperties(5, blue, false));
-props.set(PointType.startPoint, new PointTypeProperties(5, blue, true, 7));
+props.set(PointType.startPoint, new PointTypeProperties(5, blue, true, 7, blue + '99'));
 props.set(PointType.guide, new PointTypeProperties(3, grey, true, 3, transp));
 
 export default {

@@ -48,7 +48,12 @@
 					:hovered="amIHovered(p)"
 				/>
 
-				<DrawingPoint v-if="showStartPoint" :point="startPoint" :type="2" />
+				<DrawingPoint
+					v-if="showStartPoint"
+					:point="startPoint"
+					:type="2"
+					:hovered="amIHovered(startPoint)"
+				/>
 
 				<DrawingPoint :point="currentPoint" :type="1" />
 			</g>
@@ -66,7 +71,7 @@ import DebugInfo from './components/DebugInfo.vue';
 import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/DrawingPoint.vue';
 import DrawingLine from './components/DrawingLine.vue';
-import {initBounds, Point, Intersection, Line, Shape} from './components/Geometry2.js';
+import {initBounds, equiv, Point, Intersection, Line, Shape} from './components/Geometry2.js';
 
 // Only first occurence of an object will be returned
 function distinct(value, index, self) {
@@ -232,8 +237,8 @@ export default {
 				this.intersections
 					.slice(i + 1)
 					.forEach(p2 => {
-						if (p1.x === p2.x && p1.y === p2.y) {
-							console.log(`${p1.id} <=> ${p2.id} : ${p2}`);
+						if (equiv(p1.x, p2.x) && equiv(p1.y, p2.y)) {
+							console.log(`${p1.id} <=> ${p2.id}`);
 						}
 					});
 			});
@@ -243,7 +248,7 @@ export default {
 				this.lines
 					.slice(i + 1)
 					.forEach(l2 => {
-						if (Math.abs(l1.a - l2.a) < 0.01 && Math.abs(l1.b - l2.b) < 0.01) {
+						if (equiv(l1.a, l2.a) && equiv(l1.b, l2.b)) {
 							console.log(`${l1.id} <=> ${l2.id}`);
 						}
 					});

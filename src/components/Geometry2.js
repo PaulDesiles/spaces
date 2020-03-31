@@ -120,7 +120,14 @@ export class Shape {
 		const lineMap = new Map(mapConsecutive(this.points, (A, B) => {
 			let line = A.crossingLines.find(l => l.includes(B));
 			if (line === undefined) {
-				line = new Line(A, B);
+				line = B.crossingLines.find(l => l.includes(A));
+
+				if (line === undefined) {
+					line = new Line(A, B);
+				} else {
+					line.addPoint(A);
+					line.addPoint(B);
+				}
 			}
 
 			return [A, line];
@@ -149,31 +156,40 @@ export class Shape {
 
 				if (B2 === undefined) {
 					Btemp = parallelLine.intersections.find(i => i !== C2);
+				} else {
+					Btemp = B2;
 				}
 
 				if (C2 === undefined) {
 					Ctemp = parallelLine.intersections.find(i => i !== B2 && i !== Btemp);
+				} else {
+					Ctemp = C2;
 				}
 			}
 
 			if (B2 === undefined || C2 === undefined) {
 				if (Btemp === undefined || Ctemp === undefined) {
 					const movedBC = moveSegmentOutside(B, C, formsGap);
-					Btemp = movedBC.A2;
-					Ctemp = movedBC.B2;
+					Btemp = Btemp || movedBC.A2;
+					Ctemp = Ctemp || movedBC.B2;
 				}
 
 				// Get intersections with the form's previous and next segment
 				// to keep points that have more interest
-				B2 = Intersection.createFrom(getIntersection(A, B, Btemp, Ctemp));
-				C2 = Intersection.createFrom(getIntersection(Btemp, Ctemp, C, D));
-
-				if (parallelLine === undefined) {
-					parallelLine = new Line(B2, C2);
-				} else {
-					parallelLine.addPoint(B2);
-					parallelLine.addPoint(C2);
+				if (B2 === undefined) {
+					B2 = Intersection.createFrom(getIntersection(A, B, Btemp, Ctemp));
 				}
+
+				if (C2 === undefined) {
+					C2 = Intersection.createFrom(getIntersection(Btemp, Ctemp, C, D));
+				}
+			}
+
+			if (parallelLine === undefined) {
+				parallelLine = new Line(B2, C2);
+			} else {
+				parallelLine.addPoint(B2);
+				parallelLine.addPoint(C2);
 			}
 
 			AB.addPoint(B2);
@@ -184,15 +200,17 @@ export class Shape {
 		});
 
 		forEachConsecutive(this.spacedLines, (l1, l2) => {
-			const M = Intersection.createFrom(
-				getIntersection(
-					l1.intersections[0],
-					l1.intersections[1],
-					l2.intersections[0],
-					l2.intersections[1]));
+			if (!l1.intersections.some(i => i.crossingLines.includes(l2))) {
+				const M = Intersection.createFrom(
+					getIntersection(
+						l1.intersections[0],
+						l1.intersections[1],
+						l2.intersections[0],
+						l2.intersections[1]));
 
-			l1.addPoint(M);
-			l2.addPoint(M);
+				l1.addPoint(M);
+				l2.addPoint(M);
+			}
 		});
 
 		this.id = 'S' + shapeCount++;
@@ -203,7 +221,7 @@ export class Shape {
 // *** Utility and Calculation Methods ***
 // ***************************************
 
-function equiv(x, y) {
+export function equiv(x, y) {
 	return Math.abs(x - y) < epsylon;
 }
 

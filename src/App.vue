@@ -53,10 +53,16 @@
 				<DrawingPoint :point="currentPoint" :type="1" />
 			</g>
 		</SvgViewport>
+		<DebugInfo
+			:mouse="mousePosition"
+			:cursor="currentPoint"
+			:hovered="hoveredElement"
+		/>
 	</div>
 </template>
 
 <script>
+import DebugInfo from './components/DebugInfo.vue';
 import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/DrawingPoint.vue';
 import DrawingLine from './components/DrawingLine.vue';
@@ -74,6 +80,7 @@ initBounds(1000, 600);
 export default {
 	name: 'App',
 	components: {
+		DebugInfo,
 		SvgViewport,
 		DrawingPoint,
 		DrawingLine
@@ -83,6 +90,7 @@ export default {
 			snapThreshold: 20,
 			xmax: drawingWidth,
 			ymax: drawingHeight,
+			mousePosition: new Point(),
 			currentPoint: new Point(),
 			currentShapePoints: [],
 			shapes: [],
@@ -141,8 +149,8 @@ export default {
 			this.currentShapePoints = [];
 			this.checkForDuplicates();
 		},
-		getSnappedPosition(mouseEvent, updateUI) {
-			let snappedPoint = this.getPosition(mouseEvent);
+		getSnappedPosition(mousePosition, updateUI) {
+			let snappedPoint = mousePosition;
 			let nearestPoint;
 			let nearestDistance = this.snapThreshold * this.snapThreshold;
 
@@ -200,10 +208,11 @@ export default {
 					this.hoveredElement.crossingLines.includes(myModel));
 		},
 		move(event) {
-			this.currentPoint = this.getSnappedPosition(event, true);
+			this.mousePosition = this.getPosition(event);
+			this.currentPoint = this.getSnappedPosition(this.mousePosition, true);
 		},
 		clic(event) {
-			const snappedPoint = this.getSnappedPosition(event, false);
+			const snappedPoint = this.getSnappedPosition(this.getPosition(event), false);
 			if (this.showStartPoint && snappedPoint === this.startPoint) {
 				this.closeCurrentShape();
 			} else {

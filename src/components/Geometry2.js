@@ -1,4 +1,6 @@
 const formsGap = 10;
+const epsylon = 0.001;
+
 export const PointType = {
 	cursor: 1,
 	startPoint: 2,
@@ -6,8 +8,8 @@ export const PointType = {
 };
 Object.freeze(PointType);
 
-var xmax;
-var ymax;
+let xmax;
+let ymax;
 export function initBounds(width, height) {
 	xmax = width;
 	ymax = height;
@@ -23,10 +25,6 @@ export class Point {
 		this.y = y || 0;
 	}
 
-	toString() {
-		return `(${round(this.x)}, ${round(this.y)})`;
-	}
-
 	getSquaredDistanceTo(p) {
 		const dx = p.x - this.x;
 		const dy = p.y - this.y;
@@ -39,7 +37,7 @@ export class Intersection extends Point {
 	constructor(x, y) {
 		super(x, y);
 		this.crossingLines = [];
-		this.id = 'i' + intersectionCount++;
+		this.id = 'P' + intersectionCount++;
 	}
 
 	static createFrom(point) {
@@ -70,7 +68,7 @@ export class Line {
 
 		this.bounds = getLineBounds(this);
 
-		this.id = 'l' + lineCount++;
+		this.id = 'L' + lineCount++;
 	}
 
 	addPoint(p) {
@@ -91,7 +89,7 @@ export class Line {
 	}
 
 	includes(p) {
-		return this.intersections.includes(p) || p.y === this.y(p.x);
+		return this.intersections.includes(p) || equiv(p.y, this.y(p.x));
 	}
 
 	// See https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
@@ -197,7 +195,7 @@ export class Shape {
 			l2.addPoint(M);
 		});
 
-		this.id = 's' + shapeCount++;
+		this.id = 'S' + shapeCount++;
 	}
 }
 
@@ -205,8 +203,8 @@ export class Shape {
 // *** Utility and Calculation Methods ***
 // ***************************************
 
-function round(x) {
-	return Math.round(x * 100) / 100;
+function equiv(x, y) {
+	return Math.abs(x - y) < epsylon;
 }
 
 // Loop over array to find its i-th element

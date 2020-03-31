@@ -10,12 +10,12 @@
 </template>
 
 <script>
-import {AnchorType, Point} from './Geometry2.js';
+import {PointType, Point} from './Geometry2.js';
 
 const blue = '#318be7';
 const grey = '#aaa';
 const transp = 'transparent';
-class AnchorTypeProperties {
+class PointTypeProperties {
 	constructor(size, color, plain, sizeOnHover, colorOnHover) {
 		this.size = size;
 		this.stroke = plain ? transp : color;
@@ -28,12 +28,12 @@ class AnchorTypeProperties {
 }
 
 const props = new Map();
-props.set(AnchorType.cursor, new AnchorTypeProperties(5, blue, false));
-props.set(AnchorType.startPoint, new AnchorTypeProperties(5, blue, true, 7));
-props.set(AnchorType.guide, new AnchorTypeProperties(3, grey, true, 3, transp));
+props.set(PointType.cursor, new PointTypeProperties(5, blue, false));
+props.set(PointType.startPoint, new PointTypeProperties(5, blue, true, 7));
+props.set(PointType.guide, new PointTypeProperties(3, grey, true, 3, transp));
 
 export default {
-	name: 'Anchor',
+	name: 'DrawingPoint',
 	props: {
 		point: {
 			type: Object,
@@ -41,26 +41,27 @@ export default {
 		},
 		type: {
 			type: Number,
-			default: AnchorType.guide
-		}
+			default: PointType.guide
+		},
+		hovered: Boolean
 	},
 	computed: {
 		size() {
-			if (this.point.isMouseOver) {
+			if (this.hovered) {
 				return props.get(this.type).sizeOnHover;
 			}
 
 			return props.get(this.type).size;
 		},
 		strokeColor() {
-			if (this.point.isMouseOver) {
+			if (this.hovered) {
 				return props.get(this.type).strokeOnHover;
 			}
 
 			return props.get(this.type).stroke;
 		},
 		fillColor() {
-			if (this.point.isMouseOver) {
+			if (this.hovered) {
 				return props.get(this.type).fillOnHover;
 			}
 

@@ -17,15 +17,12 @@
 					border-width="1"
 				/>
 
-				<line
-					v-for="guide in projectedGuides"
-					:key="guide.id"
-					:x1="guide.x1"
-					:y1="guide.y1"
-					:x2="guide.x2"
-					:y2="guide.y2"
-					stroke-width="1"
-					:stroke="guide.color"
+				<DrawingLine
+					v-for="line in lines"
+					:key="line.id"
+					:p1="line.bounds[0]"
+					:p2="line.bounds[1]"
+					:hovered="amIHovered(line)"
 				/>
 
 				<path
@@ -43,11 +40,17 @@
 					stroke-width="1"
 				/>
 
-				<Anchor v-for="p in visibleGuidesPoints" :point="p" :type="3" />
+				<DrawingPoint
+					v-for="p in intersections"
+					:key="p.id"
+					:point="p"
+					:type="3"
+					:hovered="amIHovered(p)"
+				/>
 
-				<Anchor v-if="showStartPoint" :point="startPoint" :type="2" />
+				<DrawingPoint v-if="showStartPoint" :point="startPoint" :type="2" />
 
-				<Anchor :point="currentPoint" :type="1" />
+				<DrawingPoint :point="currentPoint" :type="1" />
 			</g>
 		</SvgViewport>
 	</div>
@@ -55,80 +58,62 @@
 
 <script>
 import SvgViewport from './components/SvgViewport.vue';
-import Anchor from './components/Anchor.vue';
-import * as Geo from './components/Geometry.js';
+import DrawingPoint from './components/DrawingPoint.vue';
+import DrawingLine from './components/DrawingLine.vue';
+import {initBounds, Point, Intersection, Line, Shape} from './components/Geometry2.js';
+
+// Only first occurence of an object will be returned
+function distinct(value, index, self) {
+	return self.indexOf(value) === index;
+}
+
+const drawingWidth = 1000;
+const drawingHeight = 600;
+initBounds(1000, 600);
 
 export default {
 	name: 'App',
 	components: {
 		SvgViewport,
-		Anchor
+		DrawingPoint,
+		DrawingLine
 	},
 	data() {
 		return {
 			snapThreshold: 20,
-			xmax: 1000,
-			ymax: 600,
-			currentPoint: new Geo.Point(),
-			currentShape: [],
-			shapes: []
+			xmax: drawingWidth,
+			ymax: drawingHeight,
+			currentPoint: new Point(),
+			currentShapePoints: [],
+			shapes: [],
+			hoveredElement: undefined
 		};
 	},
 	computed: {
 		showStartPoint() {
-			return this.currentShape.length > 2;
+			return this.currentShapePoints.length > 2;
 		},
 		startPoint() {
-			if (this.currentShape.length <= 0) {
+			if (this.currentShapePoints.length <= 0) {
 				return undefined;
 			}
 
-			return this.currentShape[0];
+			return this.currentShapePoints[0];
 		},
 		currentPath() {
-			return this.getPath(this.currentShape.concat(this.currentPoint));
+			return this.getPath(this.currentShapePoints.concat(this.currentPoint));
 		},
-		guides() {
-			return this.shapes.map(s => s.guides).flat();
+		lines() {
+			return this.shapes
+				.map(s => s.lines.concat(s.spacedLines))
+				.flat()
+				.filter(distinct);
 		},
-		projectedGuides() {
-			return this.guides.map(g => {
-				// Compute the guide's function intersections with frame borders
-				const intersections = [
-					{x: 0, y: g.y(0)}, // I_xmin
-					{x: g.x(0), y: 0}, // I_ymin
-					{x: this.xmax, y: g.y(this.xmax)}, // I_xmax
-					{x: g.x(this.ymax), y: this.ymax} // I_ymax
-				];
-
-				// Line 'bounds' are the intersections that are still inside the frame
-				const lineBounds = [];
-				intersections.forEach(p => {
-					if (lineBounds.length < 2 &&
-						p.x >= 0 &&
-						p.x <= this.xmax &&
-						p.y >= 0 &&
-						p.y <= this.ymax)
-					{
-						lineBounds.push(p);
-					}
-				});
-
-				return {
-					id: g.id,
-					x1: lineBounds[0].x,
-					y1: lineBounds[0].y,
-					x2: lineBounds[1].x,
-					y2: lineBounds[1].y,
-					color: (g.isMouseOver ? '#318be7' : '#aaa')
-				};
-			});
-		},
-		visibleGuidesPoints() {
-			return this.guides
-				.filter(g => !g.hidePoints)
-				.map(g => [g.A, g.B])
-				.flat();
+		intersections() {
+			return this.lines
+				.map(l => l.intersections)
+				.flat()
+				.filter(distinct);
 		}
 	},
 	methods: {
@@ -137,7 +122,7 @@ export default {
 				x: event.pageX,
 				y: event.pageY
 			});
-			return new Geo.Point(newP.x, newP.y);
+			return new Point(newP.x, newP.y);
 		},
 		getPath(shape, closeShape) {
 			let path = '';
@@ -151,44 +136,39 @@ export default {
 
 			return path;
 		},
-		isSnappedAtStartPoint(point) {
-			return this.showStartPoint && point.getSqDistanceFrom(this.currentShape[0]) < this.snapThreshold;
-		},
 		closeCurrentShape() {
-			this.shapes.push(new Geo.Shape(this.currentShape));
-			this.currentShape = [];
+			this.shapes.push(new Shape(this.currentShapePoints));
+			this.currentShapePoints = [];
+			this.checkForDuplicates();
 		},
 		getSnappedPosition(mouseEvent, updateUI) {
 			let snappedPoint = this.getPosition(mouseEvent);
 			let nearestPoint;
-			let nearestDistance = this.snapThreshold;
-			const allAnchors = this.visibleGuidesPoints;
+			let nearestDistance = this.snapThreshold * this.snapThreshold;
 
-			if (this.showStartPoint) {
-				allAnchors.unshift(this.startPoint);
+			if (updateUI) {
+				this.hoveredElement = undefined;
 			}
 
-			allAnchors.forEach(a => {
-				if (updateUI) {
-					a.isMouseOver = false;
-				}
-
-				const d = a.getSqDistanceFrom(snappedPoint);
+			const searchNearestPoint = function (p) {
+				const d = p.getSquaredDistanceTo(snappedPoint);
 				if (d < nearestDistance) {
 					nearestDistance = d;
-					nearestPoint = a;
+					nearestPoint = p;
 				}
-			});
+			};
+
+			if (this.showStartPoint) {
+				searchNearestPoint(this.startPoint);
+			}
+
+			this.intersections.forEach(searchNearestPoint);
 
 			if (nearestPoint === undefined) {
 				let nearestGuide;
-				this.guides.forEach(g => {
-					if (updateUI) {
-						g.isMouseOver = false;
-					}
-
+				this.lines.forEach(g => {
 					const p = g.getProjection(snappedPoint);
-					const d = p.getSqDistanceFrom(snappedPoint);
+					const d = p.getSquaredDistanceTo(snappedPoint);
 					if (d < nearestDistance) {
 						nearestDistance = d;
 						nearestPoint = p;
@@ -200,24 +180,24 @@ export default {
 					snappedPoint = nearestPoint;
 
 					if (updateUI) {
-						nearestGuide.isMouseOver = true;
+						this.hoveredElement = nearestGuide;
 					}
 				}
 			} else {
 				snappedPoint = nearestPoint;
 
 				if (updateUI) {
-					nearestPoint.isMouseOver = true;
-
-					this.guides
-						.filter(g => g.isMouseOver)
-						.forEach(g => {
-							g.isMouseOver = false;
-						});
+					this.hoveredElement = nearestPoint;
 				}
 			}
 
 			return snappedPoint;
+		},
+		amIHovered(myModel) {
+			return this.hoveredElement === myModel ||
+				(this.hoveredElement instanceof Intersection &&
+					myModel instanceof Line &&
+					this.hoveredElement.crossingLines.includes(myModel));
 		},
 		move(event) {
 			this.currentPoint = this.getSnappedPosition(event, true);
@@ -227,15 +207,38 @@ export default {
 			if (this.showStartPoint && snappedPoint === this.startPoint) {
 				this.closeCurrentShape();
 			} else {
-				this.currentShape.push(snappedPoint.clone());
+				this.currentShapePoints.push(snappedPoint);
 			}
 		},
 		cancel() {
 			if (this.startPoint === undefined) {
 				this.shapes.pop();
 			} else {
-				this.currentShape.pop();
+				this.currentShapePoints.pop();
 			}
+		},
+		checkForDuplicates() {
+			// Check points duplicates
+			this.intersections.forEach((p1, i) => {
+				this.intersections
+					.slice(i + 1)
+					.forEach(p2 => {
+						if (p1.x === p2.x && p1.y === p2.y) {
+							console.log(`${p1.id} <=> ${p2.id} : ${p2}`);
+						}
+					});
+			});
+
+			// Check lines duplicates
+			this.lines.forEach((l1, i) => {
+				this.lines
+					.slice(i + 1)
+					.forEach(l2 => {
+						if (Math.abs(l1.a - l2.a) < 0.01 && Math.abs(l1.b - l2.b) < 0.01) {
+							console.log(`${l1.id} <=> ${l2.id}`);
+						}
+					});
+			});
 		}
 	}
 };

@@ -1,10 +1,17 @@
 const formsGap = 10;
-export const AnchorType = {
+export const PointType = {
 	cursor: 1,
 	startPoint: 2,
 	guide: 3
 };
-Object.freeze(AnchorType);
+Object.freeze(PointType);
+
+var xmax;
+var ymax;
+export function initBounds(width, height) {
+	xmax = width;
+	ymax = height;
+}
 
 // **************
 // *** Models ***
@@ -18,6 +25,12 @@ export class Point {
 
 	toString() {
 		return `(${round(this.x)}, ${round(this.y)})`;
+	}
+
+	getSquaredDistanceTo(p) {
+		const dx = p.x - this.x;
+		const dy = p.y - this.y;
+		return (dx * dx) + (dy * dy);
 	}
 }
 
@@ -47,12 +60,15 @@ export class Line {
 		// and b = y - a * x
 		this.dx = p2.x - p1.x;
 		this.dy = p2.y - p1.y;
-		const a = this.dy / this.dx;
-		const b = p1.y - (a * p1.x);
-		this.y = x => (a * x) + b;
-		this.x = y => (y - b) / a;
-		this.a = a;
-		this.b = b;
+		this.a = this.dy / this.dx;
+		this.b = p1.y - (this.a * p1.x);
+		this.y = x => (this.a * x) + this.b;
+		this.x = y => (y - this.b) / this.a;
+
+		// Pre-calc for projection
+		this.squaredLength = (this.dx * this.dx) + (this.dy * this.dy);
+
+		this.bounds = getLineBounds(this);
 
 		this.id = 'l' + lineCount++;
 	}
@@ -67,15 +83,25 @@ export class Line {
 		}
 	}
 
-	includes(p) {
-		return this.intersections.includes(p) || p.y === this.y(p.x);
-	}
-
 	static linkParallelLines(l1, l2) {
 		if (!l1.parallels.includes(l2)) {
 			l1.parallels.push(l2);
 			l2.parallels.push(l1);
 		}
+	}
+
+	includes(p) {
+		return this.intersections.includes(p) || p.y === this.y(p.x);
+	}
+
+	// See https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+	getProjection(p) {
+		const M = this.intersections[0];
+		const t = (((p.x - M.x) * this.dx) + ((p.y - M.y) * this.dy)) / this.squaredLength;
+		return new Point(
+			M.x + (t * this.dx),
+			M.y + (t * this.dy)
+		);
 	}
 }
 
@@ -167,8 +193,8 @@ export class Shape {
 					l2.intersections[0],
 					l2.intersections[1]));
 
-			l1.intersections.push(M);
-			l2.intersections.push(M);
+			l1.addPoint(M);
+			l2.addPoint(M);
 		});
 
 		this.id = 's' + shapeCount++;
@@ -219,16 +245,6 @@ function mapConsecutive(array, transformator) {
 	return transformed;
 }
 
-function getSquaredDistanceBetweenPoints(A, B) {
-	const dx = B.x - A.x;
-	const dy = B.y - A.y;
-	return (dx * dx) + (dy * dy);
-}
-
-function getDistanceBetweenPoints(A, B) {
-	return Math.sqrt(getSquaredDistanceBetweenPoints(A, B));
-}
-
 // To know which side of an edge is inside the form
 // > the right side of an edge (points[i], points[i+1]) will be inside if clockwise is true
 // Sum over the edges, (x2-x1)(y2+y1)
@@ -274,4 +290,29 @@ function getIntersection(A, B, C, D) {
 		(((D.y - C.y) * (A.x - C.x)) - ((D.x - C.x) * (A.y - C.y))) /
 		(((D.x - C.x) * dy) - ((D.y - C.y) * dx));
 	return new Point(A.x + (dx * a), A.y + (dy * a));
+}
+
+function getLineBounds(line) {
+	// Compute the guide's function intersections with frame borders
+	const intersections = [
+		{x: 0, y: line.y(0)}, // I_xmin
+		{x: line.x(0), y: 0}, // I_ymin
+		{x: xmax, y: line.y(xmax)}, // I_xmax
+		{x: line.x(ymax), y: ymax} // I_ymax
+	];
+
+	// Line 'bounds' are the intersections that are still inside the frame
+	const lineBounds = [];
+	intersections.forEach(p => {
+		if (lineBounds.length < 2 &&
+			p.x >= 0 &&
+			p.x <= xmax &&
+			p.y >= 0 &&
+			p.y <= ymax)
+		{
+			lineBounds.push(p);
+		}
+	});
+
+	return lineBounds;
 }

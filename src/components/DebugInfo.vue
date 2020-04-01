@@ -57,7 +57,7 @@ export default {
 		},
 		display(p) {
 			return `(${this.round(p.x)},	${this.round(p.y)})`;
-		},
+		}
 	}
 };
 </script>
@@ -67,7 +67,7 @@ export default {
 	position: absolute;
 	top: 5px;
 	left: 5px;
-	background: #33333366;
+	background: #9999;
 	padding: 7px 10px;
 	border-radius: 5px;
 	min-width: 180px;

@@ -126,7 +126,8 @@ export default {
 			return this.lines
 				.map(l => l.intersections)
 				.flat()
-				.filter(distinct);
+				.filter(distinct)
+				.filter(p => p.insideBounds);
 		}
 	},
 	methods: {
@@ -150,7 +151,9 @@ export default {
 			return path;
 		},
 		closeCurrentShape() {
-			this.shapes.push(new Shape(this.currentShapePoints));
+			const newShape = new Shape(this.currentShapePoints);
+			newShape.updateIntersections(this.lines);
+			this.shapes.push(newShape);
 			this.currentShapePoints = [];
 			this.checkForDuplicates();
 		},

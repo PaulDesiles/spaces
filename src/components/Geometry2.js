@@ -37,6 +37,7 @@ export class Intersection extends Point {
 	constructor(x, y) {
 		super(x, y);
 		this.crossingLines = [];
+		this.insideBounds = (x >= 0 && x <= xmax && y >= 0 && y <= ymax);
 		this.id = 'P' + intersectionCount++;
 	}
 
@@ -101,6 +102,24 @@ export class Line {
 			M.y + (t * this.dy)
 		);
 	}
+
+	getKnownIntersectionWith(line) {
+		return this.intersections.find(i => i.crossingLines.includes(line));
+	}
+
+	getOrCreateIntersectionWith(line) {
+		if (this.getKnownIntersectionWith(line) === undefined) {
+			const M = Intersection.createFrom(
+				getIntersection(
+					this.intersections[0],
+					this.intersections[1],
+					line.intersections[0],
+					line.intersections[1]));
+
+			this.addPoint(M);
+			line.addPoint(M);
+		}
+	}
 }
 
 let shapeCount = 0;
@@ -145,8 +164,8 @@ export class Shape {
 			if (BC.parallels.length > 0) {
 				parallelLine = BC.parallels[0]; // TODO: correct this wrong assumption !
 
-				B2 = parallelLine.intersections.find(i => i.crossingLines.includes(AB));
-				C2 = parallelLine.intersections.find(i => i.crossingLines.includes(CD));
+				B2 = parallelLine.getKnownIntersectionWith(AB);
+				C2 = parallelLine.getKnownIntersectionWith(CD);
 
 				if (B2 === undefined) {
 					Btemp = parallelLine.intersections.find(i => i !== C2);
@@ -194,20 +213,19 @@ export class Shape {
 		});
 
 		forEachConsecutive(this.spacedLines, (l1, l2) => {
-			if (!l1.intersections.some(i => i.crossingLines.includes(l2))) {
-				const M = Intersection.createFrom(
-					getIntersection(
-						l1.intersections[0],
-						l1.intersections[1],
-						l2.intersections[0],
-						l2.intersections[1]));
-
-				l1.addPoint(M);
-				l2.addPoint(M);
-			}
+			l1.getOrCreateIntersectionWith(l2);
 		});
 
 		this.id = 'S' + shapeCount++;
+	}
+
+	updateIntersections(lines) {
+		const newLines = this.lines.concat(this.spacedLines);
+		lines.forEach(line => {
+			newLines.forEach(newLine => {
+				line.getOrCreateIntersectionWith(newLine);
+			});
+		});
 	}
 }
 

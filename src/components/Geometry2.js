@@ -132,15 +132,16 @@ export class Shape {
 
 		const lineMap = new Map(mapConsecutive(this.points, (A, B) => {
 			let line = A.crossingLines.find(l => l.includes(B));
+
 			if (line === undefined) {
 				line = B.crossingLines.find(l => l.includes(A));
+			}
 
-				if (line === undefined) {
-					line = new Line(A, B);
-				} else {
-					line.addPoint(A);
-					line.addPoint(B);
-				}
+			if (line === undefined) {
+				line = new Line(A, B);
+			} else {
+				line.addPoint(A);
+				line.addPoint(B);
 			}
 
 			return [A, line];

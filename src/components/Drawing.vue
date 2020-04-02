@@ -43,7 +43,7 @@
 <script>
 import SvgViewport from './SvgViewport.vue';
 import Anchor from './Anchor.vue';
-import {Point, Shape} from './Geometry2.js';
+import {Point, Shape} from './Geometry.js';
 
 // Only first occurence of an object will be returned
 function distinct(value, index, self) {

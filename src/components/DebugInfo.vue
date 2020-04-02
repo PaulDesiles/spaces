@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import {Point, Intersection, Line} from './Geometry2.js';
+import {Point, Intersection, Line} from './Geometry.js';
 
 export default {
 	name: 'DebugInfo',

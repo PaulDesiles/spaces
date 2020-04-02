@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import {PointType, Point} from './Geometry2.js';
+import {PointType, Point} from './Geometry.js';
 
 const blue = '#318be7';
 const grey = '#aaa';

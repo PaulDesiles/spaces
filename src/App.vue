@@ -71,7 +71,7 @@ import DebugInfo from './components/DebugInfo.vue';
 import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/DrawingPoint.vue';
 import DrawingLine from './components/DrawingLine.vue';
-import {initBounds, equiv, Point, Intersection, Line, Shape} from './components/Geometry2.js';
+import {initBounds, equiv, Point, Intersection, Line, Shape} from './components/Geometry.js';
 
 // Only first occurence of an object will be returned
 function distinct(value, index, self) {

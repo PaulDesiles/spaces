@@ -89,20 +89,20 @@ describe('Line class', () => {
 		expect(l1.y).toBeInstanceOf(Function);
 
 		expect(l1.y(100)).toBeDefined();
-		expect(l1.y(100)).toBe(20);
+		expect(l1.y(100)).toBe(Infinity);
 
-		expect(l2.y(100)).toBeDefined();
-		expect(l2.y(100)).toBe(90);
+		expect(l2.y(90)).toBeDefined();
+		expect(l2.y(90)).toBe(100);
 	});
 
 	test('function x(y)', () => {
 		expect(l1.x).toBeInstanceOf(Function);
 
 		expect(l1.x(20)).toBeDefined();
-		expect(l1.x(20)).toBeNaN();
+		expect(l1.x(20)).toBe(20);
 
-		expect(l1.x(90)).toBeDefined();
-		expect(l1.x(90)).toBe(100);
+		expect(l2.x(100)).toBeDefined();
+		expect(l2.x(100)).toBe(90);
 	});
 
 	test('bounds', () => {
@@ -115,8 +115,8 @@ describe('Line class', () => {
 			b.y === 0 ||
 			b.y === size;
 
-		expect(l1.bounds).forEach(isOnBounds).toBeTruthy();
-		expect(l2.bounds).forEach(isOnBounds).toBeTruthy();
+		expect(l1.bounds.every(isOnBounds)).toBeTruthy();
+		expect(l2.bounds.every(isOnBounds)).toBeTruthy();
 	});
 
 	test('linkParallelLines', () => {
@@ -146,7 +146,7 @@ describe('Line class', () => {
 		expect(l1.getProjection(new Point(40, 200))).toMatchObject({x: 20, y: 200});
 
 		expect(l2.getProjection(new Point(90, 100))).toMatchObject({x: 90, y: 100});
-		expect(l2.getProjection(new Point(40, 40))).toMatchObject({x: 0, y: 0});
+		expect(l2.getProjection(new Point(30, 80))).toMatchObject({x: 50, y: 120});
 	});
 
 	test('getKnownIntersectionWith', () => {
@@ -159,8 +159,7 @@ describe('Line class', () => {
 	test('getOrCreateIntersectionWith', () => {
 		expect(l1.getKnownIntersectionWith).toBeInstanceOf(Function);
 		expect(l1.getKnownIntersectionWith(l2)).toBeUndefined();
-		l1.getOrCreateIntersectionWith(l2);
-		expect(l1.getKnownIntersectionWith(l2)).toMatchObject({x: 0, y: 0});
+		expect(l1.getOrCreateIntersectionWith(l2)).toMatchObject({x: 20, y: 135});
 	});
 });
 

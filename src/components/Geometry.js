@@ -61,8 +61,26 @@ export class Line {
 		this.dy = p2.y - p1.y;
 		this.a = this.dy / this.dx;
 		this.b = p1.y - (this.a * p1.x);
-		this.y = x => (this.a * x) + this.b;
-		this.x = y => (y - this.b) / this.a;
+
+		this.y = x => {
+			if (this.dx === 0) {
+				return Infinity;
+			}
+
+			return (this.a * x) + this.b;
+		};
+
+		this.x = y => {
+			if (this.dx === 0) {
+				return p1.x;
+			}
+
+			if (this.dy === 0) {
+				return Infinity;
+			}
+
+			return (y - this.b) / this.a;
+		};
 
 		// Pre-calc for projection
 		this.squaredLength = (this.dx * this.dx) + (this.dy * this.dy);
@@ -90,7 +108,9 @@ export class Line {
 	}
 
 	includes(p) {
-		return this.intersections.includes(p) || equiv(p.y, this.y(p.x));
+		return this.intersections.includes(p) ||
+			(this.dx !== 0 && equiv(p.y, this.y(p.x))) ||
+			(this.dy !== 0 && equiv(p.x, this.x(p.y)));
 	}
 
 	// See https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
@@ -108,8 +128,9 @@ export class Line {
 	}
 
 	getOrCreateIntersectionWith(line) {
-		if (this.getKnownIntersectionWith(line) === undefined) {
-			const M = Intersection.createFrom(
+		let M = this.getKnownIntersectionWith(line);
+		if (M === undefined) {
+			M = Intersection.createFrom(
 				getIntersection(
 					this.intersections[0],
 					this.intersections[1],
@@ -119,6 +140,8 @@ export class Line {
 			this.addPoint(M);
 			line.addPoint(M);
 		}
+
+		return M;
 	}
 }
 
@@ -322,12 +345,23 @@ function getIntersection(A, B, C, D) {
 }
 
 function getLineBounds(line) {
+	// Handle special cases
+	if (line.dx === 0) {
+		const x = line.intersections[0].x;
+		return [new Point(x, 0), new Point(x, ymax)];
+	}
+
+	if (line.dy === 0) {
+		const y = line.intersections[0].y;
+		return [new Point(0, y), new Point(xmax, 0)];
+	}
+
 	// Compute the guide's function intersections with frame borders
 	const intersections = [
-		{x: 0, y: line.y(0)}, // I_xmin
-		{x: line.x(0), y: 0}, // I_ymin
-		{x: xmax, y: line.y(xmax)}, // I_xmax
-		{x: line.x(ymax), y: ymax} // I_ymax
+		new Point(0, line.y(0)), // I_xmin
+		new Point(line.x(0), 0), // I_ymin
+		new Point(xmax, line.y(xmax)), // I_xmax
+		new Point(line.x(ymax), ymax) // I_ymax
 	];
 
 	// Line 'bounds' are the intersections that are still inside the frame

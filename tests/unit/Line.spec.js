@@ -1,63 +1,4 @@
-import {initBounds, Point, Intersection, Line, Shape} from '@/components/Geometry.js';
-
-const size = 1000;
-beforeAll(() => {
-	initBounds(size, size);
-});
-
-describe('Point class', () => {
-	test('default constructor', () => {
-		const p = new Point();
-		expect(p).toEqual({x: 0, y: 0});
-	});
-
-	test('constructor', () => {
-		const p = new Point(1, 2);
-		expect(p).toEqual({x: 1, y: 2});
-	});
-
-	test('computes distance', () => {
-		const p1 = new Point(10, 2);
-		const p2 = new Point(10, 10);
-		const p3 = new Point(15, 15);
-		expect(p1.getSquaredDistanceTo(p2)).toBeCloseTo(8 * 8);
-		expect(p2.getSquaredDistanceTo(p3)).toBeCloseTo(50);
-	});
-});
-
-describe('Intersection class', () => {
-	test('extends Point', () => {
-		expect(new Intersection()).toBeInstanceOf(Point);
-	});
-
-	test('id generation', () => {
-		const i1 = new Intersection(10, 10);
-		const i2 = new Intersection(15, 15);
-		expect(i1.id).toBeDefined();
-		expect(i2.id).toBeDefined();
-		expect(i1.id).not.toBe(i2.id);
-	});
-
-	test('crossing lines array', () => {
-		const i = new Intersection(10, 10);
-		expect(i.crossingLines).toBeInstanceOf(Array);
-		expect(i.crossingLines.length).toBe(0);
-	});
-
-	test('bounds', () => {
-		const i1 = new Intersection(10, 10);
-		const i2 = new Intersection(2000, 200);
-		expect(i1.insideBounds).toBeTruthy();
-		expect(i2.insideBounds).toBeFalsy();
-	});
-
-	test('conversion from point', () => {
-		const p = new Point(10, 10);
-		const i = Intersection.createFrom(p);
-		expect(i).toMatchObject({x: 10, y: 10});
-		expect(i.id).toBeDefined();
-	});
-});
+import {initBounds, Point, Intersection, Line} from '@/components/Geometry.js';
 
 describe('Line class', () => {
 	const A = new Intersection(20, 10);
@@ -82,7 +23,7 @@ describe('Line class', () => {
 
 	test('parallels array', () => {
 		expect(l1.parallels).toBeInstanceOf(Array);
-		expect(l1.parallels.length).toBe(0);
+		expect(l1.parallels).toHaveLength(0);
 	});
 
 	test('function y(x)', () => {
@@ -105,19 +46,19 @@ describe('Line class', () => {
 		expect(l2.x(100)).toBe(90);
 	});
 
-	test('bounds', () => {
-		expect(l1.bounds).toBeInstanceOf(Array);
-		expect(l1.bounds.length).toBe(2);
+	// test('bounds', () => {
+	// 	expect(l1.bounds).toBeInstanceOf(Array);
+	// 	expect(l1.bounds).toHaveLength(2);
 
-		const isOnBounds = b =>
-			b.x === 0 ||
-			b.x === size ||
-			b.y === 0 ||
-			b.y === size;
+	// 	const isOnBounds = b =>
+	// 		b.x === 0 ||
+	// 		b.x === 1000 ||
+	// 		b.y === 0 ||
+	// 		b.y === 1000;
 
-		expect(l1.bounds.every(isOnBounds)).toBeTruthy();
-		expect(l2.bounds.every(isOnBounds)).toBeTruthy();
-	});
+	// 	expect(l1.bounds.every(isOnBounds)).toBeTruthy();
+	// 	expect(l2.bounds.every(isOnBounds)).toBeTruthy();
+	// });
 
 	test('linkParallelLines', () => {
 		const l3 = new Line(new Intersection(40, 40), new Intersection(40, 60));
@@ -163,10 +104,42 @@ describe('Line class', () => {
 	});
 });
 
-/*
-describe('', () => {
-	test('', () => {
-		expect().toBe();
+describe('Line Bounds', () => {
+	initBounds(1000, 1000);
+	const A = new Intersection(10, 10);
+	const B = new Intersection(30, 30);
+	const C = new Intersection(30, 10);
+	const D = new Intersection(10, 30);
+
+	const AB = new Line(A, B);
+	const AC = new Line(A, C);
+	const AD = new Line(A, D);
+
+	test('return type', () => {
+		expect(AB.bounds).toBeInstanceOf(Array);
+		expect(AB.bounds).toHaveLength(2);
+		expect(AB.bounds[0]).toBeInstanceOf(Point);
+		expect(AB.bounds[1]).toBeInstanceOf(Point);
+
+		expect(AC.bounds).toHaveLength(2);
+		expect(AD.bounds).toHaveLength(2);
+	});
+	test('AB', () => {
+		expect(AB.bounds[0].x).toBeCloseTo(0);
+		expect(AB.bounds[0].y).toBeCloseTo(0);
+		expect(AB.bounds[1].x).toBeCloseTo(1000);
+		expect(AB.bounds[1].y).toBeCloseTo(1000);
+	});
+	test('AC', () => {
+		expect(AC.bounds[0].x).toBeCloseTo(0);
+		expect(AC.bounds[0].y).toBeCloseTo(10);
+		expect(AC.bounds[1].x).toBeCloseTo(1000);
+		expect(AC.bounds[1].y).toBeCloseTo(10);
+	});
+	test('AD', () => {
+		expect(AD.bounds[0].x).toBeCloseTo(10);
+		expect(AD.bounds[0].y).toBeCloseTo(0);
+		expect(AD.bounds[1].x).toBeCloseTo(10);
+		expect(AD.bounds[1].y).toBeCloseTo(1000);
 	});
 });
-*/

@@ -239,26 +239,26 @@ export default {
 		},
 		checkForDuplicates() {
 			// Check points duplicates
-			this.intersections.forEach((p1, i) => {
-				this.intersections
-					.slice(i + 1)
-					.forEach(p2 => {
-						if (equiv(p1.x, p2.x) && equiv(p1.y, p2.y)) {
-							console.log(`${p1.id} <=> ${p2.id}`);
-						}
-					});
-			});
+			// this.intersections.forEach((p1, i) => {
+			// 	this.intersections
+			// 		.slice(i + 1)
+			// 		.forEach(p2 => {
+			// 			if (equiv(p1.x, p2.x) && equiv(p1.y, p2.y)) {
+			// 				console.log(`${p1.id} <=> ${p2.id}`);
+			// 			}
+			// 		});
+			// });
 
-			// Check lines duplicates
-			this.lines.forEach((l1, i) => {
-				this.lines
-					.slice(i + 1)
-					.forEach(l2 => {
-						if (equiv(l1.a, l2.a) && equiv(l1.b, l2.b)) {
-							console.log(`${l1.id} <=> ${l2.id}`);
-						}
-					});
-			});
+			// // Check lines duplicates
+			// this.lines.forEach((l1, i) => {
+			// 	this.lines
+			// 		.slice(i + 1)
+			// 		.forEach(l2 => {
+			// 			if (equiv(l1.a, l2.a) && equiv(l1.b, l2.b)) {
+			// 				console.log(`${l1.id} <=> ${l2.id}`);
+			// 			}
+			// 		});
+			// });
 		}
 	}
 };

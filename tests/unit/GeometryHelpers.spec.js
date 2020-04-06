@@ -27,6 +27,28 @@ describe('Point class', () => {
 	test('computes distance horizontaly', () => {
 		expect(p3.getSquaredDistanceTo(p4)).toBeCloseTo(100);
 	});
+
+	test('constrain distance : in bounds', () => {
+		expect(p2.constrainDistanceTo(p3, 2, 10)).toBe(p3);
+	});
+
+	test('constrain distance : min', () => {
+		const p = p2.constrainDistanceTo(p3, 7 * Math.sqrt(2), 100);
+		expect(p.x).toBeCloseTo(17);
+		expect(p.y).toBeCloseTo(17);
+	});
+
+	test('constrain distance : max', () => {
+		const p = p2.constrainDistanceTo(p3, 1, 2 * Math.sqrt(2));
+		expect(p.x).toBeCloseTo(12);
+		expect(p.y).toBeCloseTo(12);
+	});
+
+	test('constrain distance with itself', () => {
+		const p = p2.constrainDistanceTo(p2, 3, 5);
+		expect(p.x).toBeCloseTo(10);
+		expect(p.y).toBeCloseTo(7);
+	});
 });
 
 describe('equiv', () => {

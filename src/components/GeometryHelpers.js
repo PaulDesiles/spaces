@@ -11,6 +11,28 @@ export class Point {
 		const dy = p.y - this.y;
 		return (dx * dx) + (dy * dy);
 	}
+
+	// Return new position for p so as to satisfy a (this, p) length between min and max
+	constrainDistanceTo(p, min, max) {
+		const dx = p.x - this.x;
+		const dy = p.y - this.y;
+
+		if (dx === 0 && dy === 0 && min > 0) {
+			return new Point(p.x, p.y - min);
+		}
+
+		const squaredLength = (dx * dx) + (dy * dy);
+		const newLength = Math.max(min * min, Math.min(max * max, squaredLength));
+		if (newLength === squaredLength) {
+			return p;
+		}
+
+		const f = Math.sqrt(newLength / squaredLength) - 1;
+		return new Point(
+			p.x + (f * dx),
+			p.y + (f * dy)
+		);
+	}
 }
 
 export function equiv(x, y) {
@@ -81,6 +103,7 @@ export function isFormClockwiseOriented(points) {
 	return sum <= 0;
 }
 
+// Return a new segment A2B2 parallel to AB and distant of 'distance' at the left side of AB vector
 export function moveSegmentOutside(A, B, distance) {
 	let dx = B.x - A.x;
 	const dy = B.y - A.y;
@@ -102,6 +125,7 @@ export function moveSegmentOutside(A, B, distance) {
 	};
 }
 
+// Return intersection point between AB and CD
 export function getIntersection(A, B, C, D) {
 	const dx = B.x - A.x;
 	const dy = B.y - A.y;
@@ -110,3 +134,4 @@ export function getIntersection(A, B, C, D) {
 		(((D.x - C.x) * dy) - ((D.y - C.y) * dx));
 	return new Point(A.x + (dx * a), A.y + (dy * a));
 }
+

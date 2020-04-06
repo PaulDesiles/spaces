@@ -70,7 +70,15 @@ export default {
 			this.updateParameter('angleStep', value);
 		},
 		update(name, event) {
-			this.updateParameter(name, parseInt(event.target.value, 10));
+			const newValue = parseInt(event.target.value, 10);
+			if (name === 'minSize' && this.localMaxSize < newValue) {
+				this.localMaxSize = newValue;
+			}
+			else if (name === 'maxSize' && this.localMinSize > newValue) {
+				this.localMinSize = newValue;
+			}
+
+			this.updateParameter(name, newValue);
 		},
 		updateParameter(name, value) {
 			this.$emit('updateParameter', {

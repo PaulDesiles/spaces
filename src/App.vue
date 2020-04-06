@@ -166,8 +166,16 @@ export default {
 			this.currentShapePoints = [];
 			this.checkForDuplicates();
 		},
+		applyConstraints(mousePosition) {
+			if (this.currentShapePoints.length > 0) {
+				const last = this.currentShapePoints[this.currentShapePoints.length - 1];
+				return last.constrainDistanceTo(mousePosition, this.parameters.minSize, this.parameters.maxSize);
+			}
+
+			return mousePosition;
+		},
 		getSnappedPosition(mousePosition) {
-			let snappedPoint = mousePosition;
+			let snappedPoint = this.applyConstraints(mousePosition);
 			let nearestPoint;
 			let nearestDistance = this.snapThreshold * this.snapThreshold;
 

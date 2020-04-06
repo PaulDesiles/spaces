@@ -75,7 +75,5 @@ export default {
 
 p {
 	margin: 2px;
-	font-size: 10pt;
-	font-family: Arial, Helvetica;
 }
 </style>

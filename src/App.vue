@@ -63,6 +63,7 @@
 			:cursor="currentPoint"
 			:hovered="hoveredElement"
 		/>
+		<Toolbar v-bind="parameters" @updateParameter="parameterChanged" />
 	</div>
 </template>
 
@@ -71,7 +72,8 @@ import DebugInfo from './components/DebugInfo.vue';
 import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/DrawingPoint.vue';
 import DrawingLine from './components/DrawingLine.vue';
-import {initBounds, equiv, Point, Intersection, Line, Shape} from './components/Geometry.js';
+import Toolbar from './components/Toolbar.vue';
+import {initBounds, Point, Intersection, Line, Shape} from './components/Geometry.js';
 
 // Only first occurence of an object will be returned
 function distinct(value, index, self) {
@@ -88,10 +90,17 @@ export default {
 		DebugInfo,
 		SvgViewport,
 		DrawingPoint,
-		DrawingLine
+		DrawingLine,
+		Toolbar
 	},
 	data() {
 		return {
+			parameters: {
+				minSize: 0,
+				maxSize: 1000,
+				minAngle: 0,
+				angleStep: 0
+			},
 			snapThreshold: 20,
 			xmax: drawingWidth,
 			ymax: drawingHeight,
@@ -237,6 +246,9 @@ export default {
 				this.currentShapePoints.pop();
 			}
 		},
+		parameterChanged(infos) {
+			this.parameters[infos.name] = infos.value;
+		},
 		checkForDuplicates() {
 			// Check points duplicates
 			// this.intersections.forEach((p1, i) => {
@@ -265,7 +277,11 @@ export default {
 </script>
 
 <style>
-body { margin: 0px; }
+body {
+	margin: 0px;
+	font-family: Arial, Helvetica;
+	font-size: 10pt;
+}
 html, body, #app, #container {
 	width:100%;
 	height:100%;

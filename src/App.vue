@@ -98,8 +98,8 @@ export default {
 			parameters: {
 				minSize: 0,
 				maxSize: 1000,
-				minAngle: 0,
-				angleStep: 0
+				minAngleRad: 0,
+				angleStepRad: 0
 			},
 			snapThreshold: 20,
 			xmax: drawingWidth,
@@ -169,7 +169,23 @@ export default {
 		applyConstraints(mousePosition) {
 			if (this.currentShapePoints.length > 0) {
 				const last = this.currentShapePoints[this.currentShapePoints.length - 1];
-				return last.constrainDistanceTo(mousePosition, this.parameters.minSize, this.parameters.maxSize);
+				let before;
+				if (this.currentShapePoints.length > 1) {
+					before = this.currentShapePoints[this.currentShapePoints.length - 2];
+				}
+
+				let newPoint = last.constrainDistanceTo(
+					mousePosition,
+					this.parameters.minSize,
+					this.parameters.maxSize
+				);
+				newPoint = last.constrainAngleTo(
+					newPoint,
+					before,
+					this.parameters.minAngleRad,
+					this.parameters.angleStepRad
+				);
+				return newPoint;
 			}
 
 			return mousePosition;

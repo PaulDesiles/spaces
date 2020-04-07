@@ -7,7 +7,7 @@
 			min="0"
 			max="100"
 			v-model="localMinSize"
-			@change="update('minSize', $event)"
+			@change="update('minSize', parseInt($event.target.value, 10))"
 		/>
 
 		<p>max stroke size : {{ localMaxSize }}</p>
@@ -17,7 +17,7 @@
 			min="20"
 			max="1000"
 			v-model="localMaxSize"
-			@change="update('maxSize', $event)"
+			@change="update('maxSize', parseInt($event.target.value, 10))"
 		/>
 
 		<p>min Angle : {{ localMinAngle }}°</p>
@@ -27,7 +27,7 @@
 			min="0"
 			max="90"
 			v-model="localMinAngle"
-			@change="update('minAngle', $event)"
+			@change="update('minAngleRad', toRad($event.target.value))"
 		/>
 
 		<p>angle steps</p>
@@ -50,35 +50,40 @@ export default {
 	props: {
 		minSize: Number,
 		maxSize: Number,
-		minAngle: Number,
-		angleStep: Number
+		minAngleRad: Number,
+		angleStepRad: Number
 	},
 	data() {
 		return {
 			localMinSize: this.minSize,
 			localMaxSize: this.maxSize,
-			localMinAngle: this.minAngle,
-			localAngleStep: this.angleStep,
-			angleValues: [0, 10, 15, 30, 45]
+			localMinAngle: this.toDeg(this.minAngleRad),
+			localAngleStep: this.toDeg(this.angleStepRad),
+			angleValues: [0, 5, 10, 15]
 		};
 	},
 	methods: {
 		getStepClass(angle) {
-			return ['option', this.angleStep === angle ? 'selectedOption' : ''];
+			return ['option', this.toDeg(this.angleStepRad) === angle ? 'selectedOption' : ''];
 		},
 		setStep(value) {
-			this.updateParameter('angleStep', value);
+			const radValue = this.toRad(value);
+			this.updateParameter('angleStepRad', radValue);
 		},
-		update(name, event) {
-			const newValue = parseInt(event.target.value, 10);
-			if (name === 'minSize' && this.localMaxSize < newValue) {
-				this.localMaxSize = newValue;
-			}
-			else if (name === 'maxSize' && this.localMinSize > newValue) {
-				this.localMinSize = newValue;
+		toDeg(rad) {
+			return Math.round(rad / Math.PI * 180);
+		},
+		toRad(deg) {
+			return deg / 180 * Math.PI;
+		},
+		update(name, value) {
+			if (name === 'minSize' && this.localMaxSize < value) {
+				this.localMaxSize = value;
+			} else if (name === 'maxSize' && this.localMinSize > value) {
+				this.localMinSize = value;
 			}
 
-			this.updateParameter(name, newValue);
+			this.updateParameter(name, value);
 		},
 		updateParameter(name, value) {
 			this.$emit('updateParameter', {

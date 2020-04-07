@@ -49,6 +49,45 @@ describe('Point class', () => {
 		expect(p.x).toBeCloseTo(10);
 		expect(p.y).toBeCloseTo(7);
 	});
+
+	test('constrain rotation : void params', () => {
+		const result = p2.constrainAngleTo(p3, p1, 0, 0);
+		expect(result).toBe(p3);
+	});
+
+	const deg10 = Math.PI / 18;
+	const deg15 = Math.PI / 12;
+	const deg30 = Math.PI / 6;
+	const deg40 = Math.PI / 4.5;
+	const deg45 = Math.PI / 4;
+
+	test('constrain rotation : min', () => {
+		const result = p1.constrainAngleTo(p4, p3, deg45, 0);
+		// From 28° to 45°
+		expect(result.x).toBeCloseTo(28.14);
+		expect(result.y).toBeCloseTo(10.06);
+	});
+
+	test('constrain rotation : step', () => {
+		const result = p3.constrainAngleTo(p2, undefined, 0, deg10);
+		// From 45° (to X axis) to 50°
+		expect(result.x).toBeCloseTo(9.58);
+		expect(result.y).toBeCloseTo(10.45);
+	});
+
+	test('constrain rotation : min (ignored) & step', () => {
+		const result = p3.constrainAngleTo(p2, p4, deg30, deg10);
+		// From 135° to 140°
+		expect(result.x).toBeCloseTo(9.58);
+		expect(result.y).toBeCloseTo(10.45);
+	});
+
+	test('constrain rotation : min & step', () => {
+		const result = p1.constrainAngleTo(p3, p2, deg40, deg15);
+		// From 21° to 45°
+		expect(result.x).toBeCloseTo(19.85);
+		expect(result.y).toBeCloseTo(11.85);
+	});
 });
 
 describe('equiv', () => {

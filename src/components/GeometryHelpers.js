@@ -12,7 +12,7 @@ export class Point {
 		return (dx * dx) + (dy * dy);
 	}
 
-	// Return new position for p so as to satisfy a (this, p) length between min and max
+	// Return new position for p so that the (this, p) length is between min and max
 	constrainDistanceTo(p, min, max) {
 		const dx = p.x - this.x;
 		const dy = p.y - this.y;
@@ -32,6 +32,50 @@ export class Point {
 			p.x + (f * dx),
 			p.y + (f * dy)
 		);
+	}
+
+	// Return new position for p so that the (this, p) angle with screen is aligned to 'steps' ticks
+	// and that the angle (previousPoint, this, p) is at lest of 'min'
+	constrainAngleTo(p, previousPoint, min, step) {
+		const dx = p.x - this.x;
+		const dy = p.y - this.y;
+
+		const currentAngle = Math.atan2(dy, dx);
+
+		let newAngle = currentAngle;
+		if (previousPoint !== undefined && min > 0) {
+			const previousDeltaX = previousPoint.x - this.x;
+			const previousDeltaY = previousPoint.y - this.y;
+			const previousAngle = Math.atan2(previousDeltaY, previousDeltaX);
+			const angleFromPrevious = previousAngle - currentAngle;
+
+			if (angleFromPrevious >= 0) {
+				if (angleFromPrevious < min) {
+					newAngle = previousAngle - min;
+				}
+			} else if (angleFromPrevious > -min) {
+				newAngle = previousAngle + min;
+			}
+		}
+
+		if (step > 0) {
+			let steppedAngle = Math.floor(newAngle / step) * step;
+			if (Math.abs(steppedAngle - newAngle) > (step / 2)) {
+				steppedAngle += step;
+			}
+
+			newAngle = steppedAngle;
+		}
+
+		if (newAngle !== currentAngle) {
+			const length = Math.sqrt((dx * dx) + (dy * dy));
+			return new Point(
+				this.x + (length * Math.cos(newAngle)),
+				this.y + (length * Math.sin(newAngle))
+			);
+		}
+
+		return p;
 	}
 }
 

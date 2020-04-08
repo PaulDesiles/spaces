@@ -212,20 +212,20 @@ export default {
 			this.intersections.forEach(searchNearestPoint);
 
 			if (nearestPoint === undefined) {
-				let nearestGuide;
-				this.lines.forEach(g => {
-					const p = g.getProjection(snappedPoint);
+				let nearestLine;
+				this.lines.forEach(l => {
+					const p = l.getProjection(snappedPoint);
 					const d = p.getSquaredDistanceTo(snappedPoint);
 					if (d < nearestDistance) {
 						nearestDistance = d;
 						nearestPoint = p;
-						nearestGuide = g;
+						nearestLine = l;
 					}
 				});
 
 				if (nearestPoint !== undefined) {
 					snappedPoint = nearestPoint;
-					this.hoveredElement = nearestGuide;
+					this.hoveredElement = nearestLine;
 				}
 			} else {
 				snappedPoint = nearestPoint;

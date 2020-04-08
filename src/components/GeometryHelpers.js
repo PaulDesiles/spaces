@@ -170,12 +170,16 @@ export function moveSegmentOutside(A, B, distance) {
 }
 
 // Return intersection point between AB and CD
-export function getIntersection(A, B, C, D) {
+export function getIntersection(A, B, C, D, insideSegment) {
 	const dx = B.x - A.x;
 	const dy = B.y - A.y;
 	const a =
 		(((D.y - C.y) * (A.x - C.x)) - ((D.x - C.x) * (A.y - C.y))) /
 		(((D.x - C.x) * dy) - ((D.y - C.y) * dx));
-	return new Point(A.x + (dx * a), A.y + (dy * a));
+	if (!insideSegment || (a >= 0 && a <= 1)) {
+		return new Point(A.x + (dx * a), A.y + (dy * a));
+	}
+
+	return undefined;
 }
 

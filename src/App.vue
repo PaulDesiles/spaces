@@ -192,6 +192,13 @@ export default {
 		},
 		getSnappedPosition(mousePosition) {
 			let snappedPoint = this.applyConstraints(mousePosition);
+
+			const {points, segments} = getContrainedSnappingElements(
+				this.intersections,
+				this.lines,
+				this.currentShapePoints,
+				this.parameters);
+
 			let nearestPoint;
 			let nearestDistance = this.snapThreshold * this.snapThreshold;
 
@@ -209,23 +216,23 @@ export default {
 				searchNearestPoint(this.startPoint);
 			}
 
-			this.intersections.forEach(searchNearestPoint);
+			points.forEach(searchNearestPoint);
 
 			if (nearestPoint === undefined) {
-				let nearestLine;
-				this.lines.forEach(l => {
+				let nearestSegment;
+				segments.forEach(l => {
 					const p = l.getProjection(snappedPoint);
 					const d = p.getSquaredDistanceTo(snappedPoint);
 					if (d < nearestDistance) {
 						nearestDistance = d;
 						nearestPoint = p;
-						nearestLine = l;
+						nearestSegment = l;
 					}
 				});
 
 				if (nearestPoint !== undefined) {
 					snappedPoint = nearestPoint;
-					this.hoveredElement = nearestLine;
+					this.hoveredElement = nearestSegment;
 				}
 			} else {
 				snappedPoint = nearestPoint;

@@ -1,4 +1,4 @@
-import {initBounds, Point, Intersection, Line} from '@/components/Geometry.js';
+import {initBounds, Point, Intersection, Line} from '../../src/components/Geometry';
 
 describe('Line class', () => {
 	const A = new Intersection(20, 10);
@@ -46,6 +46,7 @@ describe('Line class', () => {
 		expect(l2.x(100)).toBe(90);
 	});
 
+	// Old Bounds Tests
 	// test('bounds', () => {
 	// 	expect(l1.bounds).toBeInstanceOf(Array);
 	// 	expect(l1.bounds).toHaveLength(2);

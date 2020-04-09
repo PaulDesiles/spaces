@@ -1,4 +1,4 @@
-import * as Helper from '@/components/GeometryHelpers.js';
+import * as Helper from '../../src/components/GeometryHelpers';
 
 describe('Point class', () => {
 	test('default constructor', () => {
@@ -130,119 +130,110 @@ describe('loopedGet', () => {
 
 describe('forEachConsecutive', () => {
 	const array = ['a', 'b', 'c'];
+	const callback1 = jest.fn(x => x);
+	const callback2 = jest.fn((x, y) => x + y);
+	const callback3 = jest.fn((x, y, z) => x + y + z);
 
 	test('one param starting at 0', () => {
-		const callback = jest.fn(x => x);
-		Helper.forEachConsecutive(array, callback);
-		expect(callback).toHaveBeenCalledTimes(3);
-		expect(callback).toHaveBeenNthCalledWith(1, 'a');
-		expect(callback).toHaveBeenNthCalledWith(2, 'b');
-		expect(callback).toHaveBeenNthCalledWith(3, 'c');
+		Helper.forEachConsecutive(array, callback1);
+		expect(callback1).toHaveBeenCalledTimes(3);
+		expect(callback1).toHaveBeenNthCalledWith(1, 'a');
+		expect(callback1).toHaveBeenNthCalledWith(2, 'b');
+		expect(callback1).toHaveBeenNthCalledWith(3, 'c');
 	});
 
 	test('two params starting at 0', () => {
-		const callback = jest.fn((x, y) => x);
-		Helper.forEachConsecutive(array, callback);
-		expect(callback).toHaveBeenCalledTimes(3);
-		expect(callback).toHaveBeenNthCalledWith(1, 'a', 'b');
-		expect(callback).toHaveBeenNthCalledWith(2, 'b', 'c');
-		expect(callback).toHaveBeenNthCalledWith(3, 'c', 'a');
+		Helper.forEachConsecutive(array, callback2);
+		expect(callback2).toHaveBeenCalledTimes(3);
+		expect(callback2).toHaveBeenNthCalledWith(1, 'a', 'b');
+		expect(callback2).toHaveBeenNthCalledWith(2, 'b', 'c');
+		expect(callback2).toHaveBeenNthCalledWith(3, 'c', 'a');
 	});
 
 	test('three params starting at 0', () => {
-		const callback = jest.fn((x, y, z) => x);
-		Helper.forEachConsecutive(array, callback);
-		expect(callback).toHaveBeenCalledTimes(3);
-		expect(callback).toHaveBeenNthCalledWith(1, 'a', 'b', 'c');
-		expect(callback).toHaveBeenNthCalledWith(2, 'b', 'c', 'a');
-		expect(callback).toHaveBeenNthCalledWith(3, 'c', 'a', 'b');
+		Helper.forEachConsecutive(array, callback3);
+		expect(callback3).toHaveBeenCalledTimes(3);
+		expect(callback3).toHaveBeenNthCalledWith(1, 'a', 'b', 'c');
+		expect(callback3).toHaveBeenNthCalledWith(2, 'b', 'c', 'a');
+		expect(callback3).toHaveBeenNthCalledWith(3, 'c', 'a', 'b');
 	});
 
-// 1
+	// StartIndex 1
 
 	test('one param starting at 1', () => {
-		const callback = jest.fn(x => x);
-		Helper.forEachConsecutive(array, callback, 1);
-		expect(callback).toHaveBeenCalledTimes(3);
-		expect(callback).toHaveBeenNthCalledWith(1, 'b');
-		expect(callback).toHaveBeenNthCalledWith(2, 'c');
-		expect(callback).toHaveBeenNthCalledWith(3, 'a');
+		Helper.forEachConsecutive(array, callback1, 1);
+		expect(callback1).toHaveBeenCalledTimes(3);
+		expect(callback1).toHaveBeenNthCalledWith(1, 'b');
+		expect(callback1).toHaveBeenNthCalledWith(2, 'c');
+		expect(callback1).toHaveBeenNthCalledWith(3, 'a');
 	});
 
 	test('two params starting at 1', () => {
-		const callback = jest.fn((x, y) => x);
-		Helper.forEachConsecutive(array, callback, 1);
-		expect(callback).toHaveBeenCalledTimes(3);
-		expect(callback).toHaveBeenNthCalledWith(1, 'b', 'c');
-		expect(callback).toHaveBeenNthCalledWith(2, 'c', 'a');
-		expect(callback).toHaveBeenNthCalledWith(3, 'a', 'b');
+		Helper.forEachConsecutive(array, callback2, 1);
+		expect(callback2).toHaveBeenCalledTimes(3);
+		expect(callback2).toHaveBeenNthCalledWith(1, 'b', 'c');
+		expect(callback2).toHaveBeenNthCalledWith(2, 'c', 'a');
+		expect(callback2).toHaveBeenNthCalledWith(3, 'a', 'b');
 	});
 
 	test('three params starting at 1', () => {
-		const callback = jest.fn((x, y, z) => x);
-		Helper.forEachConsecutive(array, callback, 1);
-		expect(callback).toHaveBeenCalledTimes(3);
-		expect(callback).toHaveBeenNthCalledWith(1, 'b', 'c', 'a');
-		expect(callback).toHaveBeenNthCalledWith(2, 'c', 'a', 'b');
-		expect(callback).toHaveBeenNthCalledWith(3, 'a', 'b', 'c');
+		Helper.forEachConsecutive(array, callback3, 1);
+		expect(callback3).toHaveBeenCalledTimes(3);
+		expect(callback3).toHaveBeenNthCalledWith(1, 'b', 'c', 'a');
+		expect(callback3).toHaveBeenNthCalledWith(2, 'c', 'a', 'b');
+		expect(callback3).toHaveBeenNthCalledWith(3, 'a', 'b', 'c');
 	});
 
-// 2
+	// StartIndex 2
 
 	test('one param starting at 2', () => {
-		const callback = jest.fn(x => x);
-		Helper.forEachConsecutive(array, callback, 2);
-		expect(callback).toHaveBeenCalledTimes(3);
-		expect(callback).toHaveBeenNthCalledWith(1, 'c');
-		expect(callback).toHaveBeenNthCalledWith(2, 'a');
-		expect(callback).toHaveBeenNthCalledWith(3, 'b');
+		Helper.forEachConsecutive(array, callback1, 2);
+		expect(callback1).toHaveBeenCalledTimes(3);
+		expect(callback1).toHaveBeenNthCalledWith(1, 'c');
+		expect(callback1).toHaveBeenNthCalledWith(2, 'a');
+		expect(callback1).toHaveBeenNthCalledWith(3, 'b');
 	});
 
 	test('two params starting at 2', () => {
-		const callback = jest.fn((x, y) => x);
-		Helper.forEachConsecutive(array, callback, 2);
-		expect(callback).toHaveBeenCalledTimes(3);
-		expect(callback).toHaveBeenNthCalledWith(1, 'c', 'a');
-		expect(callback).toHaveBeenNthCalledWith(2, 'a', 'b');
-		expect(callback).toHaveBeenNthCalledWith(3, 'b', 'c');
+		Helper.forEachConsecutive(array, callback2, 2);
+		expect(callback2).toHaveBeenCalledTimes(3);
+		expect(callback2).toHaveBeenNthCalledWith(1, 'c', 'a');
+		expect(callback2).toHaveBeenNthCalledWith(2, 'a', 'b');
+		expect(callback2).toHaveBeenNthCalledWith(3, 'b', 'c');
 	});
 
 	test('three params starting at 2', () => {
-		const callback = jest.fn((x, y, z) => x);
-		Helper.forEachConsecutive(array, callback, 2);
-		expect(callback).toHaveBeenCalledTimes(3);
-		expect(callback).toHaveBeenNthCalledWith(1, 'c', 'a', 'b');
-		expect(callback).toHaveBeenNthCalledWith(2, 'a', 'b', 'c');
-		expect(callback).toHaveBeenNthCalledWith(3, 'b', 'c', 'a');
+		Helper.forEachConsecutive(array, callback3, 2);
+		expect(callback3).toHaveBeenCalledTimes(3);
+		expect(callback3).toHaveBeenNthCalledWith(1, 'c', 'a', 'b');
+		expect(callback3).toHaveBeenNthCalledWith(2, 'a', 'b', 'c');
+		expect(callback3).toHaveBeenNthCalledWith(3, 'b', 'c', 'a');
 	});
 
-// -1  <=> 2
+	// StartIndex -1  <=> 2
 
 	test('one param starting at -1', () => {
-		const callback = jest.fn(x => x);
-		Helper.forEachConsecutive(array, callback, -1);
-		expect(callback).toHaveBeenCalledTimes(3);
-		expect(callback).toHaveBeenNthCalledWith(1, 'c');
-		expect(callback).toHaveBeenNthCalledWith(2, 'a');
-		expect(callback).toHaveBeenNthCalledWith(3, 'b');
+		Helper.forEachConsecutive(array, callback1, -1);
+		expect(callback1).toHaveBeenCalledTimes(3);
+		expect(callback1).toHaveBeenNthCalledWith(1, 'c');
+		expect(callback1).toHaveBeenNthCalledWith(2, 'a');
+		expect(callback1).toHaveBeenNthCalledWith(3, 'b');
 	});
 
 	test('two params starting at -1', () => {
-		const callback = jest.fn((x, y) => x);
-		Helper.forEachConsecutive(array, callback, -1);
-		expect(callback).toHaveBeenCalledTimes(3);
-		expect(callback).toHaveBeenNthCalledWith(1, 'c', 'a');
-		expect(callback).toHaveBeenNthCalledWith(2, 'a', 'b');
-		expect(callback).toHaveBeenNthCalledWith(3, 'b', 'c');
+		Helper.forEachConsecutive(array, callback2, -1);
+		expect(callback2).toHaveBeenCalledTimes(3);
+		expect(callback2).toHaveBeenNthCalledWith(1, 'c', 'a');
+		expect(callback2).toHaveBeenNthCalledWith(2, 'a', 'b');
+		expect(callback2).toHaveBeenNthCalledWith(3, 'b', 'c');
 	});
 
 	test('three params starting at -1', () => {
-		const callback = jest.fn((x, y, z) => x);
-		Helper.forEachConsecutive(array, callback, -1);
-		expect(callback).toHaveBeenCalledTimes(3);
-		expect(callback).toHaveBeenNthCalledWith(1, 'c', 'a', 'b');
-		expect(callback).toHaveBeenNthCalledWith(2, 'a', 'b', 'c');
-		expect(callback).toHaveBeenNthCalledWith(3, 'b', 'c', 'a');
+		Helper.forEachConsecutive(array, callback3, -1);
+		expect(callback3).toHaveBeenCalledTimes(3);
+		expect(callback3).toHaveBeenNthCalledWith(1, 'c', 'a', 'b');
+		expect(callback3).toHaveBeenNthCalledWith(2, 'a', 'b', 'c');
+		expect(callback3).toHaveBeenNthCalledWith(3, 'b', 'c', 'a');
 	});
 });
 
@@ -386,26 +377,26 @@ describe('getIntersection', () => {
 	const D = {x: 10, y: 30};
 
 	test('return type', () => {
-		var result = Helper.getIntersection(A, B, C, D);
+		const result = Helper.getIntersection(A, B, C, D);
 		expect(result).toBeInstanceOf(Helper.Point);
 	});
 	test('AB X CD', () => {
-		var result = Helper.getIntersection(A, B, C, D);
+		const result = Helper.getIntersection(A, B, C, D);
 		expect(result.x).toBeCloseTo(20);
 		expect(result.y).toBeCloseTo(20);
 	});
 	test('OB X AD', () => {
-		var result = Helper.getIntersection(O, B, A, D);
+		const result = Helper.getIntersection(O, B, A, D);
 		expect(result.x).toBeCloseTo(10);
 		expect(result.y).toBeCloseTo(10);
 	});
 	test('AB X AD', () => {
-		var result = Helper.getIntersection(A, B, A, D);
+		const result = Helper.getIntersection(A, B, A, D);
 		expect(result.x).toBeCloseTo(10);
 		expect(result.y).toBeCloseTo(10);
 	});
 	test('AC X AD', () => {
-		var result = Helper.getIntersection(A, C, A, D);
+		const result = Helper.getIntersection(A, C, A, D);
 		expect(result.x).toBeCloseTo(10);
 		expect(result.y).toBeCloseTo(10);
 	});

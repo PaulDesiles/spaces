@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "test": "vue-cli-service test:unit"
+    "test": "vue-cli-service test:unit",
+    "lint": "xo"
   },
   "dependencies": {
     "svg-pan-zoom": "github:ariutta/svg-pan-zoom",
@@ -31,6 +32,8 @@
     "extensions": [
       "js",
       "vue"
-    ]
+    ],
+    "webpack": true,
+    "globals": ["beforeAll", "describe", "test", "expect", "jest"]
   }
 }

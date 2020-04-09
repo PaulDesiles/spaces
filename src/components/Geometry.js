@@ -1,6 +1,6 @@
-import {Point} from './GeometryHelpers.js';
+import {Point} from './GeometryHelpers';
 export {Point};
-import * as Helper from './GeometryHelpers.js';
+import * as Helper from './GeometryHelpers';
 
 const formsGap = 10;
 
@@ -264,16 +264,13 @@ function getLineBounds(line) {
 	// Line 'bounds' are the intersections that are still inside the frame
 	const bounds = [];
 	intersections.forEach(p => {
-		if ((bounds.length === 0 ||
+		if (bounds.length === 0 ||
 				(bounds.length === 1 &&
-				p.x !== bounds[0].x &&
-				p.y !== bounds[0].y)) &&
-			p.x >= 0 &&
-			p.x <= xmax &&
-			p.y >= 0 &&
-			p.y <= ymax)
-		{
-			bounds.push(p);
+					p.x !== bounds[0].x &&
+					p.y !== bounds[0].y)) {
+			if (p.x >= 0 && p.x <= xmax && p.y >= 0 && p.y <= ymax) {
+				bounds.push(p);
+			}
 		}
 	});
 

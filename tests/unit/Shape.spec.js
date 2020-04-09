@@ -1,4 +1,4 @@
-import {initBounds, Point, Intersection, Line, Shape} from '@/components/Geometry.js';
+import {initBounds, Intersection, Shape} from '../../src/components/Geometry';
 
 describe('Shape class', () => {
 	initBounds(1000, 1000);

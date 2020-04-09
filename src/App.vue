@@ -74,6 +74,7 @@ import DrawingPoint from './components/DrawingPoint.vue';
 import DrawingLine from './components/DrawingLine.vue';
 import Toolbar from './components/Toolbar.vue';
 import {initBounds, Point, Intersection, Line, Shape} from './components/Geometry.js';
+import {getContrainedSnappingElements} from './components/Constraints.js';
 
 // Only first occurence of an object will be returned
 function distinct(value, index, self) {

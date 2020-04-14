@@ -124,9 +124,10 @@ export class Line {
 					this.intersections[1],
 					line.intersections[0],
 					line.intersections[1]));
-
-			this.addPoint(M);
-			line.addPoint(M);
+			if (M instanceof Point) {
+				this.addPoint(M);
+				line.addPoint(M);
+			}
 		}
 
 		return M;
@@ -202,11 +203,13 @@ export class Shape {
 				// Get intersections with the form's previous and next segment
 				// to keep points that have more interest
 				if (B2 === undefined) {
-					B2 = Intersection.createFrom(Helper.getIntersection(A, B, Btemp, Ctemp));
+					const i = Helper.getIntersection(A, B, Btemp, Ctemp);
+					B2 = i instanceof Point ? Intersection.createFrom(i) : Btemp;
 				}
 
 				if (C2 === undefined) {
-					C2 = Intersection.createFrom(Helper.getIntersection(Btemp, Ctemp, C, D));
+					const i = Helper.getIntersection(Btemp, Ctemp, C, D);
+					C2 = i instanceof Point ? Intersection.createFrom(i) : Ctemp;
 				}
 			}
 

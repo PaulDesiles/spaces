@@ -130,110 +130,122 @@ describe('loopedGet', () => {
 
 describe('forEachConsecutive', () => {
 	const array = ['a', 'b', 'c'];
-	const callback1 = jest.fn(x => x);
-	const callback2 = jest.fn((x, y) => x + y);
-	const callback3 = jest.fn((x, y, z) => x + y + z);
+	const callback1 = () => jest.fn(x => x);
+	const callback2 = () => jest.fn((x, y) => x + y);
+	const callback3 = () => jest.fn((x, y, z) => x + y + z);
 
 	test('one param starting at 0', () => {
-		Helper.forEachConsecutive(array, callback1);
-		expect(callback1).toHaveBeenCalledTimes(3);
-		expect(callback1).toHaveBeenNthCalledWith(1, 'a');
-		expect(callback1).toHaveBeenNthCalledWith(2, 'b');
-		expect(callback1).toHaveBeenNthCalledWith(3, 'c');
+		const callback = callback1();
+		Helper.forEachConsecutive(array, callback);
+		expect(callback).toHaveBeenCalledTimes(3);
+		expect(callback).toHaveBeenNthCalledWith(1, 'a');
+		expect(callback).toHaveBeenNthCalledWith(2, 'b');
+		expect(callback).toHaveBeenNthCalledWith(3, 'c');
 	});
 
 	test('two params starting at 0', () => {
-		Helper.forEachConsecutive(array, callback2);
-		expect(callback2).toHaveBeenCalledTimes(3);
-		expect(callback2).toHaveBeenNthCalledWith(1, 'a', 'b');
-		expect(callback2).toHaveBeenNthCalledWith(2, 'b', 'c');
-		expect(callback2).toHaveBeenNthCalledWith(3, 'c', 'a');
+		const callback = callback2();
+		Helper.forEachConsecutive(array, callback);
+		expect(callback).toHaveBeenCalledTimes(3);
+		expect(callback).toHaveBeenNthCalledWith(1, 'a', 'b');
+		expect(callback).toHaveBeenNthCalledWith(2, 'b', 'c');
+		expect(callback).toHaveBeenNthCalledWith(3, 'c', 'a');
 	});
 
 	test('three params starting at 0', () => {
-		Helper.forEachConsecutive(array, callback3);
-		expect(callback3).toHaveBeenCalledTimes(3);
-		expect(callback3).toHaveBeenNthCalledWith(1, 'a', 'b', 'c');
-		expect(callback3).toHaveBeenNthCalledWith(2, 'b', 'c', 'a');
-		expect(callback3).toHaveBeenNthCalledWith(3, 'c', 'a', 'b');
+		const callback = callback3();
+		Helper.forEachConsecutive(array, callback);
+		expect(callback).toHaveBeenCalledTimes(3);
+		expect(callback).toHaveBeenNthCalledWith(1, 'a', 'b', 'c');
+		expect(callback).toHaveBeenNthCalledWith(2, 'b', 'c', 'a');
+		expect(callback).toHaveBeenNthCalledWith(3, 'c', 'a', 'b');
 	});
 
 	// StartIndex 1
 
 	test('one param starting at 1', () => {
-		Helper.forEachConsecutive(array, callback1, 1);
-		expect(callback1).toHaveBeenCalledTimes(3);
-		expect(callback1).toHaveBeenNthCalledWith(1, 'b');
-		expect(callback1).toHaveBeenNthCalledWith(2, 'c');
-		expect(callback1).toHaveBeenNthCalledWith(3, 'a');
+		const callback = callback1();
+		Helper.forEachConsecutive(array, callback, 1);
+		expect(callback).toHaveBeenCalledTimes(3);
+		expect(callback).toHaveBeenNthCalledWith(1, 'b');
+		expect(callback).toHaveBeenNthCalledWith(2, 'c');
+		expect(callback).toHaveBeenNthCalledWith(3, 'a');
 	});
 
 	test('two params starting at 1', () => {
-		Helper.forEachConsecutive(array, callback2, 1);
-		expect(callback2).toHaveBeenCalledTimes(3);
-		expect(callback2).toHaveBeenNthCalledWith(1, 'b', 'c');
-		expect(callback2).toHaveBeenNthCalledWith(2, 'c', 'a');
-		expect(callback2).toHaveBeenNthCalledWith(3, 'a', 'b');
+		const callback = callback2();
+		Helper.forEachConsecutive(array, callback, 1);
+		expect(callback).toHaveBeenCalledTimes(3);
+		expect(callback).toHaveBeenNthCalledWith(1, 'b', 'c');
+		expect(callback).toHaveBeenNthCalledWith(2, 'c', 'a');
+		expect(callback).toHaveBeenNthCalledWith(3, 'a', 'b');
 	});
 
 	test('three params starting at 1', () => {
-		Helper.forEachConsecutive(array, callback3, 1);
-		expect(callback3).toHaveBeenCalledTimes(3);
-		expect(callback3).toHaveBeenNthCalledWith(1, 'b', 'c', 'a');
-		expect(callback3).toHaveBeenNthCalledWith(2, 'c', 'a', 'b');
-		expect(callback3).toHaveBeenNthCalledWith(3, 'a', 'b', 'c');
+		const callback = callback3();
+		Helper.forEachConsecutive(array, callback, 1);
+		expect(callback).toHaveBeenCalledTimes(3);
+		expect(callback).toHaveBeenNthCalledWith(1, 'b', 'c', 'a');
+		expect(callback).toHaveBeenNthCalledWith(2, 'c', 'a', 'b');
+		expect(callback).toHaveBeenNthCalledWith(3, 'a', 'b', 'c');
 	});
 
 	// StartIndex 2
 
 	test('one param starting at 2', () => {
-		Helper.forEachConsecutive(array, callback1, 2);
-		expect(callback1).toHaveBeenCalledTimes(3);
-		expect(callback1).toHaveBeenNthCalledWith(1, 'c');
-		expect(callback1).toHaveBeenNthCalledWith(2, 'a');
-		expect(callback1).toHaveBeenNthCalledWith(3, 'b');
+		const callback = callback1();
+		Helper.forEachConsecutive(array, callback, 2);
+		expect(callback).toHaveBeenCalledTimes(3);
+		expect(callback).toHaveBeenNthCalledWith(1, 'c');
+		expect(callback).toHaveBeenNthCalledWith(2, 'a');
+		expect(callback).toHaveBeenNthCalledWith(3, 'b');
 	});
 
 	test('two params starting at 2', () => {
-		Helper.forEachConsecutive(array, callback2, 2);
-		expect(callback2).toHaveBeenCalledTimes(3);
-		expect(callback2).toHaveBeenNthCalledWith(1, 'c', 'a');
-		expect(callback2).toHaveBeenNthCalledWith(2, 'a', 'b');
-		expect(callback2).toHaveBeenNthCalledWith(3, 'b', 'c');
+		const callback = callback2();
+		Helper.forEachConsecutive(array, callback, 2);
+		expect(callback).toHaveBeenCalledTimes(3);
+		expect(callback).toHaveBeenNthCalledWith(1, 'c', 'a');
+		expect(callback).toHaveBeenNthCalledWith(2, 'a', 'b');
+		expect(callback).toHaveBeenNthCalledWith(3, 'b', 'c');
 	});
 
 	test('three params starting at 2', () => {
-		Helper.forEachConsecutive(array, callback3, 2);
-		expect(callback3).toHaveBeenCalledTimes(3);
-		expect(callback3).toHaveBeenNthCalledWith(1, 'c', 'a', 'b');
-		expect(callback3).toHaveBeenNthCalledWith(2, 'a', 'b', 'c');
-		expect(callback3).toHaveBeenNthCalledWith(3, 'b', 'c', 'a');
+		const callback = callback3();
+		Helper.forEachConsecutive(array, callback, 2);
+		expect(callback).toHaveBeenCalledTimes(3);
+		expect(callback).toHaveBeenNthCalledWith(1, 'c', 'a', 'b');
+		expect(callback).toHaveBeenNthCalledWith(2, 'a', 'b', 'c');
+		expect(callback).toHaveBeenNthCalledWith(3, 'b', 'c', 'a');
 	});
 
 	// StartIndex -1  <=> 2
 
 	test('one param starting at -1', () => {
-		Helper.forEachConsecutive(array, callback1, -1);
-		expect(callback1).toHaveBeenCalledTimes(3);
-		expect(callback1).toHaveBeenNthCalledWith(1, 'c');
-		expect(callback1).toHaveBeenNthCalledWith(2, 'a');
-		expect(callback1).toHaveBeenNthCalledWith(3, 'b');
+		const callback = callback1();
+		Helper.forEachConsecutive(array, callback, -1);
+		expect(callback).toHaveBeenCalledTimes(3);
+		expect(callback).toHaveBeenNthCalledWith(1, 'c');
+		expect(callback).toHaveBeenNthCalledWith(2, 'a');
+		expect(callback).toHaveBeenNthCalledWith(3, 'b');
 	});
 
 	test('two params starting at -1', () => {
-		Helper.forEachConsecutive(array, callback2, -1);
-		expect(callback2).toHaveBeenCalledTimes(3);
-		expect(callback2).toHaveBeenNthCalledWith(1, 'c', 'a');
-		expect(callback2).toHaveBeenNthCalledWith(2, 'a', 'b');
-		expect(callback2).toHaveBeenNthCalledWith(3, 'b', 'c');
+		const callback = callback2();
+		Helper.forEachConsecutive(array, callback, -1);
+		expect(callback).toHaveBeenCalledTimes(3);
+		expect(callback).toHaveBeenNthCalledWith(1, 'c', 'a');
+		expect(callback).toHaveBeenNthCalledWith(2, 'a', 'b');
+		expect(callback).toHaveBeenNthCalledWith(3, 'b', 'c');
 	});
 
 	test('three params starting at -1', () => {
-		Helper.forEachConsecutive(array, callback3, -1);
-		expect(callback3).toHaveBeenCalledTimes(3);
-		expect(callback3).toHaveBeenNthCalledWith(1, 'c', 'a', 'b');
-		expect(callback3).toHaveBeenNthCalledWith(2, 'a', 'b', 'c');
-		expect(callback3).toHaveBeenNthCalledWith(3, 'b', 'c', 'a');
+		const callback = callback3();
+		Helper.forEachConsecutive(array, callback, -1);
+		expect(callback).toHaveBeenCalledTimes(3);
+		expect(callback).toHaveBeenNthCalledWith(1, 'c', 'a', 'b');
+		expect(callback).toHaveBeenNthCalledWith(2, 'a', 'b', 'c');
+		expect(callback).toHaveBeenNthCalledWith(3, 'b', 'c', 'a');
 	});
 });
 
@@ -375,6 +387,10 @@ describe('getIntersection', () => {
 	const B = {x: 30, y: 30};
 	const C = {x: 30, y: 10};
 	const D = {x: 10, y: 30};
+	const E = {x: 19, y: 19};
+	const F = {x: 35, y: 35};
+	const G = {x: 40, y: 30};
+	const H = {x: 50, y: 30};
 
 	test('return type', () => {
 		const result = Helper.getIntersection(A, B, C, D);
@@ -399,5 +415,21 @@ describe('getIntersection', () => {
 		const result = Helper.getIntersection(A, C, A, D);
 		expect(result.x).toBeCloseTo(10);
 		expect(result.y).toBeCloseTo(10);
+	});
+
+	test('AB X CG : out of segments', () => {
+		const result = Helper.getIntersection(A, B, C, G, true);
+		expect(result).not.toBeDefined();
+	});
+	test('AB X CH : parallels', () => {
+		const result = Helper.getIntersection(A, B, C, H);
+		expect(result).not.toBeDefined();
+	});
+	test('AB X EF : collinears', () => {
+		const result = Helper.getIntersection(A, B, E, F);
+		expect(result).toBeInstanceOf(Array);
+		expect(result).toHaveLength(2);
+		expect(result[0]).toBe(E);
+		expect(result[1]).toBe(B);
 	});
 });

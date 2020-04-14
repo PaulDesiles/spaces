@@ -171,15 +171,39 @@ export function moveSegmentOutside(A, B, distance) {
 
 // Return intersection point between AB and CD
 export function getIntersection(A, B, C, D, insideSegment) {
-	const dx = B.x - A.x;
-	const dy = B.y - A.y;
-	const a =
-		(((D.y - C.y) * (A.x - C.x)) - ((D.x - C.x) * (A.y - C.y))) /
-		(((D.x - C.x) * dy) - ((D.y - C.y) * dx));
-	if (!insideSegment || (a >= 0 && a <= 1)) {
-		return new Point(A.x + (dx * a), A.y + (dy * a));
+	const ABx = B.x - A.x;
+	const ABy = B.y - A.y;
+	const CDx = D.x - C.x;
+	const CDy = D.y - C.y;
+	const CAx = A.x - C.x;
+	const CAy = A.y - C.y;
+
+	const I = (CDy * CAx) - (CDx * CAy);
+	const J = (CDx * ABy) - (CDy * ABx);
+
+	if (equiv(J, 0)) {
+		if (equiv(I, 0)) {
+			// AB and CD are collinear
+			// find the two inner points by comparing their parameter 't'
+			// in the line's parametric equation
+
+			const sortedPoints = [A, B, C, D]
+				.map(p => ({point: p, t: (p.x - A.x) / ABx}))
+				.sort((a, b) => a.t - b.t)
+				.map(p => p.point);
+
+			return [sortedPoints[1], sortedPoints[2]];
+		}
+
+		// AB parallel to CD
+		return undefined;
 	}
 
-	return undefined;
-}
+	const K = I / J;
+	if (insideSegment && (K < 0 || K > 1)) {
+		// The intersection is outside AB
+		return undefined;
+	}
 
+	return new Point(A.x + (ABx * K), A.y + (ABy * K));
+}

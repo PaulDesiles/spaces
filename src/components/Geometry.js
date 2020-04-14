@@ -77,12 +77,14 @@ export class Line {
 	}
 
 	addPoint(p) {
-		if (!this.intersections.includes(p)) {
-			this.intersections.push(p);
-		}
+		if (p instanceof Intersection) {
+			if (!this.intersections.includes(p)) {
+				this.intersections.push(p);
+			}
 
-		if (!p.crossingLines.includes(this)) {
-			p.crossingLines.push(this);
+			if (!p.crossingLines.includes(this)) {
+				p.crossingLines.push(this);
+			}
 		}
 	}
 

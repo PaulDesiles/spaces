@@ -1,12 +1,14 @@
 import {Point} from './GeometryHelpers';
 import * as Helper from './GeometryHelpers';
+import {Intersection} from './Geometry';
 
 // Not linked to Line YET on purpose
 // so as to keep its possibilities to minimum
 class Segment {
-	constructor(A, B) {
+	constructor(A, B, associatedLine) {
 		this.A = A;
 		this.B = B;
+		this.associatedLine = associatedLine;
 		this.dx = B.x - A.x;
 		this.dy = B.y - A.y;
 		// Pre-calc for projection
@@ -121,10 +123,10 @@ function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPo
 
 			if (intersections.length === 1) {
 				if (respectMinAngle(s.A)) {
-					return [new Segment(s.A, intersections[0])];
+					return [new Segment(s.A, intersections[0], s.associatedLine)];
 				}
 
-				return [new Segment(s.B, intersections[0])];
+				return [new Segment(s.B, intersections[0], s.associatedLine)];
 			}
 
 			let points = [s.A, s.B, intersections[0], intersections[1]];
@@ -136,8 +138,8 @@ function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPo
 			}
 
 			return [
-				new Segment(points[0], points[1]),
-				new Segment(points[2], points[3])
+				new Segment(points[0], points[1], s.associatedLine),
+				new Segment(points[2], points[3], s.associatedLine)
 			];
 		}).flat();
 	}
@@ -156,9 +158,12 @@ function getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoint
 		.concat(
 			snappingLines
 				.map(l =>
-					stepSegments.map(s =>
-						Helper.getIntersection(s.A, s.B, l.bounds[0], l.bounds[1])
-					)
+					stepSegments.map(s => {
+						const p = Helper.getIntersection(s.A, s.B, l.bounds[0], l.bounds[1]);
+						const i = Intersection.createFrom(p);
+						i.crossingLines.push(l);
+						return i;
+					})
 				).flat()
 				.filter(p => p)
 		);
@@ -223,33 +228,34 @@ function intersectLineWithDonut(l, centerPoint, radiusMin, radiusMax) {
 	}
 
 	if (intersectionsWithMin <= 1) {
-		return [new Segment(intersectionsWithMax[0], intersectionsWithMax[1])];
+		return [new Segment(intersectionsWithMax[0], intersectionsWithMax[1], l)];
 	}
 
 	return [
-		new Segment(intersectionsWithMax[0], intersectionsWithMin[0]),
-		new Segment(intersectionsWithMax[1], intersectionsWithMin[1])
+		new Segment(intersectionsWithMax[0], intersectionsWithMin[0], l),
+		new Segment(intersectionsWithMax[1], intersectionsWithMin[1], l)
 	];
 }
 
-function intersectLineWithCircle(l, centerPoint, radius) {
+export function intersectLineWithCircle(l, centerPoint, radius) {
 	return resolve2ndDegreePolynom(
 		1 + (l.a * l.a),
 		2 * ((l.a * (l.b - centerPoint.y)) - centerPoint.x),
 		(centerPoint.x * centerPoint.x) + ((l.b - centerPoint.y) * (l.b - centerPoint.y)) - (radius * radius)
 	)
-		.map(x => new Point(x, (l.a * x) + l.b));
+		.map(x => new Point(x, l.y(x)));
 }
 
-function resolve2ndDegreePolynom(A, B, C) {
+export function resolve2ndDegreePolynom(A, B, C) {
+	console.log('ABC: ' + A + ' ' + B + ' ' + C);
 	const possibleXs = [];
-	const delta = (B * B) + (4 * A * C);
+	const delta = (B * B) - (4 * A * C);
 	if (delta >= 0) {
 		const deltaSqrt = Math.sqrt(delta);
-		possibleXs.add((-B - deltaSqrt) / (2 * A));
+		possibleXs.push((-B - deltaSqrt) / (2 * A));
 
 		if (delta > 0) {
-			possibleXs.add((-B + deltaSqrt) / (2 * A));
+			possibleXs.push((-B + deltaSqrt) / (2 * A));
 		}
 	}
 

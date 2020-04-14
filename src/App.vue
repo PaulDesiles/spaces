@@ -73,8 +73,8 @@ import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/DrawingPoint.vue';
 import DrawingLine from './components/DrawingLine.vue';
 import Toolbar from './components/Toolbar.vue';
-import {initBounds, Point, Intersection, Line, Shape} from './components/Geometry.js';
-import {getContrainedSnappingElements} from './components/Constraints.js';
+import {initBounds, Point, Intersection, Line, Shape} from './components/Geometry';
+import {getContrainedSnappingElements} from './components/Constraint';
 
 // Only first occurence of an object will be returned
 function distinct(value, index, self) {
@@ -109,6 +109,10 @@ export default {
 			currentPoint: new Point(),
 			currentShapePoints: [],
 			shapes: [],
+			constrainedElements: {
+				points: [],
+				segments: []
+			},
 			hoveredElement: undefined
 		};
 	},
@@ -193,47 +197,40 @@ export default {
 		},
 		getSnappedPosition(mousePosition) {
 			let snappedPoint = this.applyConstraints(mousePosition);
-
-			const {points, segments} = getContrainedSnappingElements(
-				this.intersections,
-				this.lines,
-				this.currentShapePoints,
-				this.parameters);
-
 			let nearestPoint;
 			let nearestDistance = this.snapThreshold * this.snapThreshold;
-
 			this.hoveredElement = undefined;
 
-			const searchNearestPoint = function (p) {
+			const {points, segments} = this.constrainedElements;
+
+			points.forEach(p => {
 				const d = p.getSquaredDistanceTo(snappedPoint);
 				if (d < nearestDistance) {
 					nearestDistance = d;
 					nearestPoint = p;
 				}
-			};
-
-			if (this.showStartPoint) {
-				searchNearestPoint(this.startPoint);
-			}
-
-			points.forEach(searchNearestPoint);
+			});
 
 			if (nearestPoint === undefined) {
 				let nearestSegment;
-				segments.forEach(l => {
-					const p = l.getProjection(snappedPoint);
+				segments.forEach(s => {
+					const p = s.getProjection(snappedPoint);
 					const d = p.getSquaredDistanceTo(snappedPoint);
 					if (d < nearestDistance) {
 						nearestDistance = d;
 						nearestPoint = p;
-						nearestSegment = l;
+						nearestSegment = s;
 					}
 				});
 
 				if (nearestPoint !== undefined) {
 					snappedPoint = nearestPoint;
-					this.hoveredElement = nearestSegment;
+
+					if (nearestSegment instanceof Line) {
+						this.hoveredElement = nearestSegment;
+					} else {
+						this.hoveredElement = nearestSegment.associatedLine;
+					}
 				}
 			} else {
 				snappedPoint = nearestPoint;
@@ -241,6 +238,18 @@ export default {
 			}
 
 			return snappedPoint;
+		},
+		updateConstraints() {
+			let points = [];
+			if (this.showStartPoint) {
+				points.push(this.startPoint);
+			}
+			// StartPoint is added first to have snapping priority over the other points
+			this.constrainedElements = getContrainedSnappingElements(
+				points.concat(this.intersections),
+				this.lines,
+				this.currentShapePoints,
+				this.parameters);
 		},
 		amIHovered(myModel) {
 			return this.hoveredElement === myModel ||
@@ -270,6 +279,8 @@ export default {
 
 				this.currentShapePoints.push(newPoint);
 			}
+
+			this.updateConstraints();
 		},
 		cancel() {
 			if (this.startPoint === undefined) {
@@ -280,6 +291,7 @@ export default {
 		},
 		parameterChanged(infos) {
 			this.parameters[infos.name] = infos.value;
+			this.updateConstraints();
 		},
 		checkForDuplicates() {
 			// Check points duplicates

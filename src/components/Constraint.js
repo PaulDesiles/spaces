@@ -216,15 +216,15 @@ function getPolarPoint(angle, radius, center) {
 	);
 }
 
-function intersectLineWithDonut(l, centerPoint, radiusMin, radiusMax) {
-	const intersectionsWithMax = intersectLineWithCircle(l, centerPoint, radiusMax);
+function intersectLineWithDonut(l, center, radiusMin, radiusMax) {
+	const intersectionsWithMax = intersectLineWithCircle(l, center, radiusMax);
 	if (intersectionsWithMax.length <= 1) {
 		return intersectionsWithMax;
 	}
 
 	let intersectionsWithMin = [];
 	if (radiusMin > 0) {
-		intersectionsWithMin = intersectLineWithCircle(l, centerPoint, radiusMin);
+		intersectionsWithMin = intersectLineWithCircle(l, center, radiusMin);
 	}
 
 	if (intersectionsWithMin <= 1) {
@@ -237,17 +237,26 @@ function intersectLineWithDonut(l, centerPoint, radiusMin, radiusMax) {
 	];
 }
 
-export function intersectLineWithCircle(l, centerPoint, radius) {
+export function intersectLineWithCircle(l, center, radius) {
+	if (l.dx === 0) {
+		const x = l.intersections[0].x;
+		return resolve2ndDegreePolynom(
+			1,
+			-2 * center.y,
+			(center.y * center.y) + ((x - center.x) * (x - center.x)) - (radius * radius)
+		)
+			.map(y => new Point(x, y));
+	}
+
 	return resolve2ndDegreePolynom(
 		1 + (l.a * l.a),
-		2 * ((l.a * (l.b - centerPoint.y)) - centerPoint.x),
-		(centerPoint.x * centerPoint.x) + ((l.b - centerPoint.y) * (l.b - centerPoint.y)) - (radius * radius)
+		2 * ((l.a * (l.b - center.y)) - center.x),
+		(center.x * center.x) + ((l.b - center.y) * (l.b - center.y)) - (radius * radius)
 	)
 		.map(x => new Point(x, l.y(x)));
 }
 
 export function resolve2ndDegreePolynom(A, B, C) {
-	console.log('ABC: ' + A + ' ' + B + ' ' + C);
 	const possibleXs = [];
 	const delta = (B * B) - (4 * A * C);
 	if (delta >= 0) {

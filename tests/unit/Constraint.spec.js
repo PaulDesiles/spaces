@@ -36,6 +36,7 @@ describe('line/circle intersections', () => {
 	const C = new Intersection(7, 2);
 	const D = new Intersection(2, 2);
 	const E = new Intersection(6, 12);
+	const F = new Intersection(0, 4);
 
 	test('BC & circle(A,3)', () => {
 		const result = intersectLineWithCircle(new Line(B, C), A, 3);
@@ -65,14 +66,21 @@ describe('line/circle intersections', () => {
 		const result = intersectLineWithCircle(new Line(B, D), A, 3);
 		expect(result).toHaveLength(0);
 	});
-	test('DE & circle(A,3): vertical tangent', () => {
+	test('BF & circle(A,4): horizontal', () => {
+		const l = new Line(B, F);
+		const result = intersectLineWithCircle(l, A, 3.5);
+		expect(result).toHaveLength(2);
+		expect(result[0].x).toBeCloseTo(1.2);
+		expect(result[0].y).toBeCloseTo(4);
+		expect(result[1].x).toBeCloseTo(4.8);
+		expect(result[1].y).toBeCloseTo(4);
+	});
+	test('BE & circle(A,3): vertical tangent', () => {
 		const l = new Line(B, E);
-		console.log(l.a);
-		console.log(l.b);
 		const result = intersectLineWithCircle(l, A, 3);
 		expect(result).toHaveLength(1);
-		expect(result[0].x).toBeCloseTo(7);
-		expect(result[0].y).toBeCloseTo(3);
+		expect(result[0].x).toBeCloseTo(6);
+		expect(result[0].y).toBeCloseTo(7);
 	});
 });
 

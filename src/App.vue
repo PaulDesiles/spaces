@@ -10,11 +10,42 @@
 				<rect
 					x="0"
 					y="0"
-					:width="xmax"
-					:height="ymax"
+					:width="parameters.xmax"
+					:height="parameters.ymax"
 					fill="white"
 					border="#000"
 					border-width="1"
+				/>
+
+				<line
+					v-for="s in stepSegments"
+					:key="s.id"
+					:x1="s.A.x"
+					:y1="s.A.y"
+					:x2="s.B.x"
+					:y2="s.B.y"
+					stroke-width="4"
+					stroke="#00ff0022"
+				/>
+
+				<line
+					v-for="s in snappingSegments"
+					:key="s.id"
+					:x1="s.A.x"
+					:y1="s.A.y"
+					:x2="s.B.x"
+					:y2="s.B.y"
+					stroke-width="4"
+					stroke="#ff000033"
+				/>
+
+				<circle
+					v-for="p in snappingPoints"
+					:key="p.id"
+					:cx="p.x"
+					:cy="p.y"
+					r="6"
+					fill="#ff000033"
 				/>
 
 				<DrawingLine
@@ -74,7 +105,7 @@ import DrawingPoint from './components/DrawingPoint.vue';
 import DrawingLine from './components/DrawingLine.vue';
 import Toolbar from './components/Toolbar.vue';
 import {initBounds, Point, Intersection, Line, Shape} from './components/Geometry';
-import {getContrainedSnappingElements} from './components/Constraint';
+import {Segment, constrainPointPosition, getStepSegments, getPolarPoint, getContrainedSnappingElements} from './components/Constraint';
 
 // Only first occurence of an object will be returned
 function distinct(value, index, self) {
@@ -99,12 +130,12 @@ export default {
 			parameters: {
 				minSize: 0,
 				maxSize: 1000,
-				minAngleRad: 0,
-				angleStepRad: 0
+				minAngleRad: 33 * Math.PI / 180,
+				angleStepRad: 10 * Math.PI / 180,
+				xmax: drawingWidth,
+				ymax: drawingHeight
 			},
 			snapThreshold: 20,
-			xmax: drawingWidth,
-			ymax: drawingHeight,
 			mousePosition: new Point(),
 			currentPoint: new Point(),
 			currentShapePoints: [],
@@ -113,7 +144,8 @@ export default {
 				points: [],
 				segments: []
 			},
-			hoveredElement: undefined
+			hoveredElement: undefined,
+			stepSegments: []
 		};
 	},
 	computed: {
@@ -142,6 +174,37 @@ export default {
 				.flat()
 				.filter(distinct)
 				.filter(p => p.insideBounds);
+		},
+		snappingPoints() {
+			return this.constrainedElements.points
+				.filter(p => p)
+				.filter(distinct)
+				.map(p => ({
+					id: 'tmp' + p.id,
+					x: p.x,
+					y: p.y
+				}));
+		},
+		snappingSegments() {
+			return this.constrainedElements.segments.filter(s => s)
+				.filter(distinct)
+				.map((s, i) => {
+					let id = 'tmp';
+					let A = new Point();
+					let B = new Point();
+
+					if (s instanceof Line) {
+						id += s.id;
+						A = s.bounds[0];
+						B = s.bounds[1];
+					} else if (s instanceof Segment) {
+						id += 'Seg' + i;
+						A = s.A;
+						B = s.B;
+					}
+
+					return {id, A, B};
+				});
 		}
 	},
 	methods: {
@@ -171,32 +234,8 @@ export default {
 			this.currentShapePoints = [];
 			this.checkForDuplicates();
 		},
-		applyConstraints(mousePosition) {
-			if (this.currentShapePoints.length > 0) {
-				const last = this.currentShapePoints[this.currentShapePoints.length - 1];
-				let before;
-				if (this.currentShapePoints.length > 1) {
-					before = this.currentShapePoints[this.currentShapePoints.length - 2];
-				}
-
-				let newPoint = last.constrainDistanceTo(
-					mousePosition,
-					this.parameters.minSize,
-					this.parameters.maxSize
-				);
-				newPoint = last.constrainAngleTo(
-					newPoint,
-					before,
-					this.parameters.minAngleRad,
-					this.parameters.angleStepRad
-				);
-				return newPoint;
-			}
-
-			return mousePosition;
-		},
 		getSnappedPosition(mousePosition) {
-			let snappedPoint = this.applyConstraints(mousePosition);
+			let snappedPoint = constrainPointPosition(mousePosition, this.currentShapePoints, this.parameters);
 			let nearestPoint;
 			let nearestDistance = this.snapThreshold * this.snapThreshold;
 			this.hoveredElement = undefined;
@@ -240,16 +279,58 @@ export default {
 			return snappedPoint;
 		},
 		updateConstraints() {
-			let points = [];
+			const points = [];
 			if (this.showStartPoint) {
 				points.push(this.startPoint);
 			}
+
 			// StartPoint is added first to have snapping priority over the other points
 			this.constrainedElements = getContrainedSnappingElements(
 				points.concat(this.intersections),
 				this.lines,
 				this.currentShapePoints,
 				this.parameters);
+
+			if (this.currentShapePoints.length > 0) {
+				const lastPoints = this.currentShapePoints.slice(-2).reverse();
+				let lastAngle;
+				if (this.parameters.minAngleRad > 0 && lastPoints.length > 1) {
+					lastAngle = Math.atan2(
+						lastPoints[1].y - lastPoints[0].y,
+						lastPoints[1].x - lastPoints[0].x);
+				}
+
+				if (this.parameters.angleStepRad > 0) {
+					this.stepSegments = getStepSegments(lastPoints[0], lastAngle, this.parameters)
+						.map((s, i) => ({
+							id: 'Seg' + i,
+							A: s.A,
+							B: s.B
+						}));
+				} else {
+					const lowerAngleSegment =
+						new Segment(
+							lastPoints[0],
+							getPolarPoint(
+								lastAngle - this.parameters.minAngleRad,
+								this.parameters.maxSize,
+								lastPoints[0])
+						);
+
+					const upperAngleSegment =
+						new Segment(
+							lastPoints[0],
+							getPolarPoint(
+								lastAngle + this.parameters.minAngleRad,
+								this.parameters.maxSize,
+								lastPoints[0])
+						);
+
+					this.stepSegments = [lowerAngleSegment, upperAngleSegment];
+				}
+			} else {
+				this.stepSegments = [];
+			}
 		},
 		amIHovered(myModel) {
 			return this.hoveredElement === myModel ||

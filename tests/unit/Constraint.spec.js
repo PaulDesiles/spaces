@@ -1,5 +1,10 @@
-import {Intersection, Line} from '../../src/components/Geometry';
-import {resolve2ndDegreePolynom, intersectLineWithCircle} from '../../src/components/Constraint';
+import {Point, Intersection, Line, initBounds} from '../../src/components/Geometry';
+import {
+	Segment,
+	resolve2ndDegreePolynom,
+	intersectLineWithCircle,
+	constrainSegmentToBounds
+} from '../../src/components/Constraint';
 
 describe('polynom resolution', () => {
 	test('x²+2x+1', () => {
@@ -84,3 +89,51 @@ describe('line/circle intersections', () => {
 	});
 });
 
+describe('constrain segment to drawing bounds', () => {
+	initBounds(1000, 600);
+
+	test('inside segment', () => {
+		const s = new Segment(new Point(20, 30), new Point(230, 400));
+		constrainSegmentToBounds(s);
+		expect(s.A.x).toBe(20);
+		expect(s.A.y).toBe(30);
+		expect(s.B.x).toBe(230);
+		expect(s.B.y).toBe(400);
+	});
+
+	test('one bound outside', () => {
+		const s = new Segment(new Point(-20, -30), new Point(230, 400));
+		constrainSegmentToBounds(s);
+		expect(s.A.x).toBeCloseTo(0);
+		expect(s.A.y).toBeCloseTo(4.4);
+		expect(s.B.x).toBe(230);
+		expect(s.B.y).toBe(400);
+	});
+
+	test('two bounds outside, threw drawing area', () => {
+		const s = new Segment(new Point(-20, 80), new Point(428, 1200));
+		constrainSegmentToBounds(s);
+		expect(s.A.x).toBeCloseTo(0);
+		expect(s.A.y).toBeCloseTo(130);
+		expect(s.B.x).toBeCloseTo(188);
+		expect(s.B.y).toBeCloseTo(600);
+	});
+
+	test('two bounds outside, out of drawing area', () => {
+		const s = new Segment(new Point(-60, -20), new Point(-20, 80));
+		constrainSegmentToBounds(s);
+		expect(s.A.x).toBeCloseTo(0);
+		expect(s.A.y).toBeCloseTo(130);
+		expect(s.B.x).toBeCloseTo(0);
+		expect(s.B.y).toBeCloseTo(130);
+	});
+
+	test('two bounds outside, no line intersections with drawing area', () => {
+		const s = new Segment(new Point(-20, -30), new Point(-60, -20));
+		constrainSegmentToBounds(s);
+		expect(s.A.x).toBeCloseTo(0);
+		expect(s.A.y).toBeCloseTo(0);
+		expect(s.B.x).toBeCloseTo(0);
+		expect(s.B.y).toBeCloseTo(0);
+	});
+});

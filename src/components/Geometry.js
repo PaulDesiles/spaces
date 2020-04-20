@@ -118,15 +118,15 @@ export class Line {
 	getOrCreateIntersectionWith(line) {
 		let M = this.getKnownIntersectionWith(line);
 		if (M === undefined) {
-			M = Intersection.createFrom(
-				Helper.getIntersection(
-					this.intersections[0],
-					this.intersections[1],
-					line.intersections[0],
-					line.intersections[1]));
+			M = Helper.getIntersection(
+				this.intersections[0],
+				this.intersections[1],
+				line.intersections[0],
+				line.intersections[1]);
 			if (M instanceof Point) {
-				this.addPoint(M);
-				line.addPoint(M);
+				const I = Intersection.createFrom(M);
+				this.addPoint(I);
+				line.addPoint(I);
 			}
 		}
 
@@ -246,7 +246,7 @@ export class Shape {
 	}
 }
 
-function getLineBounds(line) {
+export function getLineBounds(line) {
 	// Handle special cases
 	if (line.dx === 0) {
 		const x = line.intersections[0].x;
@@ -273,11 +273,18 @@ function getLineBounds(line) {
 				(bounds.length === 1 &&
 					p.x !== bounds[0].x &&
 					p.y !== bounds[0].y)) {
-			if (p.x >= 0 && p.x <= xmax && p.y >= 0 && p.y <= ymax) {
+			if (isInsideBounds(p)) {
 				bounds.push(p);
 			}
 		}
 	});
 
 	return bounds;
+}
+
+export function isInsideBounds(point) {
+	return point.x >= 0 &&
+		point.x <= xmax &&
+		point.y >= 0 &&
+		point.y <= ymax;
 }

@@ -12,70 +12,8 @@ export class Point {
 		return (dx * dx) + (dy * dy);
 	}
 
-	// Return new position for p so that the (this, p) length is between min and max
-	constrainDistanceTo(p, min, max) {
-		const dx = p.x - this.x;
-		const dy = p.y - this.y;
-
-		if (dx === 0 && dy === 0 && min > 0) {
-			return new Point(p.x, p.y - min);
-		}
-
-		const squaredLength = (dx * dx) + (dy * dy);
-		const newLength = Math.max(min * min, Math.min(max * max, squaredLength));
-		if (newLength === squaredLength) {
-			return p;
-		}
-
-		const f = Math.sqrt(newLength / squaredLength) - 1;
-		return new Point(
-			p.x + (f * dx),
-			p.y + (f * dy)
-		);
-	}
-
-	// Return new position for p so that the (this, p) angle with screen is aligned to 'steps' ticks
-	// and that the angle (previousPoint, this, p) is at lest of 'min'
-	constrainAngleTo(p, previousPoint, min, step) {
-		const dx = p.x - this.x;
-		const dy = p.y - this.y;
-
-		const currentAngle = Math.atan2(dy, dx);
-
-		let newAngle = currentAngle;
-		if (previousPoint !== undefined && min > 0) {
-			const previousDeltaX = previousPoint.x - this.x;
-			const previousDeltaY = previousPoint.y - this.y;
-			const previousAngle = Math.atan2(previousDeltaY, previousDeltaX);
-			const angleFromPrevious = previousAngle - currentAngle;
-
-			if (angleFromPrevious >= 0) {
-				if (angleFromPrevious < min) {
-					newAngle = previousAngle - min;
-				}
-			} else if (angleFromPrevious > -min) {
-				newAngle = previousAngle + min;
-			}
-		}
-
-		if (step > 0) {
-			let steppedAngle = Math.floor(newAngle / step) * step;
-			if (Math.abs(steppedAngle - newAngle) > (step / 2)) {
-				steppedAngle += step;
-			}
-
-			newAngle = steppedAngle;
-		}
-
-		if (newAngle !== currentAngle) {
-			const length = Math.sqrt((dx * dx) + (dy * dy));
-			return new Point(
-				this.x + (length * Math.cos(newAngle)),
-				this.y + (length * Math.sin(newAngle))
-			);
-		}
-
-		return p;
+	equiv(p) {
+		return equiv(this.x, p.x) && equiv(this.y, p.y);
 	}
 }
 
@@ -203,6 +141,31 @@ export function getIntersection(A, B, C, D, insideSegment) {
 	if (insideSegment && (K < 0 || K > 1)) {
 		// The intersection is outside AB
 		return undefined;
+	}
+
+	if (equiv(K, 0)) {
+		return A;
+	}
+
+	if (equiv(K, 1)) {
+		return B;
+	}
+
+	// get the parameter K2 relative to CD
+	const I2 = (ABy * (-CAx)) - (ABx * (-CAy));
+	const J2 = -J;
+	const K2 = I2 / J2;
+	if (insideSegment && (K2 < 0 || K2 > 1)) {
+		// The intersection is outside CD
+		return undefined;
+	}
+
+	if (equiv(K2, 0)) {
+		return C;
+	}
+
+	if (equiv(K2, 1)) {
+		return D;
 	}
 
 	return new Point(A.x + (ABx * K), A.y + (ABy * K));

@@ -301,7 +301,7 @@ export default {
 				}
 
 				if (this.parameters.angleStepRad > 0) {
-					this.stepSegments = getStepSegments(lastPoints[0], lastAngle, this.parameters)
+					this.stepSegments = getStepSegments(lastPoints, lastAngle, this.parameters)
 						.map((s, i) => ({
 							id: 'Seg' + i,
 							A: s.A,

@@ -79,7 +79,9 @@ class Vector {
 	angleWith(v) {
 		// 𝐴𝐵→⋅𝐵𝐶→=‖𝐴𝐵→‖‖𝐵𝐶→‖cos𝜃
 		const dotProduct = (this.dx * v.dx) + (this.dy * v.dy);
-		return Math.acos(dotProduct / (this.length * v.length));
+		const div = dotProduct / (this.length * v.length);
+		// Calculation imprecisions may lead to results slightly above 1 / below -1
+		return Math.acos(Math.max(-1, Math.min(1, div)));
 	}
 
 	signedAngleWith(v) {
@@ -108,7 +110,7 @@ export function getContrainedSnappingElements(snappingPoints, snappingLines, cur
 		return getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPoints, lastAngle, parameters);
 	}
 
-	return getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoints[0], lastAngle, parameters);
+	return getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoints, lastAngle, parameters);
 }
 
 function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPoints, lastAngle, parameters) {
@@ -139,7 +141,7 @@ function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPo
 		const lastVector = new Vector(lastPoints[0], lastPoints[1]);
 		const pointRespectMinAngle = p => {
 			const angle = lastVector.angleWith(new Vector(lastPoints[0], p));
-			return angle > parameters.minAngleRad;
+			return angle >= parameters.minAngleRad;
 		};
 
 		// Apply min-angle constraint to points
@@ -218,14 +220,14 @@ function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPo
 	};
 }
 
-function getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoint, lastAngle, parameters) {
-	const stepSegments = getStepSegments(lastPoint, lastAngle, parameters);
+function getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoints, lastAngle, parameters) {
+	const stepSegments = getStepSegments(lastPoints, lastAngle, parameters);
 
-	const points = snappingPoints.filter(p => p !== lastPoint && stepSegments.some(s => s.contains(p)));
+	const points = snappingPoints.filter(p => p !== lastPoints[0] && stepSegments.some(s => s.contains(p)));
 	const segments = [];
 
 	const addPoint = p => {
-		if (!points.includes(p) && p !== lastPoint) {
+		if (!points.includes(p) && p !== lastPoints[0]) {
 			points.push(p);
 		}
 	};
@@ -237,7 +239,7 @@ function getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoint
 
 				if (p instanceof Intersection) {
 					addPoint(p);
-				} else if (p instanceof Point && !p.equiv(lastPoint)) {
+				} else if (p instanceof Point && !p.equiv(lastPoints[0])) {
 					// Search an existing equivalent for this point
 					const existing = l.intersections.filter(i => i.equiv(p));
 
@@ -259,28 +261,38 @@ function getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoint
 	return {points, segments};
 }
 
-export function getStepSegments(lastPoint, lastAngle, parameters) {
+export function getStepSegments(lastPoints, lastAngle, parameters) {
+	let pointRespectMinAngle = _ => true;
+
+	if (lastPoints.length > 1) {
+		const lastVector = new Vector(lastPoints[0], lastPoints[1]);
+		pointRespectMinAngle = p => {
+			const angle = lastVector.angleWith(new Vector(lastPoints[0], p));
+			return angle >= parameters.minAngleRad;
+		};
+	}
+
 	const stepSegments = [];
 	const nbSteps = Math.round(Math.PI / parameters.angleStepRad);
 	for (let step = 0; step < nbSteps; step++) {
 		const i = step * parameters.angleStepRad;
 		const j = i - Math.PI;
-		const A = getPolarPoint(i, parameters.maxSize, lastPoint, parameters);
-		const B = getPolarPoint(i, parameters.minSize, lastPoint, parameters);
-		const C = getPolarPoint(j, parameters.minSize, lastPoint, parameters);
-		const D = getPolarPoint(j, parameters.maxSize, lastPoint, parameters);
+		const A = getPolarPoint(i, parameters.maxSize, lastPoints[0], parameters);
+		const B = getPolarPoint(i, parameters.minSize, lastPoints[0], parameters);
+		const C = getPolarPoint(j, parameters.minSize, lastPoints[0], parameters);
+		const D = getPolarPoint(j, parameters.maxSize, lastPoints[0], parameters);
 
 		if (parameters.minSize === 0) {
 			let p1 = A;
 			let p2 = D;
 
 			if (lastAngle !== undefined && parameters.minAngleRad > 0) {
-				if (!respectMinAngle(i, lastAngle, parameters.minAngleRad)) {
-					p1 = lastPoint;
+				if (!pointRespectMinAngle(p1)) {
+					p1 = lastPoints[0];
 				}
 
-				if (!respectMinAngle(j, lastAngle, parameters.minAngleRad)) {
-					p2 = lastPoint;
+				if (!pointRespectMinAngle(p2)) {
+					p2 = lastPoints[0];
 				}
 			}
 
@@ -288,26 +300,17 @@ export function getStepSegments(lastPoint, lastAngle, parameters) {
 				stepSegments.push(new Segment(p1, p2));
 			}
 		} else {
-			if (parameters.minAngleRad === 0 || respectMinAngle(i, lastAngle, parameters.minAngleRad)) {
+			if (parameters.minAngleRad === 0 || pointRespectMinAngle(A)) {
 				stepSegments.push(new Segment(A, B));
 			}
 
-			if (parameters.minAngleRad === 0 || respectMinAngle(j, lastAngle, parameters.minAngleRad)) {
+			if (parameters.minAngleRad === 0 || pointRespectMinAngle(D)) {
 				stepSegments.push(new Segment(C, D));
 			}
 		}
 	}
 
 	return stepSegments;
-}
-
-function respectMinAngle(a, lastAngle, minAngle) {
-	let comparingAngle = lastAngle;
-	if (a >= 0 && lastAngle < 0) {
-		comparingAngle = lastAngle - (2 * Math.PI);
-	}
-
-	return Math.abs(comparingAngle - a) >= minAngle;// - 0.001;
 }
 
 export function getPolarPoint(angle, radius, center, drawingBounds) {
@@ -476,23 +479,27 @@ function constrainAngleTo(basePoint, p, previousPoint, min, step) {
 	const currentAngle = Math.atan2(dy, dx);
 
 	let newAngle = currentAngle;
-	let stepApplied = false
+	let stepApplied = false;
 	if (previousPoint !== undefined && min > 0) {
 		const previousVector = new Vector(basePoint, previousPoint);
 		const previousAngle = Math.atan2(previousVector.dy, previousVector.dx);
 		const currentVector = new Vector(basePoint, p);
 		const angleFromPrevious = previousVector.signedAngleWith(currentVector);
 
-		// const steppedMin = step === 0 ? min : (Math.ceil(min / step) * step);
-
-		if (angleFromPrevious >= 0) {
-			if (angleFromPrevious < min) {
-				newAngle = previousAngle;
-				stepApplied = true;
+		const S = Math.sign(angleFromPrevious);
+		let steppedMin = previousAngle + (min * S);
+		let minAngleFromPrevious = (min * S);
+		if (step > 0) {
+			steppedMin = Math.ceil(steppedMin / step) * step;
+			if (S < 0) {
+				steppedMin -= step;
 			}
-		} else if (angleFromPrevious > -min) {
-			newAngle = previousAngle - min;
-			newAngle = previousAngle;
+
+			minAngleFromPrevious = (steppedMin - previousAngle) / S;
+		}
+
+		if (Math.abs(angleFromPrevious) < Math.abs(minAngleFromPrevious)) {
+			newAngle = steppedMin;
 			stepApplied = true;
 		}
 	}

@@ -93,7 +93,9 @@
 			:cursor="currentPoint"
 			:hovered="hoveredElement"
 		/>
-		<Toolbar v-bind="parameters" @updateParameter="parameterChanged" />
+		<ParametersPanel>
+			<Toolbar v-bind="parameters" @updateParameter="parameterChanged" />
+		</ParametersPanel>
 	</div>
 </template>
 
@@ -103,6 +105,8 @@ import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/DrawingPoint.vue';
 import DrawingLine from './components/DrawingLine.vue';
 import Toolbar from './components/Toolbar.vue';
+import ParametersPanel from './components/ParametersPanel.vue';
+
 import {initBounds, Point, Intersection, Line, Shape} from './components/Geometry';
 import {Segment, constrainPointPosition, getStepSegments, getPolarPoint, getContrainedSnappingElements} from './components/Constraint';
 
@@ -122,7 +126,8 @@ export default {
 		SvgViewport,
 		DrawingPoint,
 		DrawingLine,
-		Toolbar
+		Toolbar,
+		ParametersPanel
 	},
 	data() {
 		return {

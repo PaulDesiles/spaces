@@ -100,16 +100,6 @@ p {
 	margin: 2px;
 }
 
-#toolbar {
-	position: absolute;
-	left: 5px;
-	bottom: 20px;
-	background: #9999;
-	padding: 7px 10px;
-	border-radius: 5px;
-	min-width: 180px;
-}
-
 .optionLine {
 	display: flex;
 }

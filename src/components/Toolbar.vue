@@ -51,24 +51,24 @@ export default {
 		minSize: Number,
 		maxSize: Number,
 		minAngleRad: Number,
-		angleStepRad: Number
+		selectedAngleStepRad: Number
 	},
 	data() {
 		return {
 			localMinSize: this.minSize,
 			localMaxSize: this.maxSize,
 			localMinAngle: this.toDeg(this.minAngleRad),
-			localAngleStep: this.toDeg(this.angleStepRad),
-			angleValues: [0, 5, 10, 15]
+			localAngleStep: this.toDeg(this.selectedAngleStepRad),
+			angleValues: [5, 10, 15]
 		};
 	},
 	methods: {
 		getStepClass(angle) {
-			return ['option', this.toDeg(this.angleStepRad) === angle ? 'selectedOption' : ''];
+			return ['option', this.toDeg(this.selectedAngleStepRad) === angle ? 'selectedOption' : ''];
 		},
 		setStep(value) {
 			const radValue = this.toRad(value);
-			this.updateParameter('angleStepRad', radValue);
+			this.updateParameter('selectedAngleStepRad', radValue);
 		},
 		toDeg(rad) {
 			return Math.round(rad / Math.PI * 180);

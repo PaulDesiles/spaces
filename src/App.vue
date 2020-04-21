@@ -5,7 +5,6 @@
 				ref="mainGroup"
 				@click="clic($event)"
 				@mousemove="move($event)"
-				@keyup.z.ctrl="cancel()"
 			>
 				<rect
 					x="0"
@@ -128,12 +127,13 @@ export default {
 	data() {
 		return {
 			parameters: {
+				xmax: drawingWidth,
+				ymax: drawingHeight,
 				minSize: 0,
 				maxSize: 1000,
-				minAngleRad: 33 * Math.PI / 180,
-				angleStepRad: 10 * Math.PI / 180,
-				xmax: drawingWidth,
-				ymax: drawingHeight
+				minAngleRad: 10 * Math.PI / 180,
+				selectedAngleStepRad: 10 * Math.PI / 180,
+				angleStepRad: 0
 			},
 			snapThreshold: 20,
 			mousePosition: new Point(),
@@ -206,6 +206,16 @@ export default {
 					return {id, A, B};
 				});
 		}
+	},
+	created() {
+		window.addEventListener('keydown', this.keyDown);
+		window.addEventListener('keyup', this.keyUp);
+		window.addEventListener("blur", this.windowLostFocus);
+	},
+	destroyed() {
+		window.removeEventListener('keydown', this.keyDown);
+		window.removeEventListener('keyup', this.keyUp);
+		window.removeEventListener("blur", this.windowLostFocus);
 	},
 	methods: {
 		getPosition(event) {
@@ -338,9 +348,12 @@ export default {
 					myModel instanceof Line &&
 					this.hoveredElement.crossingLines.includes(myModel));
 		},
+		updateCurrentPoint() {
+			this.currentPoint = this.getSnappedPosition(this.mousePosition);
+		},
 		move(event) {
 			this.mousePosition = this.getPosition(event);
-			this.currentPoint = this.getSnappedPosition(this.mousePosition);
+			this.updateCurrentPoint();
 		},
 		clic(event) {
 			const snappedPoint = this.getSnappedPosition(this.getPosition(event));
@@ -373,6 +386,27 @@ export default {
 		parameterChanged(infos) {
 			this.parameters[infos.name] = infos.value;
 			this.updateConstraints();
+		},
+		keyDown(keyEvent) {
+			if (keyEvent.key.toLowerCase() === 'control') {
+				this.toggleAngleSteps(true);
+			}
+		},
+		keyUp(keyEvent) {
+			if (keyEvent.key.toLowerCase() === 'control') {
+				this.toggleAngleSteps(false);
+			}
+		},
+		windowLostFocus() {
+			this.toggleAngleSteps(false);
+		},
+		toggleAngleSteps(activate) {
+			const newValue = activate ? this.parameters.selectedAngleStepRad : 0;
+			if (this.parameters.angleStepRad !== newValue) {
+				this.parameters.angleStepRad = newValue;
+				this.updateConstraints();
+				this.updateCurrentPoint();
+			}
 		},
 		checkForDuplicates() {
 			// Check points duplicates

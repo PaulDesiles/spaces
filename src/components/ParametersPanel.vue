@@ -81,9 +81,14 @@ export default {
 }
 
 .fade-enter-active, .fade-leave-active {
-	transition: opacity .3s ease;
+	transition: transform .3s ease;
+	transition-delay: .1s;
 }
-.fade-enter, .fade-leave-to {
-	opacity: 0;
+.fade-enter {
+	transform: translateX(12px) rotateY(90deg);
 }
+.fade-leave-to {
+	transform: translateX(-12px) rotateY(-90deg);
+}
+
 </style>

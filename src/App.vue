@@ -16,35 +16,11 @@
 					border-width="1"
 				/>
 
-				<line
-					v-for="s in stepSegments"
-					:key="s.id"
-					:x1="s.A.x"
-					:y1="s.A.y"
-					:x2="s.B.x"
-					:y2="s.B.y"
-					stroke-width="4"
-					stroke="#00ff0022"
-				/>
-
-				<line
-					v-for="s in snappingSegments"
-					:key="s.id"
-					:x1="s.A.x"
-					:y1="s.A.y"
-					:x2="s.B.x"
-					:y2="s.B.y"
-					stroke-width="4"
-					stroke="#ff000033"
-				/>
-
-				<circle
-					v-for="p in snappingPoints"
-					:key="p.id"
-					:cx="p.x"
-					:cy="p.y"
-					r="6"
-					fill="#ff000033"
+				<DebugView
+					v-if="debugMode"
+					:parameters="parameters"
+					:currentShapePoints="currentShapePoints"
+					:constrainedElements="constrainedElements"
 				/>
 
 				<DrawingLine
@@ -89,6 +65,7 @@
 			</g>
 		</SvgViewport>
 		<DebugInfo
+			v-if="debugMode"
 			:mouse="mousePosition"
 			:cursor="currentPoint"
 			:hovered="hoveredElement"
@@ -101,6 +78,7 @@
 
 <script>
 import DebugInfo from './components/DebugInfo.vue';
+import DebugView from './components/DebugView.vue';
 import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/DrawingPoint.vue';
 import DrawingLine from './components/DrawingLine.vue';
@@ -108,7 +86,7 @@ import Toolbar from './components/Toolbar.vue';
 import ParametersPanel from './components/ParametersPanel.vue';
 
 import {initBounds, Point, Intersection, Line, Shape} from './components/Geometry';
-import {Segment, constrainPointPosition, getStepSegments, getPolarPoint, getContrainedSnappingElements} from './components/Constraint';
+import {constrainPointPosition, getContrainedSnappingElements} from './components/Constraint';
 
 // Only first occurence of an object will be returned
 function distinct(value, index, self) {
@@ -123,6 +101,7 @@ export default {
 	name: 'App',
 	components: {
 		DebugInfo,
+		DebugView,
 		SvgViewport,
 		DrawingPoint,
 		DrawingLine,
@@ -140,6 +119,7 @@ export default {
 				selectedAngleStepRad: 10 * Math.PI / 180,
 				angleStepRad: 0
 			},
+			debugMode: false,
 			snapThreshold: 20,
 			mousePosition: new Point(),
 			currentPoint: new Point(),
@@ -149,8 +129,7 @@ export default {
 				points: [],
 				segments: []
 			},
-			hoveredElement: undefined,
-			stepSegments: []
+			hoveredElement: undefined
 		};
 	},
 	computed: {
@@ -179,48 +158,17 @@ export default {
 				.flat()
 				.filter(distinct)
 				.filter(p => p.insideBounds);
-		},
-		snappingPoints() {
-			return this.constrainedElements.points
-				.filter(p => p)
-				.filter(distinct)
-				.map(p => ({
-					id: 'tmp' + p.id,
-					x: p.x,
-					y: p.y
-				}));
-		},
-		snappingSegments() {
-			return this.constrainedElements.segments.filter(s => s)
-				.filter(distinct)
-				.map((s, i) => {
-					let id = 'tmp';
-					let A = new Point();
-					let B = new Point();
-
-					if (s instanceof Line) {
-						id += s.id;
-						A = s.bounds[0];
-						B = s.bounds[1];
-					} else if (s instanceof Segment) {
-						id += 'Seg' + i;
-						A = s.A;
-						B = s.B;
-					}
-
-					return {id, A, B};
-				});
 		}
 	},
 	created() {
 		window.addEventListener('keydown', this.keyDown);
 		window.addEventListener('keyup', this.keyUp);
-		window.addEventListener("blur", this.windowLostFocus);
+		window.addEventListener('blur', this.windowLostFocus);
 	},
 	destroyed() {
 		window.removeEventListener('keydown', this.keyDown);
 		window.removeEventListener('keyup', this.keyUp);
-		window.removeEventListener("blur", this.windowLostFocus);
+		window.removeEventListener('blur', this.windowLostFocus);
 	},
 	methods: {
 		getPosition(event) {
@@ -305,47 +253,6 @@ export default {
 				this.lines,
 				this.currentShapePoints,
 				this.parameters);
-
-			if (this.currentShapePoints.length > 0) {
-				const lastPoints = this.currentShapePoints.slice(-2).reverse();
-				let lastAngle;
-				if (this.parameters.minAngleRad > 0 && lastPoints.length > 1) {
-					lastAngle = Math.atan2(
-						lastPoints[1].y - lastPoints[0].y,
-						lastPoints[1].x - lastPoints[0].x);
-				}
-
-				if (this.parameters.angleStepRad > 0) {
-					this.stepSegments = getStepSegments(lastPoints, lastAngle, this.parameters)
-						.map((s, i) => ({
-							id: 'Seg' + i,
-							A: s.A,
-							B: s.B
-						}));
-				} else {
-					const lowerAngleSegment =
-						new Segment(
-							lastPoints[0],
-							getPolarPoint(
-								lastAngle - this.parameters.minAngleRad,
-								this.parameters.maxSize,
-								lastPoints[0])
-						);
-
-					const upperAngleSegment =
-						new Segment(
-							lastPoints[0],
-							getPolarPoint(
-								lastAngle + this.parameters.minAngleRad,
-								this.parameters.maxSize,
-								lastPoints[0])
-						);
-
-					this.stepSegments = [lowerAngleSegment, upperAngleSegment];
-				}
-			} else {
-				this.stepSegments = [];
-			}
 		},
 		amIHovered(myModel) {
 			return this.hoveredElement === myModel ||
@@ -398,8 +305,11 @@ export default {
 			}
 		},
 		keyUp(keyEvent) {
-			if (keyEvent.key.toLowerCase() === 'control') {
+			const key = keyEvent.key.toLowerCase();
+			if (key === 'control') {
 				this.toggleAngleSteps(false);
+			} else if (key === 'd') {
+				this.debugMode = !this.debugMode;
 			}
 		},
 		windowLostFocus() {

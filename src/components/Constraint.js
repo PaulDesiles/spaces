@@ -429,13 +429,13 @@ export function constrainPointPosition(p, currentShapePoints, parameters) {
 	if (currentShapePoints.length > 0) {
 		const lastPoints = currentShapePoints.slice(-2).reverse();
 
-		let newPoint = constrainDistanceTo(
+		let newPoint = constrainDistance(
 			lastPoints[0],
 			p,
 			parameters.minSize,
 			parameters.maxSize
 		);
-		newPoint = constrainAngleTo(
+		newPoint = constrainAngle(
 			lastPoints[0],
 			newPoint,
 			lastPoints[1],
@@ -449,7 +449,7 @@ export function constrainPointPosition(p, currentShapePoints, parameters) {
 }
 
 // Return new position for p so that the (basePoint, p) length is between min and max
-function constrainDistanceTo(basePoint, p, min, max) {
+export function constrainDistance(basePoint, p, min, max) {
 	const dx = p.x - basePoint.x;
 	const dy = p.y - basePoint.y;
 
@@ -472,7 +472,7 @@ function constrainDistanceTo(basePoint, p, min, max) {
 
 // Return new position for p so that the (this, p) angle with screen is aligned to 'steps' ticks
 // and that the angle (previousPoint, this, p) is at least of 'min'
-function constrainAngleTo(basePoint, p, previousPoint, min, step) {
+export function constrainAngle(basePoint, p, previousPoint, min, step) {
 	const dx = p.x - basePoint.x;
 	const dy = p.y - basePoint.y;
 

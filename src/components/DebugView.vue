@@ -47,7 +47,7 @@ export default {
 	props: {
 		parameters: Object,
 		currentShapePoints: Array,
-		constrainedElements: Array
+		constrainedElements: Object
 	},
 	data() {
 		return {

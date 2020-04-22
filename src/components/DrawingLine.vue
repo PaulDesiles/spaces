@@ -27,7 +27,7 @@ export default {
 	},
 	computed: {
 		strokeColor() {
-			return this.hovered ? '#318be7' : '#aaa';
+			return this.hovered ? '#318be7' : '#0005';
 		}
 	}
 };

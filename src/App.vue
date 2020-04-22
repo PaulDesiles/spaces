@@ -12,8 +12,6 @@
 					:width="parameters.xmax"
 					:height="parameters.ymax"
 					fill="white"
-					border="#000"
-					border-width="1"
 				/>
 
 				<DebugView
@@ -21,14 +19,6 @@
 					:parameters="parameters"
 					:currentShapePoints="currentShapePoints"
 					:constrainedElements="constrainedElements"
-				/>
-
-				<DrawingLine
-					v-for="line in lines"
-					:key="line.id"
-					:p1="line.bounds[0]"
-					:p2="line.bounds[1]"
-					:hovered="amIHovered(line)"
 				/>
 
 				<path
@@ -46,19 +36,18 @@
 					stroke-width="1"
 				/>
 
-				<DrawingPoint
-					v-for="p in intersections"
-					:key="p.id"
-					:point="p"
-					:type="3"
-					:hovered="amIHovered(p)"
+				<Guides
+					v-if="showGuides"
+					:lines="lines"
+					:intersections="intersections"
+					:hoveredElement="hoveredElement"
 				/>
 
 				<DrawingPoint
 					v-if="showStartPoint"
 					:point="startPoint"
 					:type="2"
-					:hovered="amIHovered(startPoint)"
+					:hovered="hoveredElement === startPoint"
 				/>
 
 				<DrawingPoint :point="currentPoint" :type="1" />
@@ -79,9 +68,11 @@
 <script>
 import DebugInfo from './components/DebugInfo.vue';
 import DebugView from './components/DebugView.vue';
+
 import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/DrawingPoint.vue';
-import DrawingLine from './components/DrawingLine.vue';
+import Guides from './components/Guides.vue';
+
 import Toolbar from './components/Toolbar.vue';
 import ParametersPanel from './components/ParametersPanel.vue';
 
@@ -104,7 +95,7 @@ export default {
 		DebugView,
 		SvgViewport,
 		DrawingPoint,
-		DrawingLine,
+		Guides,
 		Toolbar,
 		ParametersPanel
 	},
@@ -120,6 +111,7 @@ export default {
 				angleStepRad: 0
 			},
 			debugMode: false,
+			showGuides: true,
 			snapThreshold: 20,
 			mousePosition: new Point(),
 			currentPoint: new Point(),
@@ -254,12 +246,6 @@ export default {
 				this.currentShapePoints,
 				this.parameters);
 		},
-		amIHovered(myModel) {
-			return this.hoveredElement === myModel ||
-				(this.hoveredElement instanceof Intersection &&
-					myModel instanceof Line &&
-					this.hoveredElement.crossingLines.includes(myModel));
-		},
 		updateCurrentPoint() {
 			this.currentPoint = this.getSnappedPosition(this.mousePosition);
 		},
@@ -310,6 +296,8 @@ export default {
 				this.toggleAngleSteps(false);
 			} else if (key === 'd') {
 				this.debugMode = !this.debugMode;
+			} else if (key === 'h') {
+				this.showGuides = !this.showGuides;
 			}
 		},
 		windowLostFocus() {

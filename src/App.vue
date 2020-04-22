@@ -190,6 +190,12 @@ export default {
 			this.checkForDuplicates();
 			this.updateConstraints();
 		},
+		cancelCurrentShape() {
+			if (this.currentShapePoints.length > 0) {
+				this.currentShapePoints = [];
+				this.updateConstraints();
+			}
+		},
 		getSnappedPosition(mousePosition) {
 			let snappedPoint = constrainPointPosition(mousePosition, this.currentShapePoints, this.parameters);
 			let nearestPoint;
@@ -300,6 +306,8 @@ export default {
 				this.showGuides = !this.showGuides;
 			} else if (key === 'enter') {
 				this.closeCurrentShape();
+			} else if (key === 'escape') {
+				this.cancelCurrentShape();
 			}
 		},
 		windowLostFocus() {

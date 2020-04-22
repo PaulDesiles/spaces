@@ -1,12 +1,12 @@
 <template>
-	<div id="parametersPanel" :class="panelTransformClass">
+	<div id="parametersPanel" :class="panelClass">
 		<Transition name="fade">
-			<div v-if="opened" id="panel">
+			<div v-if="opened" id="container">
 				<slot />
 			</div>
 		</Transition>
 		<div id="toggleButton" @click="toggle()">
-			<Transition name="fade" mode="out-in">
+			<Transition name="sphereRotation" mode="out-in">
 				<i v-if="opened" key="openedIcon" class="las la-chevron-left" />
 				<i v-else key="closedIcon" class="las la-cog" />
 			</Transition>
@@ -23,7 +23,7 @@ export default {
 		};
 	},
 	computed: {
-		panelTransformClass() {
+		panelClass() {
 			return this.opened ? 'openedPanel' : '';
 		}
 	},
@@ -48,6 +48,29 @@ export default {
 	transform: translateX(190px);
 }
 
+/* Content */
+
+#container {
+	background: #9999;
+	padding: 7px 10px;
+	border-radius: 5px;
+	width: 180px;
+
+	position:absolute;
+	bottom: 0;
+	transform: translateX(-190px);
+}
+
+.fade-enter-active, .fade-leave-active {
+	transition: opacity .3s ease;
+}
+
+.fade-enter, .fade-leave-to {
+	opacity: 0;
+}
+
+/* Button */
+
 #toggleButton {
 	background: #666;
 	color: white;
@@ -69,25 +92,14 @@ export default {
 	top: 2px;
 }
 
-#panel {
-	background: #9999;
-	padding: 7px 10px;
-	border-radius: 5px;
-	width: 180px;
-
-	position:absolute;
-	bottom: 0;
-	transform: translateX(-190px);
-}
-
-.fade-enter-active, .fade-leave-active {
-	transition: transform .3s ease;
+.sphereRotation-enter-active, .sphereRotation-leave-active {
+	transition: transform .15s ease;
 	transition-delay: .1s;
 }
-.fade-enter {
+.sphereRotation-enter {
 	transform: translateX(12px) rotateY(90deg);
 }
-.fade-leave-to {
+.sphereRotation-leave-to {
 	transform: translateX(-12px) rotateY(-90deg);
 }
 

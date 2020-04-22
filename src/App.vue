@@ -188,6 +188,7 @@ export default {
 			this.shapes.push(newShape);
 			this.currentShapePoints = [];
 			this.checkForDuplicates();
+			this.updateConstraints();
 		},
 		getSnappedPosition(mousePosition) {
 			let snappedPoint = constrainPointPosition(mousePosition, this.currentShapePoints, this.parameters);
@@ -270,9 +271,8 @@ export default {
 				}
 
 				this.currentShapePoints.push(newPoint);
+				this.updateConstraints();
 			}
-
-			this.updateConstraints();
 		},
 		cancel() {
 			if (this.startPoint === undefined) {
@@ -298,6 +298,8 @@ export default {
 				this.debugMode = !this.debugMode;
 			} else if (key === 'h') {
 				this.showGuides = !this.showGuides;
+			} else if (key === 'enter') {
+				this.closeCurrentShape();
 			}
 		},
 		windowLostFocus() {

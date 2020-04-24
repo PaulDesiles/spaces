@@ -1,11 +1,7 @@
 <template>
 	<div id="app">
 		<SvgViewport ref="svgViewport">
-			<g
-				ref="mainGroup"
-				@click="clic($event)"
-				@mousemove="move($event)"
-			>
+			<g ref="mainGroup"	>
 				<rect
 					x="0"
 					y="0"
@@ -121,7 +117,8 @@ export default {
 				points: [],
 				segments: []
 			},
-			hoveredElement: undefined
+			hoveredElement: undefined,
+			downBeforeUp: false
 		};
 	},
 	computed: {
@@ -152,15 +149,21 @@ export default {
 				.filter(p => p.insideBounds);
 		}
 	},
-	created() {
+	mounted() {
 		window.addEventListener('keydown', this.keyDown);
 		window.addEventListener('keyup', this.keyUp);
 		window.addEventListener('blur', this.windowLostFocus);
+		this.$refs.mainGroup.addEventListener('mousedown', this.mouseDown);
+		this.$refs.mainGroup.addEventListener('mouseup', this.mouseUp);
+		this.$refs.mainGroup.addEventListener('mousemove', this.mouseMove);
 	},
-	destroyed() {
+	unmounted() {
 		window.removeEventListener('keydown', this.keyDown);
 		window.removeEventListener('keyup', this.keyUp);
 		window.removeEventListener('blur', this.windowLostFocus);
+		this.$refs.mainGroup.removeEventListener('mousedown', this.mouseDown);
+		this.$refs.mainGroup.removeEventListener('mouseup', this.mouseUp);
+		this.$refs.mainGroup.removeEventListener('mousemove', this.mouseMove);
 	},
 	methods: {
 		getPosition(event) {
@@ -256,11 +259,21 @@ export default {
 		updateCurrentPoint() {
 			this.currentPoint = this.getSnappedPosition(this.mousePosition);
 		},
-		move(event) {
+		mouseMove(event) {
 			this.mousePosition = this.getPosition(event);
 			this.updateCurrentPoint();
 		},
-		clic(event) {
+		mouseDown() {
+			// We want to react to mouseUp only if mouseDown was also captured
+			this.downBeforeUp = true;
+		},
+		mouseUp(event) {
+			if (this.downBeforeUp) {
+				this.downBeforeUp = false;
+			} else {
+				return;
+			}
+
 			const snappedPoint = this.getSnappedPosition(this.getPosition(event));
 
 			if (this.showStartPoint && snappedPoint === this.startPoint) {
@@ -292,8 +305,11 @@ export default {
 			this.updateConstraints();
 		},
 		keyDown(keyEvent) {
-			if (keyEvent.key.toLowerCase() === 'control') {
+			const key = keyEvent.key.toLowerCase();
+			if (key === 'control') {
 				this.toggleAngleSteps(true);
+			} else if (key === ' ' && !keyEvent.repeat) {
+				this.$refs.svgViewport.initMousePan();
 			}
 		},
 		keyUp(keyEvent) {
@@ -308,6 +324,8 @@ export default {
 				this.closeCurrentShape();
 			} else if (key === 'escape') {
 				this.cancelCurrentShape();
+			} else if (key === ' ') {
+				this.$refs.svgViewport.stopMousePan();
 			}
 		},
 		windowLostFocus() {

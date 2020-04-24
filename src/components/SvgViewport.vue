@@ -1,5 +1,5 @@
 <template>
-	<div id="container">
+	<div id="container" :style="cursorStyle">
 		<svg id="viewer" ref="viewer" xmlns="http://www.w3.org/2000/svg">
 			<g ref="viewerContent">
 				<slot />
@@ -11,7 +11,7 @@
 					ref="hScrollBar"
 					class="scrollBar"
 					:style="hBarStyle"
-					@mousedown.stop="hang($event)"
+					@mousedown.stop="horizontalHandler.hang($event)"
 				/>
 			</div>
 			<div id="vScrollContainer">
@@ -19,7 +19,7 @@
 					ref="vScrollBar"
 					class="scrollBar"
 					:style="vBarStyle"
-					@mousedown.stop="hang($event)"
+					@mousedown.stop="verticalHandler.hang($event)"
 				/>
 			</div>
 		</div>
@@ -28,6 +28,72 @@
 
 <script>
 import svgPanZoom from 'svg-pan-zoom';
+
+class PanHandler {
+	constructor(panHorizontally, panVertically, invert) {
+		this.panHorizontally = panHorizontally;
+		this.panVertically = panVertically;
+		this.direction = invert ? 1 : -1;
+		this.initMouse = {x: 0, y: 0};
+		this.initPan = {x: 0, y: 0};
+		this.panning = false;
+	}
+
+	// All events pass threw this method
+	// so that "this" refers to current object
+	handleEvent(event) {
+		switch(event.type) {
+			case 'mousedown':
+				this.hang(event);
+				break;
+			case 'mousemove':
+				this.move(event);
+				break;
+			case 'mouseup':
+			case 'mouseleave':
+				this.drop(event);
+				break;
+			default:
+				break;
+		}
+	}
+
+	hang(event) {
+		event.stopPropagation();
+		event.preventDefault();
+		this.initMouse = {x: event.pageX, y: event.pageY};
+		this.initPan = this.pz.getPan();
+		window.addEventListener('mouseup', this, true);
+		window.addEventListener('mouseleave', this, true);
+		this.panning = true;
+	}
+
+	move(event) {
+		event.stopPropagation();
+		event.preventDefault();
+
+		if (this.panning) {
+			const deltaX = this.panHorizontally ? (event.pageX - this.initMouse.x) : 0;
+			const deltaY = this.panVertically ? (event.pageY - this.initMouse.y) : 0;
+			this.pz.pan({
+				x: this.initPan.x + (deltaX * this.direction),
+				y: this.initPan.y + (deltaY * this.direction)
+			});
+		}
+	}
+
+	drop(event) {
+		if (event) {
+			event.stopPropagation();
+			event.preventDefault();
+		}
+
+		window.removeEventListener('mouseup', this, true);
+		window.removeEventListener('mouseleave', this, true);
+
+		this.panning = false;
+	}
+}
 
 export default {
 	name: 'SvgViewport',
@@ -41,10 +107,11 @@ export default {
 			zoom: 1,
 			availableWidth: 1000,
 			availableHeight: 1000,
-			initMouse: {x: 0, y: 0},
-			initPan: {x: 0, y: 0},
-			isScrollHorizontal: undefined,
-			pz: undefined
+			pz: undefined,
+			horizontalHandler: new PanHandler(true, false),
+			verticalHandler: new PanHandler(false, true),
+			mouseHandler: new PanHandler(true, true, true),
+			mousePanMode: false
 		};
 	},
 	computed: {
@@ -60,7 +127,6 @@ export default {
 		vBarY() {
 			return (1 - (this.y / this.availableHeight)) * (this.availableHeight - this.vBarSize - this.barsWidth);
 		},
-
 		hBarStyle() {
 			return {
 				height: this.barsWidth + 'px',
@@ -74,30 +140,29 @@ export default {
 				height: this.vBarSize + 'px',
 				top: this.vBarY + 'px'
 			};
+		},
+		cursorStyle() {
+			return {
+				cursor: this.mousePanMode ? (this.mouseHandler.panning ? 'move ' : 'grab') : 'auto'
+			};
 		}
 	},
 	methods: {
-		hang(event) {
-			this.initMouse = {x: event.pageX, y: event.pageY};
-			this.initPan = this.pz.getPan();
-			this.isScrollHorizontal = event.srcElement === this.$refs.hScrollBar;
-			window.addEventListener('mousemove', this.move);
-			window.addEventListener('mouseup', this.drop);
-			window.addEventListener('mouseleave', this.drop);
+		initMousePan() {
+			if (!this.mousePanMode) {
+				this.mousePanMode = true;
+				window.addEventListener('mousedown', this.mouseHandler, true);
+				// Register mousemove to block events even if not yet used to pan
+				window.addEventListener('mousemove', this.mouseHandler, true);
+			}
 		},
-		move(event) {
-			event.preventDefault();
-			const deltaX = this.isScrollHorizontal ? (event.pageX - this.initMouse.x) : 0;
-			const deltaY = this.isScrollHorizontal ? 0 : (event.pageY - this.initMouse.y);
-			this.pz.pan({
-				x: this.initPan.x - deltaX,
-				y: this.initPan.y - deltaY
-			});
-		},
-		drop() {
-			window.removeEventListener('mousemove', this.move, false);
-			window.removeEventListener('mouseup', this.move, false);
-			window.removeEventListener('mouseleave', this.move, false);
+		stopMousePan() {
+			if (this.mousePanMode) {
+				this.mousePanMode = false;
+				this.mouseHandler.drop();
+				window.removeEventListener('mousedown', this.mouseHandler, true);
+				window.removeEventListener('mousemove', this.mouseHandler, true);
+			}
 		},
 		pointToSvg(domPoint) {
 			const p = this.$refs.viewer.createSVGPoint();
@@ -141,6 +206,9 @@ export default {
 				that.y = Math.max(0, pan.y);
 			}
 		});
+		this.horizontalHandler.pz = this.pz;
+		this.verticalHandler.pz = this.pz;
+		this.mouseHandler.pz = this.pz;
 
 		window.addEventListener('resize', onResize);
 		function onResize() {

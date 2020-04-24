@@ -9,7 +9,6 @@
     "lint": "xo"
   },
   "dependencies": {
-    "svg-pan-zoom": "github:ariutta/svg-pan-zoom",
     "vue": "^2.6.11"
   },
   "devDependencies": {
@@ -34,6 +33,12 @@
       "vue"
     ],
     "webpack": true,
-    "globals": ["beforeAll", "describe", "test", "expect", "jest"]
+    "globals": [
+      "beforeAll",
+      "describe",
+      "test",
+      "expect",
+      "jest"
+    ]
   }
 }

@@ -30,11 +30,16 @@
 </template>
 
 <script>
-import svgPanZoom from 'svg-pan-zoom';
-
 class PanHandler {
-	constructor(deltaModifier, getPan, setPan, registerMouseMove) {
-		this.deltaModifier = deltaModifier;
+	constructor(getDeltaRatio, getPan, setPan, registerMouseMove) {
+		if (getDeltaRatio) {
+			this.getDeltaRatio = getDeltaRatio;
+		} else {
+			this.getDeltaRatio = function () {
+				return {x: 1, y: 1};
+			};
+		}
+
 		this.getPan = getPan;
 		this.setPan = setPan;
 		this.registerMouseMove = registerMouseMove;
@@ -44,7 +49,7 @@ class PanHandler {
 	}
 
 	// All events pass threw this method
-	// so that "this" refers to current object
+	// so this "this" refers to current object
 	handleEvent(event) {
 		switch (event.type) {
 			case 'mousedown':
@@ -80,13 +85,14 @@ class PanHandler {
 		event.preventDefault();
 
 		if (this.panning) {
-			const deltaX = this.deltaModifier.x * (event.pageX - this.initMouse.x);
-			const deltaY = this.deltaModifier.y * (event.pageY - this.initMouse.y);
+			const ratio = this.getDeltaRatio();
+			const deltaX = ratio.x * (event.pageX - this.initMouse.x);
+			const deltaY = ratio.y * (event.pageY - this.initMouse.y);
 
-			this.setPan({
-				x: this.initPan.x + deltaX,
-				y: this.initPan.y + deltaY
-			});
+			this.setPan(
+				this.initPan.x + deltaX,
+				this.initPan.y + deltaY
+			);
 		}
 	}
 
@@ -107,6 +113,10 @@ class PanHandler {
 
 export default {
 	name: 'SvgViewport',
+	props: {
+		drawingWidth: Number,
+		drawingHeight: Number
+	},
 	data() {
 		return {
 			minZoom: 0.2,
@@ -114,13 +124,12 @@ export default {
 			barsWidth: 14,
 			x: 20,
 			y: 20,
-			zoom: 0.3,
+			zoom: 0.7,
 			availableWidth: 1000,
 			availableHeight: 1000,
-			pz: undefined,
-			horizontalHandler: new PanHandler({x: -1, y: 0}, this.getPan, this.setPan, true),
-			verticalHandler: new PanHandler({x: 0, y: -1}, this.getPan, this.setPan, true),
-			mouseHandler: new PanHandler({x: 1, y: 1}, this.getPan, this.setPan, false),
+			horizontalHandler: new PanHandler(this.hBarPanRatio, this.getPan, this.setPan, true),
+			verticalHandler: new PanHandler(this.vBarPanRatio, this.getPan, this.setPan, true),
+			mouseHandler: new PanHandler(undefined, this.getPan, this.setPan, false),
 			mousePanMode: false
 		};
 	},
@@ -128,30 +137,45 @@ export default {
 		transformMatrix() {
 			return `matrix(${this.zoom}, 0, 0, ${this.zoom}, ${this.x}, ${this.y})`;
 		},
+		panBounds() {
+			const margin = 20;
+			return {
+				minX: margin - (this.drawingWidth * this.zoom),
+				minY: margin - (this.drawingHeight * this.zoom),
+				maxX: this.availableWidth - margin,
+				maxY: this.availableHeight - margin
+			};
+		},
 		hBarSize() {
 			return (this.availableWidth - this.barsWidth) / (this.zoom / this.minZoom);
 		},
-		hBarX() {
-			return (1 - (this.x / this.availableWidth)) * (this.availableWidth - this.hBarSize - this.barsWidth);
+		hBarMaxSize() {
+			return this.availableWidth - this.hBarSize - this.barsWidth;
+		},
+		hBarStyle() {
+			const xRatio = (this.x - this.panBounds.minX) / (this.panBounds.maxX - this.panBounds.minX);
+			const barX = (1 - xRatio) * this.hBarMaxSize;
+
+			return {
+				height: this.barsWidth + 'px',
+				width: this.hBarSize + 'px',
+				left: barX + 'px'
+			};
 		},
 		vBarSize() {
 			return (this.availableHeight - this.barsWidth) / (this.zoom / this.minZoom);
 		},
-		vBarY() {
-			return (1 - (this.y / this.availableHeight)) * (this.availableHeight - this.vBarSize - this.barsWidth);
-		},
-		hBarStyle() {
-			return {
-				height: this.barsWidth + 'px',
-				width: this.hBarSize + 'px',
-				left: this.hBarX + 'px'
-			};
+		vBarMaxSize() {
+			return this.availableHeight - this.vBarSize - this.barsWidth;
 		},
 		vBarStyle() {
+			const yRatio = (this.y - this.panBounds.minY) / (this.panBounds.maxY - this.panBounds.minY);
+			const barY = (1 - yRatio) * this.vBarMaxSize;
+
 			return {
 				width: this.barsWidth + 'px',
 				height: this.vBarSize + 'px',
-				top: this.vBarY + 'px'
+				top: barY + 'px'
 			};
 		},
 		cursorStyle() {
@@ -180,9 +204,18 @@ export default {
 		getPan() {
 			return {x: this.x, y: this.y};
 		},
-		setPan({x, y}) {
-			this.x = x;
-			this.y = y;
+		setPan(x, y) {
+			const bounds = this.panBounds;
+			this.x = Math.max(bounds.minX, Math.min(bounds.maxX, x));
+			this.y = Math.max(bounds.minY, Math.min(bounds.maxY, y));
+		},
+		hBarPanRatio() {
+			const ratio = (this.panBounds.maxX - this.panBounds.minX) / this.hBarMaxSize;
+			return {x: -ratio, y: 0};
+		},
+		vBarPanRatio() {
+			const ratio = (this.panBounds.maxY - this.panBounds.minY) / this.vBarMaxSize;
+			return {x: 0, y: -ratio};
 		},
 		pointToSvg(domPoint) {
 			const p = this.$refs.viewer.createSVGPoint();
@@ -193,81 +226,66 @@ export default {
 				x: transformed.x,
 				y: transformed.y
 			};
-		}
-	},
-	mounted() {
-		const that = this;
-
-		// this.pz = svgPanZoom('#viewer', {
-		// 	panEnabled: false,
-		// 	zoomEnabled: true,
-		// 	dblClickZoomEnabled: false,
-		// 	zoomScaleSensitivity: 0.2,
-		// 	minZoom: that.minZoom,
-		// 	maxZoom: that.maxZoom,
-		// 	fit: true,
-		// 	contain: true,
-		// 	center: true,
-		// 	onZoom() {
-		// 		that.zoom = that.pz.getZoom();
-
-		// 		const pan = that.pz.getPan();
-		// 		that.x = Math.max(0, pan.x);
-		// 		that.y = Math.max(0, pan.y);
-		// 	},
-		// 	beforePan(oldPoint, newPoint) {
-		// 		return {
-		// 			x: newPoint.x > 0 && newPoint.x < document.documentElement.clientWidth,
-		// 			y: newPoint.y > 0 && newPoint.y < document.documentElement.clientHeight
-		// 		};
-		// 	},
-		// 	onPan() {
-		// 		const pan = that.pz.getPan();
-		// 		that.x = Math.max(0, pan.x);
-		// 		that.y = Math.max(0, pan.y);
-		// 	}
-		// });
-		// this.horizontalHandler.pz = this.pz;
-		// this.verticalHandler.pz = this.pz;
-		// this.mouseHandler.pz = this.pz;
-
-		window.addEventListener('wheel', onWheel);
-		function onWheel(event) {
+		},
+		handleEvent(event) {
+			switch (event.type) {
+				case 'resize':
+					this.onResize(event);
+					break;
+				case 'wheel':
+					this.onWheel(event);
+					break;
+				default:
+					break;
+			}
+		},
+		onResize() {
+			this.availableWidth = document.documentElement.clientWidth;
+			this.availableHeight = document.documentElement.clientHeight;
+		},
+		onWheel(event) {
 			event.stopPropagation();
 			event.preventDefault();
+			if (!this.$refs.viewer) {
+				console.warn('not mounted yet');
+				return;
+			}
+
 			if (event.ctrlKey) {
-				let newZoom = that.zoom + (event.deltaY * -0.01);
-				newZoom = Math.max(that.minZoom, Math.min(that.maxZoom, newZoom));
-				if (newZoom !== that.zoom) {
-					const ctm = that.$refs.viewerContent.getScreenCTM();
-					const point = that.$refs.viewer.createSVGPoint();
+				let newZoom = this.zoom + (event.deltaY * -0.01);
+				newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, newZoom));
+				if (newZoom !== this.zoom) {
+					const ctm = this.$refs.viewerContent.getScreenCTM();
+					const point = this.$refs.viewer.createSVGPoint();
 					point.x = event.pageX;
 					point.y = event.pageY;
 					const relativePoint = point.matrixTransform(ctm.inverse());
-					const modifier = that.$refs.viewer
+					const modifier = this.$refs.viewer
 						.createSVGMatrix()
 						.translate(relativePoint.x, relativePoint.y)
-						.scale(newZoom / that.zoom)
+						.scale(newZoom / this.zoom)
 						.translate(-relativePoint.x, -relativePoint.y);
 					const newCTM = ctm.multiply(modifier);
 
-					that.zoom = newCTM.a;
-					that.x = newCTM.e;
-					that.y = newCTM.f;
+					this.zoom = newCTM.a;
+					this.setPan(newCTM.e, newCTM.f);
 				}
 			} else {
-				that.x = that.x + (event.deltaX * -3);
-				that.y = that.y + (event.deltaY * -3);
+				this.setPan(
+					this.x + (event.deltaX * -3),
+					this.y + (event.deltaY * -3)
+				);
 			}
 		}
-
-		window.addEventListener('resize', onResize);
-		function onResize() {
-			that.availableWidth = document.documentElement.clientWidth;
-			that.availableHeight = document.documentElement.clientHeight;
-		}
-
-		onResize();
+	},
+	mounted() {
+		window.addEventListener('wheel', this, false);
+		window.addEventListener('resize', this, false);
+		this.onResize();
+	},
+	unmounted() {
+		window.removeEventListener('wheel', this, false);
+		window.removeEventListener('resize', this, false);
 	}
 };
 </script>

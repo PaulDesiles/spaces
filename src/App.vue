@@ -1,6 +1,10 @@
 <template>
 	<div id="app">
-		<SvgViewport ref="svgViewport">
+		<SvgViewport
+			ref="svgViewport"
+			:drawingWidth="parameters.xmax"
+			:drawingHeight="parameters.ymax"
+		>
 			<g ref="mainGroup">
 				<rect
 					x="0"

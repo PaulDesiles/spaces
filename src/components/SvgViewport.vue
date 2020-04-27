@@ -276,12 +276,28 @@ export default {
 					this.y + (event.deltaY * -3)
 				);
 			}
+		},
+		centerDrawing() {
+			const margin = 30;
+			const margin2 = margin * 2;
+			const screenRatio = this.availableWidth / this.availableHeight;
+			const drawingRatio = (this.drawingWidth + margin2 + this.barsWidth) / (this.drawingHeight + margin2 + this.barsWidth);
+			if (drawingRatio > screenRatio) {
+				this.zoom = (this.availableWidth - margin2 - this.barsWidth) / this.drawingWidth;
+				this.x = margin;
+				this.y = ((this.availableHeight - this.barsWidth - (this.zoom * this.drawingHeight)) / 2);
+			} else {
+				this.zoom = (this.availableHeight - margin2 - this.barsWidth) / this.drawingHeight;
+				this.y = margin;
+				this.x = ((this.availableWidth - this.barsWidth - (this.zoom * this.drawingWidth)) / 2);
+			}
 		}
 	},
 	mounted() {
 		window.addEventListener('wheel', this, false);
 		window.addEventListener('resize', this, false);
 		this.onResize();
+		this.centerDrawing();
 	},
 	unmounted() {
 		window.removeEventListener('wheel', this, false);

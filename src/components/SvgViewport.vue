@@ -49,7 +49,7 @@ class PanHandler {
 	}
 
 	// All events pass threw this method
-	// so this "this" refers to current object
+	// so "this" refers to current object
 	handleEvent(event) {
 		switch (event.type) {
 			case 'mousedown':
@@ -59,7 +59,6 @@ class PanHandler {
 				this.move(event);
 				break;
 			case 'mouseup':
-			case 'mouseleave':
 				this.drop(event);
 				break;
 			default:
@@ -74,7 +73,6 @@ class PanHandler {
 		this.initMouse = {x: event.pageX, y: event.pageY};
 		this.panning = true;
 		window.addEventListener('mouseup', this, true);
-		window.addEventListener('mouseleave', this, true);
 		if (this.registerMouseMove) {
 			window.addEventListener('mousemove', this, true);
 		}
@@ -104,7 +102,6 @@ class PanHandler {
 
 		this.panning = false;
 		window.removeEventListener('mouseup', this, true);
-		window.removeEventListener('mouseleave', this, true);
 		if (this.registerMouseMove) {
 			window.removeEventListener('mousemove', this, true);
 		}

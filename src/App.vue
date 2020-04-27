@@ -265,7 +265,13 @@ export default {
 		},
 		mouseMove(event) {
 			this.mousePosition = this.getPosition(event);
-			this.updateCurrentPoint();
+			if (this.mousePosition.x >= 0 &&
+				this.mousePosition.x <= this.parameters.xmax &&
+				this.mousePosition.y >= 0 &&
+				this.mousePosition.y <= this.parameters.ymax)
+			{
+				this.updateCurrentPoint();
+			}
 		},
 		mouseDown() {
 			// We want to react to mouseUp only if mouseDown was also captured

@@ -62,6 +62,8 @@
 		<ParametersPanel>
 			<Toolbar v-bind="parameters" @updateParameter="parameterChanged" />
 		</ParametersPanel>
+
+		<ContextMenu ref="contextMenu" />
 	</div>
 </template>
 
@@ -75,6 +77,7 @@ import Guides from './components/Guides.vue';
 
 import Toolbar from './components/Toolbar.vue';
 import ParametersPanel from './components/ParametersPanel.vue';
+import ContextMenu from './components/ContextMenu.vue';
 
 import {initBounds, Point, Intersection, Line, Shape} from './components/Geometry';
 import {constrainPointPosition, getContrainedSnappingElements} from './components/Constraint';
@@ -97,7 +100,8 @@ export default {
 		DrawingPoint,
 		Guides,
 		Toolbar,
-		ParametersPanel
+		ParametersPanel,
+		ContextMenu
 	},
 	data() {
 		return {
@@ -160,6 +164,7 @@ export default {
 		this.$refs.mainGroup.addEventListener('mousedown', this.mouseDown);
 		this.$refs.mainGroup.addEventListener('mouseup', this.mouseUp);
 		this.$refs.mainGroup.addEventListener('mousemove', this.mouseMove);
+		document.addEventListener('contextmenu', this.openContextMenu);
 	},
 	unmounted() {
 		window.removeEventListener('keydown', this.keyDown);
@@ -168,6 +173,7 @@ export default {
 		this.$refs.mainGroup.removeEventListener('mousedown', this.mouseDown);
 		this.$refs.mainGroup.removeEventListener('mouseup', this.mouseUp);
 		this.$refs.mainGroup.removeEventListener('mousemove', this.mouseMove);
+		document.removeEventListener('contextmenu', this.openContextMenu);
 	},
 	methods: {
 		getPosition(event) {
@@ -265,7 +271,8 @@ export default {
 		},
 		mouseMove(event) {
 			this.mousePosition = this.getPosition(event);
-			if (this.mousePosition.x >= 0 &&
+			if (!this.$refs.contextMenu.opened &&
+				this.mousePosition.x >= 0 &&
 				this.mousePosition.x <= this.parameters.xmax &&
 				this.mousePosition.y >= 0 &&
 				this.mousePosition.y <= this.parameters.ymax)
@@ -273,12 +280,16 @@ export default {
 				this.updateCurrentPoint();
 			}
 		},
-		mouseDown() {
-			// We want to react to mouseUp only if mouseDown was also captured
-			this.downBeforeUp = true;
+		mouseDown(event) {
+			if (this.$refs.contextMenu.opened) {
+				this.$refs.contextMenu.close();
+			} else if (event.which === 1) {
+				// We want to react to mouseUp only if mouseDown was also captured
+				this.downBeforeUp = true;
+			}
 		},
 		mouseUp(event) {
-			if (this.downBeforeUp) {
+			if (this.downBeforeUp && event.which === 1) {
 				this.downBeforeUp = false;
 			} else {
 				return;
@@ -302,6 +313,34 @@ export default {
 				this.currentShapePoints.push(newPoint);
 				this.updateConstraints();
 			}
+		},
+		openContextMenu(event) {
+			event.preventDefault();
+			let actions = [];
+			if (this.hoveredElement instanceof Line) {
+				actions = [
+					{
+						id: 1,
+						title: 'current stroke // to this line',
+						onClick: () => {}
+					},
+					{
+						id: 2,
+						title: 'next stroke // to this line…',
+						onClick: () => {}
+					}
+				];
+			} else if (this.hoveredElement instanceof Intersection) {
+				actions = [
+					{
+						id: 3,
+						title: 'current stroke towards this point',
+						onClick: () => {}
+					}
+				];
+			}
+
+			this.$refs.contextMenu.initialize(actions, event.clientX, event.clientY);
 		},
 		cancel() {
 			if (this.startPoint === undefined) {

@@ -68,6 +68,8 @@
 </template>
 
 <script>
+import {mapState, mapGetters} from 'vuex';
+
 import DebugInfo from './components/DebugInfo.vue';
 import DebugView from './components/DebugView.vue';
 
@@ -119,13 +121,10 @@ export default {
 			snapThreshold: 20,
 			mousePosition: new Point(),
 			currentPoint: new Point(),
-			currentShapePoints: [],
-			shapes: [],
 			constrainedElements: {
 				points: [],
 				segments: []
 			},
-			hoveredElement: undefined,
 			downBeforeUp: false
 		};
 	},
@@ -143,19 +142,15 @@ export default {
 		currentPath() {
 			return this.getPath(this.currentShapePoints.concat(this.currentPoint));
 		},
-		lines() {
-			return this.shapes
-				.map(s => s.lines.concat(s.spacedLines))
-				.flat()
-				.filter(distinct);
-		},
-		intersections() {
-			return this.lines
-				.map(l => l.intersections)
-				.flat()
-				.filter(distinct)
-				.filter(p => p.insideBounds);
-		}
+		...mapState([
+			'shapes',
+			'currentShapePoints',
+			'hoveredElement'
+		]),
+		...mapGetters([
+			'lines',
+			'intersections'
+		])
 	},
 	mounted() {
 		window.addEventListener('keydown', this.keyDown);
@@ -198,14 +193,14 @@ export default {
 		closeCurrentShape() {
 			const newShape = new Shape(this.currentShapePoints);
 			newShape.updateIntersections(this.lines);
-			this.shapes.push(newShape);
-			this.currentShapePoints = [];
+			this.$store.commit('addShape', newShape);
+			this.$store.commit('emptyCurrentShape');
 			this.checkForDuplicates();
 			this.updateConstraints();
 		},
 		cancelCurrentShape() {
 			if (this.currentShapePoints.length > 0) {
-				this.currentShapePoints = [];
+				this.$store.commit('emptyCurrentShape');
 				this.updateConstraints();
 			}
 		},
@@ -213,7 +208,7 @@ export default {
 			let snappedPoint = constrainPointPosition(mousePosition, this.currentShapePoints, this.parameters);
 			let nearestPoint;
 			let nearestDistance = this.snapThreshold * this.snapThreshold;
-			this.hoveredElement = undefined;
+			let hovered = undefined;
 
 			const {points, segments} = this.constrainedElements;
 
@@ -241,14 +236,19 @@ export default {
 					snappedPoint = nearestPoint;
 
 					if (nearestSegment instanceof Line) {
-						this.hoveredElement = nearestSegment;
+						hovered = nearestSegment;
 					} else {
-						this.hoveredElement = nearestSegment.associatedLine;
+						hovered = nearestSegment.associatedLine;
 					}
 				}
 			} else {
 				snappedPoint = nearestPoint;
-				this.hoveredElement = nearestPoint;
+				hovered = nearestPoint;
+			}
+
+
+			if (hovered !== this.hoveredElement) {
+				this.$store.commit('setHoveredElement', hovered);
 			}
 
 			return snappedPoint;
@@ -310,7 +310,7 @@ export default {
 					}
 				}
 
-				this.currentShapePoints.push(newPoint);
+				this.$store.commit('addPoint', newPoint);
 				this.updateConstraints();
 			}
 		},
@@ -344,9 +344,9 @@ export default {
 		},
 		cancel() {
 			if (this.startPoint === undefined) {
-				this.shapes.pop();
+				this.$store.commit('removeLastShape');
 			} else {
-				this.currentShapePoints.pop();
+				this.$store.commit('removeLastPoint');
 			}
 		},
 		parameterChanged(infos) {

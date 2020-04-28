@@ -9,7 +9,8 @@
     "lint": "xo"
   },
   "dependencies": {
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "vuex": "^3.3.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-unit-jest": "^4.2.3",

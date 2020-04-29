@@ -2,7 +2,7 @@ import {initBounds, Point, Intersection} from '../../src/components/Geometry';
 
 const size = 1000;
 beforeAll(() => {
-	initBounds(size, size);
+	initBounds({x: size, y: size});
 });
 
 describe('Intersection class', () => {

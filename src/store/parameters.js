@@ -1,14 +1,35 @@
 export default {
-	namespaces: true,
+	namespaced: true,
 	state: {
-		xmax: 1000,
-		ymax: 600,
+		drawingSize: {x: 1000, y: 600},
 		formsGap: 10,
 		snapThreshold: 20,
-		minSize: 0,
-		maxSize: 1000,
-		minAngleRad: 10 * Math.PI / 180,
-		selectedAngleStepRad: 10 * Math.PI / 180,
-		angleStepRad: 0
+		minStroke: 0,
+		maxStroke: 1000,
+		minAngle: 10 * Math.PI / 180,
+		selectedAngleStep: 10 * Math.PI / 180,
+		angleStep: 0
+	},
+	mutations: {
+		setMinStroke(state, value) {
+			state.minStroke = value;
+		},
+		setMaxStroke(state, value) {
+			state.maxStroke = value;
+		},
+		setMinAngle(state, value) {
+			state.minAngle = value;
+		},
+		setSelectedAngleStep(state, value) {
+			state.selectedAngleStep = value;
+		},
+		toggleAngleSteps(state, value) {
+			const newValue = value ? state.selectedAngleStep : 0;
+			if (state.angleStep !== newValue) {
+				state.angleStep = newValue;
+				// this.updateConstraints();
+				// this.updateCurrentPoint();
+			}
+		}
 	}
 };

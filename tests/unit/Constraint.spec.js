@@ -92,7 +92,7 @@ describe('line/circle intersections', () => {
 });
 
 describe('constrain segment to drawing bounds', () => {
-	initBounds(1000, 600);
+	initBounds({x:1000, y:600});
 
 	test('inside segment', () => {
 		const s = new Segment(new Point(20, 30), new Point(230, 400));

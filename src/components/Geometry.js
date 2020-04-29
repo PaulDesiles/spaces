@@ -13,9 +13,9 @@ Object.freeze(PointType);
 
 let xmax;
 let ymax;
-export function initBounds(width, height) {
-	xmax = width;
-	ymax = height;
+export function initBounds(dimensions) {
+	xmax = dimensions.x;
+	ymax = dimensions.y;
 }
 
 let intersectionCount = 0;
@@ -137,9 +137,9 @@ export class Line {
 let shapeCount = 0;
 export class Shape {
 	constructor(points) {
-		this.points = points;
+		this.points = [...points];
 		if (!Helper.isFormClockwiseOriented(this.points)) {
-			this.points = this.points.reverse();
+			this.points.reverse();
 		}
 
 		const lineMap = new Map(Helper.mapConsecutive(this.points, (A, B) => {

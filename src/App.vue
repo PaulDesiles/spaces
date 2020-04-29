@@ -1,23 +1,17 @@
 <template>
 	<div id="app">
-		<SvgViewport
-			ref="svgViewport"
-			:drawingWidth="parameters.xmax"
-			:drawingHeight="parameters.ymax"
-		>
+		<SvgViewport ref="svgViewport" >
 			<g ref="mainGroup">
 				<rect
 					x="0"
 					y="0"
-					:width="parameters.xmax"
-					:height="parameters.ymax"
+					:width="drawingSize.x"
+					:height="drawingSize.y"
 					fill="white"
 				/>
 
 				<DebugView
 					v-if="debugMode"
-					:parameters="parameters"
-					:currentShapePoints="currentShapePoints"
 					:constrainedElements="constrainedElements"
 				/>
 
@@ -36,12 +30,7 @@
 					stroke-width="1"
 				/>
 
-				<Guides
-					v-if="showGuides"
-					:lines="lines"
-					:intersections="intersections"
-					:hoveredElement="hoveredElement"
-				/>
+				<Guides v-if="showGuides" />
 
 				<DrawingPoint
 					v-if="showStartPoint"
@@ -60,7 +49,7 @@
 			:hovered="hoveredElement"
 		/>
 		<ParametersPanel>
-			<Toolbar v-bind="parameters" @updateParameter="parameterChanged" />
+			<Toolbar />
 		</ParametersPanel>
 
 		<ContextMenu ref="contextMenu" />
@@ -81,17 +70,8 @@ import Toolbar from './components/Toolbar.vue';
 import ParametersPanel from './components/ParametersPanel.vue';
 import ContextMenu from './components/ContextMenu.vue';
 
-import {initBounds, Point, Intersection, Line, Shape} from './components/Geometry';
+import {initBounds, Point, Intersection, Line} from './components/Geometry';
 import {constrainPointPosition, getContrainedSnappingElements} from './components/Constraint';
-
-// Only first occurence of an object will be returned
-function distinct(value, index, self) {
-	return self.indexOf(value) === index;
-}
-
-const drawingWidth = 1000;
-const drawingHeight = 600;
-initBounds(1000, 600);
 
 export default {
 	name: 'App',
@@ -107,15 +87,6 @@ export default {
 	},
 	data() {
 		return {
-			parameters: {
-				xmax: drawingWidth,
-				ymax: drawingHeight,
-				minSize: 0,
-				maxSize: 1000,
-				minAngleRad: 10 * Math.PI / 180,
-				selectedAngleStepRad: 10 * Math.PI / 180,
-				angleStepRad: 0
-			},
 			debugMode: false,
 			showGuides: true,
 			snapThreshold: 20,
@@ -147,10 +118,14 @@ export default {
 			'currentShapePoints',
 			'hoveredElement'
 		]),
+		...mapState('parameters', ['drawingSize']),
 		...mapGetters([
 			'lines',
 			'intersections'
 		])
+	},
+	created() {
+		initBounds(this.drawingSize);
 	},
 	mounted() {
 		window.addEventListener('keydown', this.keyDown);
@@ -191,10 +166,7 @@ export default {
 			return path;
 		},
 		closeCurrentShape() {
-			const newShape = new Shape(this.currentShapePoints);
-			newShape.updateIntersections(this.lines);
-			this.$store.commit('addShape', newShape);
-			this.$store.commit('emptyCurrentShape');
+			this.$store.commit('validateCurrentShape');
 			this.checkForDuplicates();
 			this.updateConstraints();
 		},
@@ -205,10 +177,18 @@ export default {
 			}
 		},
 		getSnappedPosition(mousePosition) {
-			let snappedPoint = constrainPointPosition(mousePosition, this.currentShapePoints, this.parameters);
+			let snappedPoint = constrainPointPosition(
+				mousePosition,
+				this.currentShapePoints,
+				{
+					minStroke: this.$store.state.parameters.minStroke,
+					maxStroke: this.$store.state.parameters.maxStroke,
+					minAngle: this.$store.state.parameters.minAngle,
+					angleStep: this.$store.state.parameters.angleStep
+				});
 			let nearestPoint;
 			let nearestDistance = this.snapThreshold * this.snapThreshold;
-			let hovered = undefined;
+			let hovered;
 
 			const {points, segments} = this.constrainedElements;
 
@@ -246,7 +226,6 @@ export default {
 				hovered = nearestPoint;
 			}
 
-
 			if (hovered !== this.hoveredElement) {
 				this.$store.commit('setHoveredElement', hovered);
 			}
@@ -264,7 +243,13 @@ export default {
 				points.concat(this.intersections),
 				this.lines,
 				this.currentShapePoints,
-				this.parameters);
+				{
+					drawingSize: this.$store.state.parameters.drawingSize,
+					minStroke: this.$store.state.parameters.minStroke,
+					maxStroke: this.$store.state.parameters.maxStroke,
+					minAngle: this.$store.state.parameters.minAngle,
+					angleStep: this.$store.state.parameters.angleStep
+				});
 		},
 		updateCurrentPoint() {
 			this.currentPoint = this.getSnappedPosition(this.mousePosition);
@@ -273,9 +258,9 @@ export default {
 			this.mousePosition = this.getPosition(event);
 			if (!this.$refs.contextMenu.opened &&
 				this.mousePosition.x >= 0 &&
-				this.mousePosition.x <= this.parameters.xmax &&
+				this.mousePosition.x <= this.drawingSize.x &&
 				this.mousePosition.y >= 0 &&
-				this.mousePosition.y <= this.parameters.ymax)
+				this.mousePosition.y <= this.drawingSize.y)
 			{
 				this.updateCurrentPoint();
 			}
@@ -349,10 +334,6 @@ export default {
 				this.$store.commit('removeLastPoint');
 			}
 		},
-		parameterChanged(infos) {
-			this.parameters[infos.name] = infos.value;
-			this.updateConstraints();
-		},
 		keyDown(keyEvent) {
 			const key = keyEvent.key.toLowerCase();
 			if (key === 'control') {
@@ -381,12 +362,9 @@ export default {
 			this.toggleAngleSteps(false);
 		},
 		toggleAngleSteps(activate) {
-			const newValue = activate ? this.parameters.selectedAngleStepRad : 0;
-			if (this.parameters.angleStepRad !== newValue) {
-				this.parameters.angleStepRad = newValue;
-				this.updateConstraints();
-				this.updateCurrentPoint();
-			}
+			this.$store.commit('parameters/toggleAngleSteps', activate);
+			this.updateConstraints();
+			this.updateCurrentPoint();
 		},
 		checkForDuplicates() {
 			// Check points duplicates

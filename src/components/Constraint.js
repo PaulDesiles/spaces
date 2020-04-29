@@ -100,13 +100,13 @@ export function getContrainedSnappingElements(snappingPoints, snappingLines, cur
 
 	const lastPoints = currentShapePoints.slice(-2).reverse();
 	let lastAngle;
-	if (parameters.minAngleRad > 0 && lastPoints.length > 1) {
+	if (parameters.minAngle > 0 && lastPoints.length > 1) {
 		lastAngle = Math.atan2(
 			lastPoints[1].y - lastPoints[0].y,
 			lastPoints[1].x - lastPoints[0].x);
 	}
 
-	if (parameters.angleStepRad === 0) {
+	if (parameters.angleStep === 0) {
 		return getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPoints, lastAngle, parameters);
 	}
 
@@ -115,8 +115,8 @@ export function getContrainedSnappingElements(snappingPoints, snappingLines, cur
 
 function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPoints, lastAngle, parameters) {
 	// Apply length constraint to points
-	const min2 = parameters.minSize * parameters.minSize;
-	const max2 = parameters.maxSize * parameters.maxSize;
+	const min2 = parameters.minStroke * parameters.minStroke;
+	const max2 = parameters.maxStroke * parameters.maxStroke;
 	snappingPoints = snappingPoints.filter(p => {
 		const d2 = lastPoints[0].getSquaredDistanceTo(p);
 		return 	d2 > min2 && d2 <= max2;
@@ -127,7 +127,7 @@ function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPo
 	let snappingSegments = [];
 
 	snappingLines
-		.map(l => intersectLineWithDonut(l, lastPoints[0], parameters.minSize, parameters.maxSize))
+		.map(l => intersectLineWithDonut(l, lastPoints[0], parameters.minStroke, parameters.maxStroke))
 		.flat()
 		.forEach(element => {
 			if (element instanceof Point) {
@@ -141,7 +141,7 @@ function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPo
 		const lastVector = new Vector(lastPoints[0], lastPoints[1]);
 		const pointRespectMinAngle = p => {
 			const angle = lastVector.angleWith(new Vector(lastPoints[0], p));
-			return angle >= parameters.minAngleRad;
+			return angle >= parameters.minAngle;
 		};
 
 		// Apply min-angle constraint to points
@@ -156,8 +156,8 @@ function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPo
 			new Segment(
 				lastPoints[0],
 				getPolarPoint(
-					lastAngle - parameters.minAngleRad,
-					parameters.maxSize,
+					lastAngle - parameters.minAngle,
+					parameters.maxStroke,
 					lastPoints[0])
 			);
 
@@ -165,8 +165,8 @@ function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPo
 			new Segment(
 				lastPoints[0],
 				getPolarPoint(
-					lastAngle + parameters.minAngleRad,
-					parameters.maxSize,
+					lastAngle + parameters.minAngle,
+					parameters.maxStroke,
 					lastPoints[0])
 			);
 
@@ -268,25 +268,25 @@ export function getStepSegments(lastPoints, lastAngle, parameters) {
 		const lastVector = new Vector(lastPoints[0], lastPoints[1]);
 		pointRespectMinAngle = p => {
 			const angle = lastVector.angleWith(new Vector(lastPoints[0], p));
-			return angle >= parameters.minAngleRad;
+			return angle >= parameters.minAngle;
 		};
 	}
 
 	const stepSegments = [];
-	const nbSteps = Math.round(Math.PI / parameters.angleStepRad);
+	const nbSteps = Math.round(Math.PI / parameters.angleStep);
 	for (let step = 0; step < nbSteps; step++) {
-		const i = step * parameters.angleStepRad;
+		const i = step * parameters.angleStep;
 		const j = i - Math.PI;
-		const A = getPolarPoint(i, parameters.maxSize, lastPoints[0], parameters);
-		const B = getPolarPoint(i, parameters.minSize, lastPoints[0], parameters);
-		const C = getPolarPoint(j, parameters.minSize, lastPoints[0], parameters);
-		const D = getPolarPoint(j, parameters.maxSize, lastPoints[0], parameters);
+		const A = getPolarPoint(i, parameters.maxStroke, lastPoints[0], parameters.drawingSize);
+		const B = getPolarPoint(i, parameters.minStroke, lastPoints[0], parameters.drawingSize);
+		const C = getPolarPoint(j, parameters.minStroke, lastPoints[0], parameters.drawingSize);
+		const D = getPolarPoint(j, parameters.maxStroke, lastPoints[0], parameters.drawingSize);
 
-		if (parameters.minSize === 0) {
+		if (parameters.minStroke === 0) {
 			let p1 = A;
 			let p2 = D;
 
-			if (lastAngle !== undefined && parameters.minAngleRad > 0) {
+			if (lastAngle !== undefined && parameters.minAngle > 0) {
 				if (!pointRespectMinAngle(p1)) {
 					p1 = lastPoints[0];
 				}
@@ -300,11 +300,11 @@ export function getStepSegments(lastPoints, lastAngle, parameters) {
 				stepSegments.push(new Segment(p1, p2));
 			}
 		} else {
-			if (parameters.minAngleRad === 0 || pointRespectMinAngle(A)) {
+			if (parameters.minAngle === 0 || pointRespectMinAngle(A)) {
 				stepSegments.push(new Segment(A, B));
 			}
 
-			if (parameters.minAngleRad === 0 || pointRespectMinAngle(D)) {
+			if (parameters.minAngle === 0 || pointRespectMinAngle(D)) {
 				stepSegments.push(new Segment(C, D));
 			}
 		}
@@ -313,7 +313,7 @@ export function getStepSegments(lastPoints, lastAngle, parameters) {
 	return stepSegments;
 }
 
-export function getPolarPoint(angle, radius, center, drawingBounds) {
+export function getPolarPoint(angle, radius, center, drawingSize) {
 	if (radius === 0) {
 		return center;
 	}
@@ -323,14 +323,14 @@ export function getPolarPoint(angle, radius, center, drawingBounds) {
 
 	let r = radius;
 	let x = (cos * r) + center.x;
-	if (drawingBounds && (x < 0 || x > drawingBounds.xmax)) {
-		x = Math.min(drawingBounds.xmax, Math.max(0, x));
+	if (drawingSize && (x < 0 || x > drawingSize.x)) {
+		x = Math.min(drawingSize.x, Math.max(0, x));
 		r = (x - center.x) / cos;
 	}
 
 	let y = (sin * r) + center.y;
-	if (drawingBounds && (y < 0 || y > drawingBounds.ymax)) {
-		y = Math.min(drawingBounds.ymax, Math.max(0, y));
+	if (drawingSize && (y < 0 || y > drawingSize.y)) {
+		y = Math.min(drawingSize.y, Math.max(0, y));
 		r = (y - center.y) / sin;
 		x = (cos * r) + center.x;
 	}
@@ -432,15 +432,15 @@ export function constrainPointPosition(p, currentShapePoints, parameters) {
 		let newPoint = constrainDistance(
 			lastPoints[0],
 			p,
-			parameters.minSize,
-			parameters.maxSize
+			parameters.minStroke,
+			parameters.maxStroke
 		);
 		newPoint = constrainAngle(
 			lastPoints[0],
 			newPoint,
 			lastPoints[1],
-			parameters.minAngleRad,
-			parameters.angleStepRad
+			parameters.minAngle,
+			parameters.angleStep
 		);
 		return newPoint;
 	}

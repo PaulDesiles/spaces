@@ -18,6 +18,8 @@
 </template>
 
 <script>
+import {mapState, mapGetters} from 'vuex';
+
 import DrawingPoint from './DrawingPoint.vue';
 import DrawingLine from './DrawingLine.vue';
 import {Intersection, Line} from './Geometry';
@@ -28,10 +30,14 @@ export default {
 		DrawingPoint,
 		DrawingLine
 	},
-	props: {
-		lines: Array,
-		intersections: Array,
-		hoveredElement: Object
+	computed: {
+		...mapState([
+			'hoveredElement'
+		]),
+		...mapGetters([
+			'lines',
+			'intersections'
+		])
 	},
 	methods: {
 		amIHovered(myModel) {

@@ -34,6 +34,8 @@
 </template>
 
 <script>
+import {mapState} from 'vuex';
+
 import {Point, Line} from './Geometry';
 import {Segment, getStepSegments, getPolarPoint} from './Constraint';
 
@@ -45,8 +47,6 @@ function distinct(value, index, self) {
 export default {
 	name: 'DebugView',
 	props: {
-		parameters: Object,
-		currentShapePoints: Array,
 		constrainedElements: Object
 	},
 	data() {
@@ -85,21 +85,38 @@ export default {
 
 					return {id, A, B};
 				});
-		}
+		},
+		...mapState(['currentShapePoints']),
+		...mapState('parameters', [
+			'drawingSize',
+			'minStroke',
+			'maxStroke',
+			'minAngle',
+			'angleStep'
+		])
 	},
 	watch: {
 		constrainedElements() {
 			if (this.currentShapePoints.length > 0) {
 				const lastPoints = this.currentShapePoints.slice(-2).reverse();
 				let lastAngle;
-				if (this.parameters.minAngleRad > 0 && lastPoints.length > 1) {
+				if (this.minAngle > 0 && lastPoints.length > 1) {
 					lastAngle = Math.atan2(
 						lastPoints[1].y - lastPoints[0].y,
 						lastPoints[1].x - lastPoints[0].x);
 				}
 
-				if (this.parameters.angleStepRad > 0) {
-					this.stepSegments = getStepSegments(lastPoints, lastAngle, this.parameters)
+				if (this.angleStep > 0) {
+					this.stepSegments = getStepSegments(
+						lastPoints,
+						lastAngle,
+						{
+							drawingSize: this.drawingSize,
+							minStroke: this.minStroke,
+							maxStroke: this.maxStroke,
+							minAngle: this.minAngle,
+							angleStep: this.angleStep
+						})
 						.map((s, i) => ({
 							id: 'Seg' + i,
 							A: s.A,
@@ -110,8 +127,8 @@ export default {
 						new Segment(
 							lastPoints[0],
 							getPolarPoint(
-								lastAngle - this.parameters.minAngleRad,
-								this.parameters.maxSize,
+								lastAngle - this.minAngle,
+								this.maxStroke,
 								lastPoints[0])
 						);
 
@@ -119,8 +136,8 @@ export default {
 						new Segment(
 							lastPoints[0],
 							getPolarPoint(
-								lastAngle + this.parameters.minAngleRad,
-								this.parameters.maxSize,
+								lastAngle + this.minAngle,
+								this.maxStroke,
 								lastPoints[0])
 						);
 

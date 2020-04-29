@@ -1,7 +1,7 @@
 import {initBounds, Intersection, Shape} from '../../src/components/Geometry';
 
 describe('Shape class', () => {
-	initBounds(1000, 1000);
+	initBounds({x:1000, y:1000});
 
 	const A = new Intersection(150, 150);
 	const B = new Intersection(180, 130);

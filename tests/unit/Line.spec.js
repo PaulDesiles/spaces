@@ -106,7 +106,7 @@ describe('Line class', () => {
 });
 
 describe('Line Bounds', () => {
-	initBounds(1000, 1000);
+	initBounds({x:1000, y:1000});
 	const A = new Intersection(10, 10);
 	const B = new Intersection(30, 30);
 	const C = new Intersection(30, 10);

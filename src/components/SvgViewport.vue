@@ -110,10 +110,6 @@ class PanHandler {
 
 export default {
 	name: 'SvgViewport',
-	props: {
-		drawingWidth: Number,
-		drawingHeight: Number
-	},
 	data() {
 		return {
 			minZoom: 0.2,
@@ -131,6 +127,12 @@ export default {
 		};
 	},
 	computed: {
+		drawingWidth() {
+			return this.$store.state.parameters.drawingSize.x;
+		},
+		drawingHeight() {
+			return this.$store.state.parameters.drawingSize.y;
+		},
 		transformMatrix() {
 			return `matrix(${this.zoom}, 0, 0, ${this.zoom}, ${this.x}, ${this.y})`;
 		},

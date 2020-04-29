@@ -1,33 +1,33 @@
 <template>
 	<div id="toolbar">
-		<p>min stroke size : {{ localMinSize }}</p>
+		<p>min stroke size : {{ localMinStroke }}</p>
 		<input
+			v-model="localMinStroke"
 			type="range"
 			class="slider"
 			min="0"
 			max="100"
-			v-model="localMinSize"
-			@change="update('minSize', parseInt($event.target.value, 10))"
+			@change="setMinStroke(parseInt($event.target.value, 10))"
 		/>
 
-		<p>max stroke size : {{ localMaxSize }}</p>
+		<p>max stroke size : {{ localMaxStroke }}</p>
 		<input
+			v-model="localMaxStroke"
 			type="range"
 			class="slider"
 			min="20"
 			max="1000"
-			v-model="localMaxSize"
-			@change="update('maxSize', parseInt($event.target.value, 10))"
+			@change="setMaxStroke(parseInt($event.target.value, 10))"
 		/>
 
 		<p>min Angle : {{ localMinAngle }}°</p>
 		<input
+			v-model="localMinAngle"
 			type="range"
 			class="slider"
 			min="0"
 			max="90"
-			v-model="localMinAngle"
-			@change="update('minAngleRad', toRad($event.target.value))"
+			@change="setMinAngle(toRad($event.target.value))"
 		/>
 
 		<p>angle steps</p>
@@ -47,28 +47,23 @@
 <script>
 export default {
 	name: 'Toolbar',
-	props: {
-		minSize: Number,
-		maxSize: Number,
-		minAngleRad: Number,
-		selectedAngleStepRad: Number
-	},
 	data() {
 		return {
-			localMinSize: this.minSize,
-			localMaxSize: this.maxSize,
-			localMinAngle: this.toDeg(this.minAngleRad),
-			localAngleStep: this.toDeg(this.selectedAngleStepRad),
+			localMinStroke: this.$store.state.parameters.minStroke,
+			localMaxStroke: this.$store.state.parameters.maxStroke,
+			localMinAngle: this.toDeg(this.$store.state.parameters.minAngle),
+			localAngleStep: this.toDeg(this.$store.state.parameters.selectedAngleStep),
 			angleValues: [5, 10, 15]
 		};
 	},
 	methods: {
 		getStepClass(angle) {
-			return ['option', this.toDeg(this.selectedAngleStepRad) === angle ? 'selectedOption' : ''];
-		},
-		setStep(value) {
-			const radValue = this.toRad(value);
-			this.updateParameter('selectedAngleStepRad', radValue);
+			const classes = ['option'];
+			if (this.toDeg(this.$store.state.parameters.selectedAngleStep) === angle) {
+				classes.push('selectedOption');
+			}
+
+			return classes;
 		},
 		toDeg(rad) {
 			return Math.round(rad / Math.PI * 180);
@@ -76,20 +71,25 @@ export default {
 		toRad(deg) {
 			return deg / 180 * Math.PI;
 		},
-		update(name, value) {
-			if (name === 'minSize' && this.localMaxSize < value) {
-				this.localMaxSize = value;
-			} else if (name === 'maxSize' && this.localMinSize > value) {
-				this.localMinSize = value;
+		setMinStroke(value) {
+			if (this.localMaxStroke < value) {
+				this.localMaxStroke = value;
 			}
 
-			this.updateParameter(name, value);
+			this.$store.commit('parameters/setMinStroke', value);
 		},
-		updateParameter(name, value) {
-			this.$emit('updateParameter', {
-				name,
-				value
-			});
+		setMaxStroke(value) {
+			if (this.localMinStroke > value) {
+				this.localMinStroke = value;
+			}
+
+			this.$store.commit('parameters/setMaxStroke', value);
+		},
+		setMinAngle(value) {
+			this.$store.commit('parameters/setMinAngle', value);
+		},
+		setStep(value) {
+			this.$store.commit('parameters/setSelectedAngleStep', this.toRad(value));
 		}
 	}
 };

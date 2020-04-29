@@ -1,6 +1,6 @@
 <template>
 	<div id="app">
-		<SvgViewport ref="svgViewport" >
+		<SvgViewport ref="svgViewport">
 			<g ref="mainGroup">
 				<rect
 					x="0"
@@ -71,7 +71,7 @@ import ParametersPanel from './components/ParametersPanel.vue';
 import ContextMenu from './components/ContextMenu.vue';
 
 import {initBounds, Point, Intersection, Line} from './components/Geometry';
-import {constrainPointPosition, getContrainedSnappingElements} from './components/Constraint';
+import {constrainPointPosition} from './components/Constraint';
 
 export default {
 	name: 'App',
@@ -92,10 +92,6 @@ export default {
 			snapThreshold: 20,
 			mousePosition: new Point(),
 			currentPoint: new Point(),
-			constrainedElements: {
-				points: [],
-				segments: []
-			},
 			downBeforeUp: false
 		};
 	},
@@ -121,7 +117,8 @@ export default {
 		...mapState('parameters', ['drawingSize']),
 		...mapGetters([
 			'lines',
-			'intersections'
+			'intersections',
+			'constrainedElements'
 		])
 	},
 	created() {
@@ -167,13 +164,10 @@ export default {
 		},
 		closeCurrentShape() {
 			this.$store.commit('validateCurrentShape');
-			this.checkForDuplicates();
-			this.updateConstraints();
 		},
 		cancelCurrentShape() {
 			if (this.currentShapePoints.length > 0) {
 				this.$store.commit('emptyCurrentShape');
-				this.updateConstraints();
 			}
 		},
 		getSnappedPosition(mousePosition) {
@@ -232,25 +226,6 @@ export default {
 
 			return snappedPoint;
 		},
-		updateConstraints() {
-			const points = [];
-			if (this.showStartPoint) {
-				points.push(this.startPoint);
-			}
-
-			// StartPoint is added first to have snapping priority over the other points
-			this.constrainedElements = getContrainedSnappingElements(
-				points.concat(this.intersections),
-				this.lines,
-				this.currentShapePoints,
-				{
-					drawingSize: this.$store.state.parameters.drawingSize,
-					minStroke: this.$store.state.parameters.minStroke,
-					maxStroke: this.$store.state.parameters.maxStroke,
-					minAngle: this.$store.state.parameters.minAngle,
-					angleStep: this.$store.state.parameters.angleStep
-				});
-		},
 		updateCurrentPoint() {
 			this.currentPoint = this.getSnappedPosition(this.mousePosition);
 		},
@@ -296,7 +271,6 @@ export default {
 				}
 
 				this.$store.commit('addPoint', newPoint);
-				this.updateConstraints();
 			}
 		},
 		openContextMenu(event) {
@@ -363,31 +337,7 @@ export default {
 		},
 		toggleAngleSteps(activate) {
 			this.$store.commit('parameters/toggleAngleSteps', activate);
-			this.updateConstraints();
 			this.updateCurrentPoint();
-		},
-		checkForDuplicates() {
-			// Check points duplicates
-			// this.intersections.forEach((p1, i) => {
-			// 	this.intersections
-			// 		.slice(i + 1)
-			// 		.forEach(p2 => {
-			// 			if (equiv(p1.x, p2.x) && equiv(p1.y, p2.y)) {
-			// 				console.log(`${p1.id} <=> ${p2.id}`);
-			// 			}
-			// 		});
-			// });
-
-			// // Check lines duplicates
-			// this.lines.forEach((l1, i) => {
-			// 	this.lines
-			// 		.slice(i + 1)
-			// 		.forEach(l2 => {
-			// 			if (equiv(l1.a, l2.a) && equiv(l1.b, l2.b)) {
-			// 				console.log(`${l1.id} <=> ${l2.id}`);
-			// 			}
-			// 		});
-			// });
 		}
 	}
 };

@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import parameters from './parameters';
 import {Shape} from '../components/Geometry';
+import {getContrainedSnappingElements} from '../components/Constraint';
 
 Vue.use(Vuex);
 
@@ -23,6 +24,24 @@ const getters = {
 			.flat()
 			.filter(distinct)
 			.filter(p => p.insideBounds);
+	},
+	constrainedElements(state, getters) {
+		const points = [...getters.intersections];
+		if (state.currentShapePoints.length > 2) {
+			points.push(state.currentShapePoints[0]);
+		}
+
+		return getContrainedSnappingElements(
+			points,
+			getters.lines,
+			state.currentShapePoints,
+			{
+				drawingSize: state.parameters.drawingSize,
+				minStroke: state.parameters.minStroke,
+				maxStroke: state.parameters.maxStroke,
+				minAngle: state.parameters.minAngle,
+				angleStep: state.parameters.angleStep
+			});
 	}
 };
 
@@ -68,9 +87,6 @@ export default new Vuex.Store({
 		setHoveredElement(state, element) {
 			state.hoveredElement = element;
 		}
-	},
-	actions: {
-
 	},
 	getters
 });

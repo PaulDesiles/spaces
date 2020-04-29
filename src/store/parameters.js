@@ -27,8 +27,6 @@ export default {
 			const newValue = value ? state.selectedAngleStep : 0;
 			if (state.angleStep !== newValue) {
 				state.angleStep = newValue;
-				// this.updateConstraints();
-				// this.updateCurrentPoint();
 			}
 		}
 	}

@@ -1,7 +1,12 @@
 <template>
 	<div id="app">
 		<SvgViewport ref="svgViewport">
-			<g ref="mainGroup">
+			<g
+				ref="mainGroup"
+				@mousemove="mouseMove($event)"
+				@mousedown.left="mouseDown()"
+				@mouseup.left="mouseUp($event)"
+			>
 				<rect
 					x="0"
 					y="0"
@@ -86,7 +91,13 @@ export default {
 			snapThreshold: 20,
 			mousePosition: new Point(),
 			currentPoint: new Point(),
-			downBeforeUp: false
+			downBeforeUp: false,
+			eventListeners: [
+				{event: 'keydown', listener: this.keyDown},
+				{event: 'keyup', listener: this.keyUp},
+				{event: 'blur', listener: this.windowLostFocus},
+				{event: 'contextmenu', listener: this.openContextMenu}
+			]
 		};
 	},
 	computed: {
@@ -94,10 +105,6 @@ export default {
 			return this.currentShapePoints.length > 2;
 		},
 		startPoint() {
-			if (this.currentShapePoints.length <= 0) {
-				return undefined;
-			}
-
 			return this.currentShapePoints[0];
 		},
 		currentPath() {
@@ -119,22 +126,10 @@ export default {
 		initBounds(this.drawingSize);
 	},
 	mounted() {
-		window.addEventListener('keydown', this.keyDown);
-		window.addEventListener('keyup', this.keyUp);
-		window.addEventListener('blur', this.windowLostFocus);
-		this.$refs.mainGroup.addEventListener('mousedown', this.mouseDown);
-		this.$refs.mainGroup.addEventListener('mouseup', this.mouseUp);
-		this.$refs.mainGroup.addEventListener('mousemove', this.mouseMove);
-		document.addEventListener('contextmenu', this.openContextMenu);
+		this.eventListeners.forEach(l => document.addEventListener(l.event, l.listener));
 	},
 	unmounted() {
-		window.removeEventListener('keydown', this.keyDown);
-		window.removeEventListener('keyup', this.keyUp);
-		window.removeEventListener('blur', this.windowLostFocus);
-		this.$refs.mainGroup.removeEventListener('mousedown', this.mouseDown);
-		this.$refs.mainGroup.removeEventListener('mouseup', this.mouseUp);
-		this.$refs.mainGroup.removeEventListener('mousemove', this.mouseMove);
-		document.removeEventListener('contextmenu', this.openContextMenu);
+		this.eventListeners.forEach(l => document.removeEventListener(l.event, l.listener));
 	},
 	methods: {
 		getPosition(event) {
@@ -234,16 +229,16 @@ export default {
 				this.updateCurrentPoint();
 			}
 		},
-		mouseDown(event) {
+		mouseDown() {
 			if (this.$refs.contextMenu.opened) {
 				this.$refs.contextMenu.close();
-			} else if (event.which === 1) {
+			} else {
 				// We want to react to mouseUp only if mouseDown was also captured
 				this.downBeforeUp = true;
 			}
 		},
 		mouseUp(event) {
-			if (this.downBeforeUp && event.which === 1) {
+			if (this.downBeforeUp) {
 				this.downBeforeUp = false;
 			} else {
 				return;

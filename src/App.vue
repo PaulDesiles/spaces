@@ -316,7 +316,11 @@ export default {
 			} else if (key === 'enter') {
 				this.closeCurrentShape();
 			} else if (key === 'escape') {
-				this.cancelCurrentShape();
+				if (this.$refs.contextMenu.opened) {
+					this.$refs.contextMenu.close();
+				} else {
+					this.cancelCurrentShape();
+				}
 			} else if (key === ' ') {
 				this.$refs.svgViewport.stopMousePan();
 			}

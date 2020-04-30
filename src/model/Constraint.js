@@ -40,7 +40,7 @@ export class Segment {
 		};
 
 		// Pre-calc for projection
-		this.squaredLength = (this.dx * this.dx) + (this.dy * this.dy);
+		this.squaredLength = (this.dx ** 2) + (this.dy ** 2);
 	}
 
 	contains(p) {
@@ -73,7 +73,7 @@ class Vector {
 	constructor(A, B) {
 		this.dx = B.x - A.x;
 		this.dy = B.y - A.y;
-		this.length = Math.sqrt((this.dx * this.dx) + (this.dy * this.dy));
+		this.length = Math.hypot(this.dx, this.dy);
 	}
 
 	angleWith(v) {
@@ -115,8 +115,8 @@ export function getContrainedSnappingElements(snappingPoints, snappingLines, cur
 
 function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPoints, lastAngle, parameters) {
 	// Apply length constraint to points
-	const min2 = parameters.minStroke * parameters.minStroke;
-	const max2 = parameters.maxStroke * parameters.maxStroke;
+	const min2 = parameters.minStroke ** 2;
+	const max2 = parameters.maxStroke ** 2;
 	snappingPoints = snappingPoints.filter(p => {
 		const d2 = lastPoints[0].getSquaredDistanceTo(p);
 		return 	d2 > min2 && d2 <= max2;
@@ -396,22 +396,22 @@ export function intersectLineWithCircle(l, center, radius) {
 		return resolve2ndDegreePolynom(
 			1,
 			-2 * center.y,
-			(center.y * center.y) + ((x - center.x) * (x - center.x)) - (radius * radius)
+			(center.y ** 2) + ((x - center.x) ** 2) - (radius ** 2)
 		)
 			.map(y => new Point(x, y));
 	}
 
 	return resolve2ndDegreePolynom(
-		1 + (l.a * l.a),
+		1 + (l.a ** 2),
 		2 * ((l.a * (l.b - center.y)) - center.x),
-		(center.x * center.x) + ((l.b - center.y) * (l.b - center.y)) - (radius * radius)
+		(center.x ** 2) + ((l.b - center.y) ** 2) - (radius ** 2)
 	)
 		.map(x => new Point(x, l.y(x)));
 }
 
 export function resolve2ndDegreePolynom(A, B, C) {
 	const possibleXs = [];
-	const delta = (B * B) - (4 * A * C);
+	const delta = (B ** 2) - (4 * A * C);
 	if (delta >= 0) {
 		const deltaSqrt = Math.sqrt(delta);
 		possibleXs.push((-B - deltaSqrt) / (2 * A));
@@ -457,8 +457,8 @@ export function constrainDistance(basePoint, p, min, max) {
 		return new Point(p.x, p.y - min);
 	}
 
-	const squaredLength = (dx * dx) + (dy * dy);
-	const newLength = Math.max(min * min, Math.min(max * max, squaredLength));
+	const squaredLength = (dx ** 2) + (dy ** 2);
+	const newLength = Math.max(min ** 2, Math.min(max ** 2, squaredLength));
 	if (newLength === squaredLength) {
 		return p;
 	}
@@ -509,7 +509,7 @@ export function constrainAngle(basePoint, p, previousPoint, min, step) {
 	}
 
 	if (newAngle !== currentAngle) {
-		const length = Math.sqrt((dx * dx) + (dy * dy));
+		const length = Math.hypot(dx, dy);
 		return new Point(
 			basePoint.x + (length * Math.cos(newAngle)),
 			basePoint.y + (length * Math.sin(newAngle))

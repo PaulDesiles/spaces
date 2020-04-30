@@ -69,7 +69,7 @@ export class Line {
 		};
 
 		// Pre-calc for projection
-		this.squaredLength = (this.dx * this.dx) + (this.dy * this.dy);
+		this.squaredLength = (this.dx ** 2) + (this.dy ** 2);
 
 		this.bounds = getLineBounds(this);
 

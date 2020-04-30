@@ -9,7 +9,7 @@ export class Point {
 	getSquaredDistanceTo(p) {
 		const dx = p.x - this.x;
 		const dy = p.y - this.y;
-		return (dx * dx) + (dy * dy);
+		return (dx ** 2) + (dy ** 2);
 	}
 
 	equiv(p) {
@@ -94,7 +94,7 @@ export function moveSegmentOutside(A, B, distance) {
 		dx = 0.01;
 	}
 
-	const x = -1 * dy / dx;
+	const x = -dy / dx;
 	let sizeFactor = distance / Math.sqrt((x * x) + 1);
 
 	if (dx > 0) { // Or dx < 0 if not clockwise

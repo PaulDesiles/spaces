@@ -1,4 +1,4 @@
-import * as Helper from '../../src/components/GeometryHelpers';
+import * as Helper from '../../src/model/GeometryHelpers';
 
 describe('Point class', () => {
 	test('default constructor', () => {

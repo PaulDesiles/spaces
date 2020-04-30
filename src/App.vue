@@ -10,10 +10,7 @@
 					fill="white"
 				/>
 
-				<DebugView
-					v-if="debugMode"
-					:constrainedElements="constrainedElements"
-				/>
+				<DebugView v-if="debugMode" />
 
 				<path
 					v-for="shape in shapes"

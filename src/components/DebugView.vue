@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import {mapState} from 'vuex';
+import {mapState, mapGetters} from 'vuex';
 
 import {Point, Line} from './Geometry';
 import {Segment, getStepSegments, getPolarPoint} from './Constraint';
@@ -46,14 +46,6 @@ function distinct(value, index, self) {
 
 export default {
 	name: 'DebugView',
-	props: {
-		constrainedElements: Object
-	},
-	data() {
-		return {
-			stepSegments: []
-		};
-	},
 	computed: {
 		snappingPoints() {
 			return this.constrainedElements.points
@@ -86,17 +78,7 @@ export default {
 					return {id, A, B};
 				});
 		},
-		...mapState(['currentShapePoints']),
-		...mapState('parameters', [
-			'drawingSize',
-			'minStroke',
-			'maxStroke',
-			'minAngle',
-			'angleStep'
-		])
-	},
-	watch: {
-		constrainedElements() {
+		stepSegments() {
 			if (this.currentShapePoints.length > 0) {
 				const lastPoints = this.currentShapePoints.slice(-2).reverse();
 				let lastAngle;
@@ -107,7 +89,7 @@ export default {
 				}
 
 				if (this.angleStep > 0) {
-					this.stepSegments = getStepSegments(
+					return getStepSegments(
 						lastPoints,
 						lastAngle,
 						{
@@ -141,12 +123,21 @@ export default {
 								lastPoints[0])
 						);
 
-					this.stepSegments = [lowerAngleSegment, upperAngleSegment];
+					return [lowerAngleSegment, upperAngleSegment];
 				}
-			} else {
-				this.stepSegments = [];
 			}
-		}
+
+			return [];
+		},
+		...mapState(['currentShapePoints']),
+		...mapState('parameters', [
+			'drawingSize',
+			'minStroke',
+			'maxStroke',
+			'minAngle',
+			'angleStep'
+		]),
+		...mapGetters(['constrainedElements'])
 	}
 };
 </script>

@@ -1,4 +1,4 @@
-import {initBounds, Point, Intersection, Line} from '../../src/components/Geometry';
+import {initBounds, Point, Intersection, Line} from '../../src/model/Geometry';
 
 describe('Line class', () => {
 	const A = new Intersection(20, 10);

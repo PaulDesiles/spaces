@@ -1,5 +1,5 @@
 <template>
-	<div id="toolbar">
+	<div>
 		<p>min stroke size : {{ localMinStroke }}</p>
 		<input
 			v-model="localMinStroke"
@@ -46,7 +46,7 @@
 
 <script>
 export default {
-	name: 'Toolbar',
+	name: 'ParametersContent',
 	data() {
 		return {
 			localMinStroke: this.$store.state.parameters.minStroke,

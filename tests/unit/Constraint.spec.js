@@ -1,4 +1,4 @@
-import {Point, Intersection, Line, initBounds} from '../../src/components/Geometry';
+import {Point, Intersection, Line, initBounds} from '../../src/model/Geometry';
 import {
 	Segment,
 	resolve2ndDegreePolynom,
@@ -6,7 +6,7 @@ import {
 	constrainSegmentToBounds,
 	constrainDistance,
 	constrainAngle
-} from '../../src/components/Constraint';
+} from '../../src/model/Constraint';
 
 describe('polynom resolution', () => {
 	test('x²+2x+1', () => {

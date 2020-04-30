@@ -1,4 +1,4 @@
-import {initBounds, Point, Intersection} from '../../src/components/Geometry';
+import {initBounds, Point, Intersection} from '../../src/model/Geometry';
 
 const size = 1000;
 beforeAll(() => {

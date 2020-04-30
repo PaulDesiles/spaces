@@ -20,9 +20,9 @@
 <script>
 import {mapState, mapGetters} from 'vuex';
 
-import DrawingPoint from './DrawingPoint.vue';
-import DrawingLine from './DrawingLine.vue';
-import {Intersection, Line} from './Geometry';
+import DrawingPoint from './drawing/DrawingPoint.vue';
+import DrawingLine from './drawing/DrawingLine.vue';
+import {Intersection, Line} from '../model/Geometry';
 
 export default {
 	name: 'Guides',

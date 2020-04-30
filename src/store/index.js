@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import parameters from './parameters';
-import {Shape} from '../components/Geometry';
-import {getContrainedSnappingElements} from '../components/Constraint';
+import {Shape} from '../model/Geometry';
+import {getContrainedSnappingElements} from '../model/Constraint';
 
 Vue.use(Vuex);
 

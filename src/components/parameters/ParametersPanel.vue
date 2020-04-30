@@ -1,9 +1,7 @@
 <template>
 	<div id="parametersPanel" :class="panelClass">
 		<Transition name="fade">
-			<div v-if="opened" id="container">
-				<slot />
-			</div>
+			<ParametersContent v-if="opened" id="container" />
 		</Transition>
 		<div id="toggleButton" @click="toggle()">
 			<Transition name="sphereRotation" mode="out-in">
@@ -15,8 +13,13 @@
 </template>
 
 <script>
+import ParametersContent from './ParametersContent';
+
 export default {
 	name: 'ParametersPanel',
+	components: {
+		ParametersContent
+	},
 	data() {
 		return {
 			opened: false

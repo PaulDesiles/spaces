@@ -1,4 +1,4 @@
-import {initBounds, Intersection, Shape} from '../../src/components/Geometry';
+import {initBounds, Intersection, Shape} from '../../src/model/Geometry';
 
 describe('Shape class', () => {
 	initBounds({x:1000, y:1000});

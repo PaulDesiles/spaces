@@ -45,9 +45,8 @@
 			:cursor="currentPoint"
 			:hovered="hoveredElement"
 		/>
-		<ParametersPanel>
-			<Toolbar />
-		</ParametersPanel>
+
+		<ParametersPanel />
 
 		<ContextMenu ref="contextMenu" />
 	</div>
@@ -56,19 +55,18 @@
 <script>
 import {mapState, mapGetters} from 'vuex';
 
-import DebugInfo from './components/DebugInfo.vue';
-import DebugView from './components/DebugView.vue';
+import DebugInfo from './components/debug/DebugInfo.vue';
+import DebugView from './components/debug/DebugView.vue';
 
 import SvgViewport from './components/SvgViewport.vue';
-import DrawingPoint from './components/DrawingPoint.vue';
+import DrawingPoint from './components/drawing/DrawingPoint.vue';
 import Guides from './components/Guides.vue';
 
-import Toolbar from './components/Toolbar.vue';
-import ParametersPanel from './components/ParametersPanel.vue';
+import ParametersPanel from './components/parameters/ParametersPanel.vue';
 import ContextMenu from './components/ContextMenu.vue';
 
-import {initBounds, Point, Intersection, Line} from './components/Geometry';
-import {constrainPointPosition} from './components/Constraint';
+import {initBounds, Point, Intersection, Line} from './model/Geometry';
+import {constrainPointPosition} from './model/Constraint';
 
 export default {
 	name: 'App',
@@ -78,7 +76,6 @@ export default {
 		SvgViewport,
 		DrawingPoint,
 		Guides,
-		Toolbar,
 		ParametersPanel,
 		ContextMenu
 	},

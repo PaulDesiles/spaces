@@ -36,8 +36,8 @@
 <script>
 import {mapState, mapGetters} from 'vuex';
 
-import {Point, Line} from './Geometry';
-import {Segment, getStepSegments, getPolarPoint} from './Constraint';
+import {Point, Line} from '../../model/Geometry';
+import {Segment, getStepSegments, getPolarPoint} from '../../model/Constraint';
 
 // Only first occurence of an object will be returned
 function distinct(value, index, self) {

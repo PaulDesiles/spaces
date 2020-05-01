@@ -138,11 +138,13 @@ let shapeCount = 0;
 export class Shape {
 	constructor(points) {
 		this.points = [...points];
-		if (!Helper.isFormClockwiseOriented(this.points)) {
-			this.points.reverse();
+
+		let clockwisePoints = this.points;
+		if (!Helper.isFormClockwiseOriented(clockwisePoints)) {
+			clockwisePoints = [...points].reverse();
 		}
 
-		const lineMap = new Map(Helper.mapConsecutive(this.points, (A, B) => {
+		const lineMap = new Map(Helper.mapConsecutive(clockwisePoints, (A, B) => {
 			let line = A.crossingLines.find(l => l.includes(B));
 
 			if (line === undefined) {
@@ -227,7 +229,7 @@ export class Shape {
 			this.spacedLines.push(parallelLine);
 		};
 
-		Helper.forEachConsecutive(this.points, createParallelLines, -1);
+		Helper.forEachConsecutive(clockwisePoints, createParallelLines, -1);
 
 		Helper.forEachConsecutive(this.spacedLines, (l1, l2) => {
 			l1.getOrCreateIntersectionWith(l2);

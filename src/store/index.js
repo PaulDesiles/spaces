@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import parameters from './parameters';
-import {Shape} from '../model/Geometry';
+import {Shape, Point} from '../model/Geometry';
 import {getContrainedSnappingElements} from '../model/Constraint';
 
 Vue.use(Vuex);
@@ -45,13 +45,21 @@ const getters = {
 	}
 };
 
+const validateCurrentShape = function (state) {
+	const newShape = new Shape(state.currentShapePoints);
+	newShape.updateIntersections(getters.lines(state));
+	state.currentShapePoints = [];
+	state.shapes.push(newShape);
+};
+
 const debug = process.env.NODE_ENV !== 'production';
 export default new Vuex.Store({
 	strict: debug,
 	state: {
 		shapes: [],
 		currentShapePoints: [],
-		hoveredElement: undefined
+		hoveredElement: undefined,
+		redoStack: []
 	},
 	modules: {
 		parameters
@@ -60,32 +68,47 @@ export default new Vuex.Store({
 		addPoint(state, point) {
 			state.currentShapePoints.push(point);
 		},
-		removeLastPoint(state) {
-			if (state.currentShapePoints.length > 0) {
-				state.currentShapePoints.pop();
-			}
-		},
-		emptyCurrentShape(state) {
-			state.currentShapePoints = [];
-		},
-
-		validateCurrentShape(state) {
-			const newShape = new Shape(state.currentShapePoints);
-			newShape.updateIntersections(getters.lines(state));
-			state.currentShapePoints = [];
-			state.shapes.push(newShape);
-		},
-		removeLastShape(state) {
-			if (state.shapes.length > 0) {
-				state.shapes.pop();
-			}
-		},
-		emptyShapes(state) {
-			state.shapes = [];
-		},
+		// removeLastPoint(state) {
+		// 	if (state.currentShapePoints.length > 0) {
+		// 		state.currentShapePoints.pop();
+		// 	}
+		// },
+		// emptyCurrentShape(state) {
+		// 	state.currentShapePoints = [];
+		// },
+		validateCurrentShape,
+		// removeLastShape(state) {
+		// 	if (state.shapes.length > 0) {
+		// 		state.shapes.pop();
+		// 	}
+		// },
+		// emptyShapes(state) {
+		// 	state.shapes = [];
+		// },
 
 		setHoveredElement(state, element) {
 			state.hoveredElement = element;
+		},
+
+
+		undo(state) {
+			if (state.currentShapePoints.length > 0) {
+				state.redoStack.push(state.currentShapePoints.pop());
+			} else if (state.shapes.length > 0) {
+				const shape = state.shapes.pop();
+				state.currentShapePoints = shape.points;
+				state.redoStack.push('closeShape');
+			}
+		},
+		redo(state) {
+			if (state.redoStack.length > 0) {
+				const last = state.redoStack.pop();
+				if (last instanceof Point) {
+					state.currentShapePoints.push(last);
+				} else if (last === 'closeShape') {
+					validateCurrentShape(state);
+				}
+			}
 		}
 	},
 	getters

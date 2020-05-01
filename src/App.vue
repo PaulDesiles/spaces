@@ -155,9 +155,9 @@ export default {
 			this.$store.commit('validateCurrentShape');
 		},
 		cancelCurrentShape() {
-			if (this.currentShapePoints.length > 0) {
-				this.$store.commit('emptyCurrentShape');
-			}
+			// if (this.currentShapePoints.length > 0) {
+			// 	this.$store.commit('emptyCurrentShape');
+			// }
 		},
 		getSnappedPosition(mousePosition) {
 			let snappedPoint = constrainPointPosition(
@@ -290,13 +290,6 @@ export default {
 
 			this.$refs.contextMenu.initialize(actions, event.clientX, event.clientY);
 		},
-		cancel() {
-			if (this.startPoint === undefined) {
-				this.$store.commit('removeLastShape');
-			} else {
-				this.$store.commit('removeLastPoint');
-			}
-		},
 		keyDown(keyEvent) {
 			const key = keyEvent.key.toLowerCase();
 			if (key === 'control') {
@@ -309,6 +302,14 @@ export default {
 			const key = keyEvent.key.toLowerCase();
 			if (key === 'control') {
 				this.toggleAngleSteps(false);
+			} else if (key === 'z' && keyEvent.ctrlKey) {
+				if (keyEvent.shiftKey) {
+					this.$store.commit('redo');
+				} else {
+					this.$store.commit('undo');
+				}
+			} else if ((key === 'y' && keyEvent.ctrlKey)) {
+				this.$store.commit('redo');
 			} else if (key === 'd') {
 				this.debugMode = !this.debugMode;
 			} else if (key === 'h') {

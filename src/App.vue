@@ -155,9 +155,9 @@ export default {
 			this.$store.commit('validateCurrentShape');
 		},
 		cancelCurrentShape() {
-			// if (this.currentShapePoints.length > 0) {
-			// 	this.$store.commit('emptyCurrentShape');
-			// }
+			if (this.currentShapePoints.length > 0) {
+				this.$store.commit('cancelShape');
+			}
 		},
 		getSnappedPosition(mousePosition) {
 			let snappedPoint = constrainPointPosition(

@@ -68,28 +68,11 @@ export default new Vuex.Store({
 		addPoint(state, point) {
 			state.currentShapePoints.push(point);
 		},
-		// removeLastPoint(state) {
-		// 	if (state.currentShapePoints.length > 0) {
-		// 		state.currentShapePoints.pop();
-		// 	}
-		// },
-		// emptyCurrentShape(state) {
-		// 	state.currentShapePoints = [];
-		// },
 		validateCurrentShape,
-		// removeLastShape(state) {
-		// 	if (state.shapes.length > 0) {
-		// 		state.shapes.pop();
-		// 	}
-		// },
-		// emptyShapes(state) {
-		// 	state.shapes = [];
-		// },
 
 		setHoveredElement(state, element) {
 			state.hoveredElement = element;
 		},
-
 
 		undo(state) {
 			if (state.currentShapePoints.length > 0) {
@@ -97,7 +80,15 @@ export default new Vuex.Store({
 			} else if (state.shapes.length > 0) {
 				const shape = state.shapes.pop();
 				state.currentShapePoints = shape.points;
+				shape.removeAllLinks();
 				state.redoStack.push('closeShape');
+			}
+		},
+		cancelShape(state) {
+			if (state.currentShapePoints.length > 0) {
+				const reversed = [...state.currentShapePoints].reverse();
+				state.redoStack.push(...reversed);
+				state.currentShapePoints = [];
 			}
 		},
 		redo(state) {

@@ -39,6 +39,7 @@ export class Line {
 		this.addPoint(p1);
 		this.addPoint(p2);
 		this.parallels = [];
+		this.linkedShapes = [];
 
 		// The line function is (y = a * x + b)
 		// with a = dx / dy
@@ -235,6 +236,10 @@ export class Shape {
 			l1.getOrCreateIntersectionWith(l2);
 		});
 
+		this.lines
+			.concat(this.spacedLines)
+			.forEach(l => l.linkedShapes.push(this));
+
 		this.id = 'S' + shapeCount++;
 	}
 
@@ -245,6 +250,39 @@ export class Shape {
 				line.getOrCreateIntersectionWith(newLine);
 			});
 		});
+	}
+
+	removeAllLinks() {
+		// Remove all links on lines that are linked only to this shape
+		const myLines = this.lines
+			.concat(this.spacedLines)
+			.filter(line => line.linkedShapes.length === 1);
+
+		myLines.forEach(line => {
+			line.parallels.forEach(p => {
+				removeIfAny(p.parallels, line);
+			});
+			line.parallels = [];
+			line.linkedShapes = [];
+		});
+
+		[...myLines.map(line => line.intersections).flat()]
+			.forEach(i => {
+				i.crossingLines.forEach(l => {
+					removeIfAny(l.intersections, i);
+				});
+
+				myLines.forEach(l => {
+					removeIfAny(i.crossingLines, l);
+				});
+			});
+	}
+}
+
+function removeIfAny(array, element) {
+	const index = array.indexOf(element);
+	if (index >= 0) {
+		array.splice(index, 1);
 	}
 }
 

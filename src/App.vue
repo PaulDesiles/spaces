@@ -44,6 +44,7 @@
 				<DrawingPoint :point="currentPoint" :type="1" />
 			</g>
 		</SvgViewport>
+
 		<DebugInfo
 			v-if="debugMode"
 			:mouse="mousePosition"
@@ -54,6 +55,8 @@
 		<ParametersPanel />
 
 		<ContextMenu ref="contextMenu" />
+
+		<Tutorial />
 	</div>
 </template>
 
@@ -62,6 +65,7 @@ import {mapState, mapGetters} from 'vuex';
 
 import DebugInfo from './components/debug/DebugInfo.vue';
 import DebugView from './components/debug/DebugView.vue';
+import Tutorial from './components/tutorial/Tutorial.vue';
 
 import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/drawing/DrawingPoint.vue';
@@ -78,6 +82,7 @@ export default {
 	components: {
 		DebugInfo,
 		DebugView,
+		Tutorial,
 		SvgViewport,
 		DrawingPoint,
 		Guides,

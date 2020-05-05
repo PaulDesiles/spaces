@@ -52,6 +52,8 @@
 			:hovered="hoveredElement"
 		/>
 
+		<Menu />
+
 		<ParametersPanel />
 
 		<ContextMenu ref="contextMenu" />
@@ -66,6 +68,7 @@ import {mapState, mapGetters} from 'vuex';
 import DebugInfo from './components/debug/DebugInfo.vue';
 import DebugView from './components/debug/DebugView.vue';
 import Tutorial from './components/tutorial/Tutorial.vue';
+import Menu from './components/menu/Menu.vue';
 
 import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/drawing/DrawingPoint.vue';
@@ -83,6 +86,7 @@ export default {
 		DebugInfo,
 		DebugView,
 		Tutorial,
+		Menu,
 		SvgViewport,
 		DrawingPoint,
 		Guides,

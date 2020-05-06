@@ -1,64 +1,65 @@
 <template>
 	<div id="app">
-		<SvgViewport ref="svgViewport">
-			<g
-				ref="mainGroup"
-				@mousemove="mouseMove($event)"
-				@mousedown.left="mouseDown()"
-				@mouseup.left="mouseUp($event)"
-			>
-				<rect
-					x="0"
-					y="0"
-					:width="drawingSize.x"
-					:height="drawingSize.y"
-					fill="white"
-				/>
+		<Menu id="menu" />
+		<div id="mainContent">
+			<SvgViewport ref="svgViewport">
+				<g
+					ref="mainGroup"
+					@mousemove="mouseMove($event)"
+					@mousedown.left="mouseDown()"
+					@mouseup.left="mouseUp($event)"
+				>
+					<rect
+						x="0"
+						y="0"
+						:width="drawingSize.x"
+						:height="drawingSize.y"
+						fill="white"
+					/>
 
-				<DebugView v-if="debugMode" />
+					<DebugView v-if="debugMode" />
 
-				<path
-					v-for="shape in shapes"
-					:key="shape.id"
-					:d="getPath(shape.points, true)"
-					stroke-width="0"
-					fill="black"
-				/>
+					<path
+						v-for="shape in shapes"
+						:key="shape.id"
+						:d="getPath(shape.points, true)"
+						stroke-width="0"
+						fill="black"
+					/>
 
-				<path
-					:d="currentPath"
-					stroke="black"
-					fill="none"
-					stroke-width="1"
-				/>
+					<path
+						:d="currentPath"
+						stroke="black"
+						fill="none"
+						stroke-width="1"
+					/>
 
-				<Guides v-if="showGuides" />
+					<Guides v-if="showGuides" />
 
-				<DrawingPoint
-					v-if="showStartPoint"
-					:point="startPoint"
-					:type="2"
-					:hovered="hoveredElement === startPoint"
-				/>
+					<DrawingPoint
+						v-if="showStartPoint"
+						:point="startPoint"
+						:type="2"
+						:hovered="hoveredElement === startPoint"
+					/>
 
-				<DrawingPoint :point="currentPoint" :type="1" />
-			</g>
-		</SvgViewport>
+					<DrawingPoint :point="currentPoint" :type="1" />
+				</g>
+			</SvgViewport>
 
-		<DebugInfo
-			v-if="debugMode"
-			:mouse="mousePosition"
-			:cursor="currentPoint"
-			:hovered="hoveredElement"
-		/>
+			<DebugInfo
+				v-if="debugMode"
+				:mouse="mousePosition"
+				:cursor="currentPoint"
+				:hovered="hoveredElement"
+			/>
 
-		<Menu />
+			<ParametersPanel />
 
-		<ParametersPanel />
+			<ContextMenu ref="contextMenu" />
+		</div>
 
-		<ContextMenu ref="contextMenu" />
-
-		<Tutorial />
+		<Tutorial class="fullScreen" />
 	</div>
 </template>
 
@@ -352,8 +353,32 @@ body {
 	font-family: Arial, Helvetica;
 	font-size: 10pt;
 }
+
 html, body, #app {
 	width:100%;
 	height:100%;
+}
+
+#app {
+	display: grid;
+	grid-template-columns: 190px auto;
+}
+
+#menu {
+	grid-column: 1 / 2;
+	background: #f2f2f2;
+	box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.3);
+	user-select: none;
+	z-index: 10;
+}
+
+#mainContent {
+	grid-column: 2 / 3;
+	position: relative;
+}
+
+.fullScreen {
+	grid-column: 1 / 3;
+	z-index: 20;
 }
 </style>

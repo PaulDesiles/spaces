@@ -239,8 +239,9 @@ export default {
 			}
 		},
 		onResize() {
-			this.availableWidth = document.documentElement.clientWidth;
-			this.availableHeight = document.documentElement.clientHeight;
+			const rect = this.$refs.viewer.getBoundingClientRect();
+			this.availableWidth = rect.width;
+			this.availableHeight = rect.height;
 		},
 		onWheel(event) {
 			event.stopPropagation();

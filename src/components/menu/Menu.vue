@@ -1,5 +1,5 @@
 <template>
-	<div id="menuPanel">
+	<div>
 		<h1>SPACES</h1>
 		<ul>
 			<li :enabled="shapesCount > 0">
@@ -71,17 +71,6 @@ export default {
 </script>
 
 <style scoped>
-
-#menuPanel {
-	position: fixed;
-	top: 0;
-	left: 0;
-	height: 100%;
-	width: 180px;
-	background: #f2f2f2;
-	box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.3);
-	user-select: none;
-}
 
 h1 {
 	font-weight: normal;

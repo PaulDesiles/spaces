@@ -2,73 +2,113 @@
 	<div>
 		<h1>SPACES</h1>
 		<ul>
-			<li>
-				<a @click="reset()">
-					<img src="./assets/new.svg" />
-					<span>New</span>
-				</a>
-			</li>
-			<li>
-				<a :class="getClass(canUndo)" @click="undo()">
-					<img src="./assets/undo.svg" />
-					<span>Undo</span>
-					<span class="shortcut">ctrl+Z</span>
-				</a>
-			</li>
-			<li>
-				<a :class="getClass(canRedo)" @click="redo()">
-					<img src="./assets/redo.svg" />
-					<span>Redo</span>
-					<span class="shortcut">ctrl+Y</span>
-				</a>
-			</li>
-			<li>
-				<a class="disabledLink">
-					<img src="./assets/export.svg" />
-					<span>Export</span>
-				</a>
-			</li>
-			<li>
-				<a class="disabledLink">
-					<img src="./assets/guides.svg" />
-					<span>Guides</span>
-					<img class="expand" src="./assets/arrow.svg" />
-				</a>
-			</li>
-			<li>
-				<a class="disabledLink">
-					<img src="./assets/current.svg" />
-					<span>Current stroke</span>
-					<img class="expand" src="./assets/arrow.svg" />
-				</a>
-			</li>
-			<li>
-				<a class="disabledLink">
-					<img src="./assets/next.svg" />
-					<span>Next stroke</span>
-					<img class="expand" src="./assets/arrow.svg" />
-				</a>
-			</li>
+			<MenuItem
+				v-for="item in items"
+				:key="item.label"
+				v-bind="item"
+			/>
 		</ul>
 	</div>
 </template>
 
 <script>
-import {mapGetters} from 'vuex';
+import MenuItem from './MenuItem';
+
+import iconNew from './assets/new.svg';
+import iconUndo from './assets/undo.svg';
+import iconRedo from './assets/redo.svg';
+import iconExport from './assets/export.svg';
+import iconGuides from './assets/guides.svg';
+import iconCurrent from './assets/current.svg';
+import iconNext from './assets/next.svg';
 
 export default {
 	name: 'Menu',
+	components: {
+		MenuItem
+	},
 	data() {
 		return {
 			items: [
+				{
+					label: 'New',
+					icon: iconNew,
+					onClick: this.reset
+				},
+				{
+					label: 'Undo',
+					icon: iconUndo,
+					shortcut: 'ctrl+Z',
+					isEnabled: this.canUndo,
+					onClick: this.undo
+				},
+				{
+					label: 'Redo',
+					icon: iconRedo,
+					shortcut: 'ctrl+Y',
+					isEnabled: this.canRedo,
+					onClick: this.redo
+				},
+				{
+					label: 'Export',
+					icon: iconExport,
+					isEnabled: () => false
+				},
+				{
+					label: 'Guides',
+					icon: iconGuides,
+					children: [
+						{
+							label: 'Add horizontal',
+							shortcut: 'H',
+							isEnabled: () => false
+						},
+						{
+							label: 'Add vertical',
+							shortcut: 'V',
+							isEnabled: () => false
+						},
+						{
+							label: 'Clear all',
+							shortcut: 'G',
+							isEnabled: () => false
+						}
+					]
+				},
+				{
+					label: 'Current stroke',
+					icon: iconCurrent,
+					children: [
+						{
+							label: 'Parallel to line',
+							shortcut: 'L',
+							isEnabled: () => false
+						},
+						{
+							label: 'Points toward',
+							shortcut: 'P',
+							isEnabled: () => false
+						},
+						{
+							label: 'Copy length',
+							shortcut: 'S',
+							isEnabled: () => false
+						}
+					]
+				},
+				{
+					label: 'Next stroke',
+					icon: iconNext,
+					children: [
+						{
+							label: 'Parallel to line…',
+							shortcut: 'N',
+							isEnabled: () => false
+						}
+					]
+				}
 			]
 		};
-	},
-	computed: {
-		...mapGetters([
-			'canUndo',
-			'canRedo'
-		])
 	},
 	methods: {
 		reset() {
@@ -80,8 +120,11 @@ export default {
 		redo() {
 			this.$store.commit('redo');
 		},
-		getClass(isEnabled) {
-			return isEnabled ? '' : 'disabledLink';
+		canUndo() {
+			return this.$store.getters.canUndo;
+		},
+		canRedo() {
+			return this.$store.getters.canRedo;
 		}
 	}
 };
@@ -99,53 +142,6 @@ h1 {
 ul {
 	padding: 0;
 	margin: 0;
-	font-size: 14px;
-}
-
-li {
-	list-style: none;
-}
-	li img {
-		width: 24px;
-		margin-right: 8px;
-		vertical-align: middle;
-	}
-
-	li span {
-		vertical-align: middle;
-	}
-
-a {
-	display: block;
-	line-height: 24px;
-	cursor: pointer;
-	padding: 8px 10px;
-	position: relative;
-}
-
-.disabledLink {
-	opacity: 0.4;
-    pointer-events: none;
-}
-
-a:hover {
-	background: #fff6;
-	color: #318be7;
-}
-
-.expand, .shortcut {
-	position: absolute;
-	right: 10px;
-}
-
-.shortcut {
-	opacity: 0.3;
-}
-
-.expand {
-	width: 10px;
-	margin: -.5em 0 0 0;
-	top: 50%;
 }
 
 </style>

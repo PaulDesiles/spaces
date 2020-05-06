@@ -56,8 +56,9 @@
 
 			<ParametersPanel />
 
-			<ContextMenu ref="contextMenu" />
 		</div>
+		
+		<ContextMenu ref="contextMenu" />
 
 		<Tutorial class="fullScreen" />
 	</div>

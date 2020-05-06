@@ -6,6 +6,8 @@
 				v-for="item in items"
 				:key="item.label"
 				v-bind="item"
+				:opened="item === openedItem"
+				@toggleOpening="toggleOpening(item)"
 			/>
 		</ul>
 	</div>
@@ -29,6 +31,7 @@ export default {
 	},
 	data() {
 		return {
+			openedItem: undefined,
 			items: [
 				{
 					label: 'New',
@@ -125,6 +128,13 @@ export default {
 		},
 		canRedo() {
 			return this.$store.getters.canRedo;
+		},
+		toggleOpening(item) {
+			if (this.openedItem === item) {
+				this.openedItem = undefined;
+			} else {
+				this.openedItem = item;
+			}
 		}
 	}
 };

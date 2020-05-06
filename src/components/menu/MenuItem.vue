@@ -56,12 +56,8 @@ export default {
 		children: {
 			type: Array,
 			default: () => []
-		}
-	},
-	data() {
-		return {
-			opened: false
-		};
+		},
+		opened: Boolean
 	},
 	computed: {
 		linkClass() {
@@ -77,8 +73,8 @@ export default {
 	methods: {
 		action() {
 			if (this.hasChildren) {
-				this.opened = !this.opened;
-			} else if(this.onClick) {
+				this.$emit('toggleOpening');
+			} else if (this.onClick) {
 				this.onClick();
 			}
 		}

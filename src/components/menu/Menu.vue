@@ -2,48 +2,48 @@
 	<div>
 		<h1>SPACES</h1>
 		<ul>
-			<li :enabled="shapesCount > 0">
-				<a>
+			<li>
+				<a @click="reset()">
 					<img src="./assets/new.svg" />
 					<span>New</span>
 				</a>
 			</li>
-			<li :enabled="canUndo">
-				<a>
+			<li>
+				<a :class="getClass(canUndo)" @click="undo()">
 					<img src="./assets/undo.svg" />
 					<span>Undo</span>
 					<span class="shortcut">ctrl+Z</span>
 				</a>
 			</li>
-			<li :enabled="canRedo">
-				<a>
+			<li>
+				<a :class="getClass(canRedo)" @click="redo()">
 					<img src="./assets/redo.svg" />
 					<span>Redo</span>
 					<span class="shortcut">ctrl+Y</span>
 				</a>
 			</li>
-			<li :enabled="shapesCount > 0">
-				<a>
+			<li>
+				<a class="disabledLink">
 					<img src="./assets/export.svg" />
 					<span>Export</span>
 				</a>
 			</li>
-			<li :enabled="false">
-				<a>
+			<li>
+				<a class="disabledLink">
 					<img src="./assets/guides.svg" />
 					<span>Guides</span>
 					<img class="expand" src="./assets/arrow.svg" />
 				</a>
 			</li>
-			<li :enabled="false">
-				<a>
+			<li>
+				<a class="disabledLink">
 					<img src="./assets/current.svg" />
 					<span>Current stroke</span>
 					<img class="expand" src="./assets/arrow.svg" />
 				</a>
 			</li>
-			<li :enabled="false">
-				<a>
+			<li>
+				<a class="disabledLink">
 					<img src="./assets/next.svg" />
 					<span>Next stroke</span>
 					<img class="expand" src="./assets/arrow.svg" />
@@ -54,6 +54,8 @@
 </template>
 
 <script>
+import {mapGetters} from 'vuex';
+
 export default {
 	name: 'Menu',
 	data() {
@@ -63,9 +65,24 @@ export default {
 		};
 	},
 	computed: {
-		shapesCount() { return 0; },
-		canUndo() { return true; },
-		canRedo() { return true; }
+		...mapGetters([
+			'canUndo',
+			'canRedo'
+		])
+	},
+	methods: {
+		reset() {
+			this.$store.commit('reset');
+		},
+		undo() {
+			this.$store.commit('undo');
+		},
+		redo() {
+			this.$store.commit('redo');
+		},
+		getClass(isEnabled) {
+			return isEnabled ? '' : 'disabledLink';
+		}
 	}
 };
 </script>
@@ -104,6 +121,11 @@ a {
 	cursor: pointer;
 	padding: 8px 10px;
 	position: relative;
+}
+
+.disabledLink {
+	opacity: 0.4;
+    pointer-events: none;
 }
 
 a:hover {

@@ -42,6 +42,12 @@ const getters = {
 				minAngle: state.parameters.minAngle,
 				angleStep: state.parameters.angleStep
 			});
+	},
+	canUndo(state) {
+		return state.shapes.length > 0 || state.currentShapePoints.length > 0;
+	},
+	canRedo(state) {
+		return state.redoStack.length > 0;
 	}
 };
 
@@ -100,6 +106,12 @@ export default new Vuex.Store({
 					validateCurrentShape(state);
 				}
 			}
+		},
+		reset(state) {
+			state.shapes = [];
+			state.currentShapePoints = [];
+			state.hoveredElement = undefined;
+			state.redoStack = [];
 		}
 	},
 	getters

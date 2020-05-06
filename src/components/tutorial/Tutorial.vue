@@ -1,40 +1,42 @@
 <template>
-	<div v-if="opened" id="overlay" @click="close()">
-		<div id="tutorialPanel">
-			<div>
-				<img id="drawing" src="./assets/drawing.svg" />
-				<h1>SPACES is a vector drawing software with a focus on keeping a constant distance between all shapes.</h1>
-			</div>
-			<ul>
-				<li>
-					<img src="./assets/add.svg" />
-					click to add points
-				</li>
-				<li>
-					<img src="./assets/end.svg" />
-					click on blue circle or <i>[enter]</i> to close the shape
-				</li>
-				<li>
-					<img src="./assets/steps.svg" />
-					hold <i>[ctrl]</i> to force angle steps
-				</li>
-				<li>
-					<img src="./assets/zoom.svg" />
-					<i>[ctrl]</i> + scroll to zoom in and out
-				</li>
-				<li>
-					<img src="./assets/move.svg" />
-					<i>[space]</i> + mouse drag to move the drawing
-				</li>
-			</ul>
+	<Transition name="fade">
+		<div v-if="opened" id="overlay" @click="close()">
+			<div id="tutorialPanel" @click.stop>
+				<div>
+					<img id="drawing" src="./assets/drawing.svg" />
+					<h1>SPACES is a vector drawing software with a focus on keeping a constant distance between all shapes.</h1>
+				</div>
+				<ul>
+					<li>
+						<img src="./assets/add.svg" />
+						click to add points
+					</li>
+					<li>
+						<img src="./assets/end.svg" />
+						click on blue circle or <i>[enter]</i> to close the shape
+					</li>
+					<li>
+						<img src="./assets/steps.svg" />
+						hold <i>[ctrl]</i> to force angle steps
+					</li>
+					<li>
+						<img src="./assets/zoom.svg" />
+						<i>[ctrl]</i> + scroll to zoom in and out
+					</li>
+					<li>
+						<img src="./assets/move.svg" />
+						<i>[space]</i> + mouse drag to move the drawing
+					</li>
+				</ul>
 
-			<div id="lastLine">
-				<button @click="close()">
-					Start
-				</button>
+				<div id="lastLine">
+					<button @click="close()">
+						Start
+					</button>
+				</div>
 			</div>
 		</div>
-	</div>
+	</Transition>
 </template>
 
 <script>
@@ -145,5 +147,12 @@ button:active {
 	background: #106bc8;
 }
 
+.fade-enter-active, .fade-leave-active {
+	transition: opacity .3s ease;
+}
+
+.fade-enter, .fade-leave-to {
+	opacity: 0;
+}
 
 </style>

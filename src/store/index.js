@@ -51,7 +51,7 @@ const getters = {
 	}
 };
 
-const validateCurrentShape = function (state) {
+const closeCurrentShape = function (state) {
 	const newShape = new Shape(state.currentShapePoints);
 	newShape.updateIntersections(getters.lines(state));
 	state.currentShapePoints = [];
@@ -73,9 +73,12 @@ export default new Vuex.Store({
 	mutations: {
 		addPoint(state, point) {
 			state.currentShapePoints.push(point);
+			state.redoStack = [];
 		},
-		validateCurrentShape,
-
+		validateCurrentShape(state) {
+			closeCurrentShape(state);
+			state.redoStack = [];
+		},
 		setHoveredElement(state, element) {
 			state.hoveredElement = element;
 		},
@@ -103,7 +106,7 @@ export default new Vuex.Store({
 				if (last instanceof Point) {
 					state.currentShapePoints.push(last);
 				} else if (last === 'closeShape') {
-					validateCurrentShape(state);
+					closeCurrentShape(state);
 				}
 			}
 		},

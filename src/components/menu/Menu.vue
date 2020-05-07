@@ -55,6 +55,7 @@ export default {
 				{
 					label: 'Export',
 					icon: iconExport,
+					isEnabled: this.hasShape,
 					onClick: this.export
 				},
 				{
@@ -127,6 +128,10 @@ export default {
 		canRedo() {
 			return this.$store.getters.canRedo;
 		},
+		hasShape() {
+			return this.$store.state.shapes.length > 0;
+		},
+
 		reset() {
 			this.$store.commit('reset');
 		},

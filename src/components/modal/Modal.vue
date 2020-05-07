@@ -3,20 +3,29 @@
 		<div v-if="opened" id="overlay" @click="close()">
 			<div class="contentPanel" @click.stop>
 				<slot />
+				<img id="close" :src="closeIcon" @click="close()" />
 			</div>
 		</div>
 	</Transition>
 </template>
 
 <script>
+import iconCross from './assets/cross.svg';
+
 export default {
 	name: 'Modal',
 	props: {
-		openedState: String
+		openedState: {
+			type: String,
+			default: ''
+		}
 	},
 	computed: {
 		opened() {
 			return this.$store.state.interactionState === this.openedState;
+		},
+		closeIcon() {
+			return iconCross;
 		}
 	},
 	methods: {
@@ -49,6 +58,7 @@ export default {
 	padding: 15px 20px;
 	box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.3);
 	border-radius: 3px;
+	position: relative;
 }
 
 .fade-enter-active, .fade-leave-active {
@@ -57,6 +67,14 @@ export default {
 
 .fade-enter, .fade-leave-to {
 	opacity: 0;
+}
+
+#close {
+	position: absolute;
+	cursor: pointer;
+	top: 8px;
+	right: 8px;
+	width: 12px;
 }
 
 </style>

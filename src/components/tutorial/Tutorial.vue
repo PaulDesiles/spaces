@@ -29,9 +29,9 @@
 			</ul>
 
 			<div id="lastLine">
-				<button @click="close()">
+				<a class="buttonLink" @click="close()">
 					Start
-				</button>
+				</a>
 			</div>
 		</div>
 	</Modal>
@@ -93,36 +93,6 @@ i {
 	display: flex;
 	justify-content: center;
 	margin-top: 20px;
-}
-
-button {
-	background: #318be7;
-	color: white;
-	border-radius: 14px;
-	border: 0px;
-	height: 28px;
-	min-width: 80px;
-	box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3);
-	transition: background 0.2s;
-	text-transform: none;
-}
-
-button:hover {
-	background: #559feb;
-}
-
-button:focus {
-	padding: 0;
-	outline: none;
-	border: 2px solid #106bc8;
-}
-
-button::-moz-focus-inner {
-	border: 0;
-}
-
-button:active {
-	background: #106bc8;
 }
 
 </style>

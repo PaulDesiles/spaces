@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" >
+	<path
+		style="fill:none;stroke:#318be7;stroke-width:5;stroke-linecap:round;"
+		d="M 47.5,25.000004 A 22.5,22.5 0 0 1 32.695453,46.143088 22.5,22.5 0 0 1 7.7639993,39.462724"
+	>
+		<animateTransform
+			attributeName="transform"
+			type="rotate"
+			from="0 25 25"
+			to="360 25 25"
+			dur="0.4s"
+			repeatCount="indefinite"
+		/>
+	</path>
+</svg>

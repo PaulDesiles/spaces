@@ -11,6 +11,11 @@ function distinct(value, index, self) {
 	return self.indexOf(value) === index;
 }
 
+// STATES
+const DRAWING_STATE = 'drawing';
+const TUTORIAL_STATE = 'tutorial';
+const EXPORT_STATE = 'export';
+
 const getters = {
 	lines(state) {
 		return state.shapes
@@ -48,6 +53,9 @@ const getters = {
 	},
 	canRedo(state) {
 		return state.redoStack.length > 0;
+	},
+	drawingState(state) {
+		return state.interactionState === DRAWING_STATE;
 	}
 };
 
@@ -62,6 +70,7 @@ const debug = process.env.NODE_ENV !== 'production';
 export default new Vuex.Store({
 	strict: debug,
 	state: {
+		interactionState: TUTORIAL_STATE,
 		shapes: [],
 		currentShapePoints: [],
 		hoveredElement: undefined,
@@ -71,6 +80,9 @@ export default new Vuex.Store({
 		parameters
 	},
 	mutations: {
+		setInteractionState(state, uiState) {
+			state.interactionState = uiState;
+		},
 		addPoint(state, point) {
 			state.currentShapePoints.push(point);
 			state.redoStack = [];

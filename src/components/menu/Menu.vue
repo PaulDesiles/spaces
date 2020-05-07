@@ -55,7 +55,7 @@ export default {
 				{
 					label: 'Export',
 					icon: iconExport,
-					isEnabled: () => false
+					onClick: this.export
 				},
 				{
 					label: 'Guides',
@@ -114,6 +114,19 @@ export default {
 		};
 	},
 	methods: {
+		toggleOpening(item) {
+			if (this.openedItem === item) {
+				this.openedItem = undefined;
+			} else {
+				this.openedItem = item;
+			}
+		},
+		canUndo() {
+			return this.$store.getters.canUndo;
+		},
+		canRedo() {
+			return this.$store.getters.canRedo;
+		},
 		reset() {
 			this.$store.commit('reset');
 		},
@@ -123,18 +136,8 @@ export default {
 		redo() {
 			this.$store.commit('redo');
 		},
-		canUndo() {
-			return this.$store.getters.canUndo;
-		},
-		canRedo() {
-			return this.$store.getters.canRedo;
-		},
-		toggleOpening(item) {
-			if (this.openedItem === item) {
-				this.openedItem = undefined;
-			} else {
-				this.openedItem = item;
-			}
+		export() {
+			this.$store.commit('setInteractionState', 'export');
 		}
 	}
 };

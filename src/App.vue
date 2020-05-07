@@ -22,7 +22,7 @@
 					<path
 						v-for="shape in shapes"
 						:key="shape.id"
-						:d="getPath(shape.points, true)"
+						:d="getPath(shape.points)"
 						stroke-width="0"
 						fill="black"
 					/>
@@ -55,12 +55,12 @@
 			/>
 
 			<ParametersPanel />
-
 		</div>
-		
+
 		<ContextMenu ref="contextMenu" />
 
 		<Tutorial class="fullScreen" />
+		<ExportModal class="fullScreen" />
 	</div>
 </template>
 
@@ -71,6 +71,7 @@ import DebugInfo from './components/debug/DebugInfo.vue';
 import DebugView from './components/debug/DebugView.vue';
 import Tutorial from './components/tutorial/Tutorial.vue';
 import Menu from './components/menu/Menu.vue';
+import ExportModal from './components/exporter/ExportModal.vue';
 
 import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/drawing/DrawingPoint.vue';
@@ -81,6 +82,7 @@ import ContextMenu from './components/ContextMenu.vue';
 
 import {initBounds, Point, Intersection, Line} from './model/Geometry';
 import {constrainPointPosition} from './model/Constraint';
+import {getShapePath} from './model/SvgHelpers';
 
 export default {
 	name: 'App',
@@ -89,6 +91,7 @@ export default {
 		DebugView,
 		Tutorial,
 		Menu,
+		ExportModal,
 		SvgViewport,
 		DrawingPoint,
 		Guides,
@@ -119,7 +122,7 @@ export default {
 			return this.currentShapePoints[0];
 		},
 		currentPath() {
-			return this.getPath(this.currentShapePoints.concat(this.currentPoint));
+			return getShapePath(this.currentShapePoints.concat(this.currentPoint), false);
 		},
 		...mapState([
 			'shapes',
@@ -150,17 +153,8 @@ export default {
 			});
 			return new Point(newP.x, newP.y);
 		},
-		getPath(shape, closeShape) {
-			let path = '';
-			shape.forEach((s, i) => {
-				path += (i === 0 ? 'M' : 'L');
-				path += s.x + ' ' + s.y + ' ';
-			});
-			if (closeShape) {
-				path += 'Z';
-			}
-
-			return path;
+		getPath(shape) {
+			return getShapePath(shape, true);
 		},
 		closeCurrentShape() {
 			this.$store.commit('validateCurrentShape');

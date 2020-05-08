@@ -1,36 +1,33 @@
 <template>
 	<div>
-		<p>min stroke size : {{ localMinStroke }}</p>
+		<span>min stroke size : </span><b>{{ localMinStroke }}</b>
 		<input
 			v-model="localMinStroke"
 			type="range"
-			class="slider"
 			min="0"
 			max="100"
 			@change="setMinStroke(parseInt($event.target.value, 10))"
 		/>
 
-		<p>max stroke size : {{ localMaxStroke }}</p>
+		<span>max stroke size : </span><b>{{ localMaxStroke }}</b>
 		<input
 			v-model="localMaxStroke"
 			type="range"
-			class="slider"
 			min="20"
 			max="1000"
 			@change="setMaxStroke(parseInt($event.target.value, 10))"
 		/>
 
-		<p>min Angle : {{ localMinAngle }}°</p>
+		<span>min Angle : </span><b>{{ localMinAngle }}°</b>
 		<input
 			v-model="localMinAngle"
 			type="range"
-			class="slider"
 			min="0"
 			max="90"
 			@change="setMinAngle(toRad($event.target.value))"
 		/>
 
-		<p>angle steps</p>
+		<span>angle steps</span>
 		<div class="optionLine">
 			<button
 				v-for="a in angleValues"
@@ -96,25 +93,154 @@ export default {
 </script>
 
 <style scoped>
-p {
-	margin: 2px;
+span {
+	font-size: 9pt;
+	opacity: 0.6;
 }
 
 .optionLine {
 	display: flex;
+	margin: 4px -4px 0 -4px;
 }
 
 .option {
 	border: 0px;
 	border-radius: 5px;
-	margin: 2px;
+	margin: 4px;
 	padding: 4px 8px;
-	min-width: 30px;
-	background: #666;
-	color: black;
+	background: #aaa;
+	color: #000a;
+	width: 33%;
+	border: 2px solid transparent;
+}
+
+.option:hover {
+	background: #559feb;
+}
+
+.option:focus {
+	outline: none;
+	border-color: #106bc8;
+}
+
+.option::-moz-focus-inner {
+  border: 0;
 }
 
 .selectedOption {
-	background: #66f;
+	background: #318be7;
+	color: #fff;
 }
+
+input[type=range] {
+	height: 26px;
+	-webkit-appearance: none;
+	margin: 0 0 10px 0;
+	width: 100%;
+	background: transparent;
+}
+input[type=range]:focus {
+  outline: none;
+}
+
+/* Webkit */
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  cursor: pointer;
+  animate: 0.2s;
+  background: #0005;
+  border-radius: 4px;
+  border: 0px solid #000;
+}
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 0px 0px 6px #fff;
+  height: 14px;
+  width: 14px;
+  border-radius: 14px;
+  background: #318BE7;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -5px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #318BE7;
+}
+input[type=range]:focus::-webkit-slider-thumb {
+  box-shadow: 0px 0px 6px #0008;
+  border: 2px solid #fff;
+}
+
+/* Firefox */
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  cursor: pointer;
+  animate: 0.2s;
+  background: #0006;
+  border-radius: 4px;
+  border: 0px solid #000;
+}
+input[type=range]:focus::-moz-range-track {
+  background: #318BE7;
+}
+input[type=range]::-moz-focus-outer {
+    border: 0;
+}
+
+input[type=range]::-moz-range-thumb {
+  box-shadow: 0px 0px 6px #fff;
+  height: 14px;
+  width: 14px;
+  border-radius: 14px;
+  border: none;
+  background: #318BE7;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+input[type=range]:focus::-moz-range-thumb {
+  box-shadow: 0px 0px 6px #0008;
+  border: 2px solid #fff;
+}
+
+/* MS */
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 4px;
+  cursor: pointer;
+  animate: 0.2s;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  background: #0006;
+  border: 0px solid #000;
+  border-radius: 8px;
+}
+input[type=range]::-ms-fill-upper {
+  background: #0006;
+  border: 0px solid #000;
+  border-radius: 8px;
+}
+input[type=range]:focus::-ms-fill-lower {
+  background: #318BE7;
+}
+input[type=range]:focus::-ms-fill-upper {
+  background: #318BE7;
+}
+input[type=range]::-ms-thumb {
+  margin-top: 1px;
+  box-shadow: 0px 0px 6px #fff;
+  height: 14px;
+  width: 14px;
+  border-radius: 14px;
+  background: #318BE7;
+  cursor: pointer;
+}
+input[type=range]:focus::-ms-thumb {
+  box-shadow: 0px 0px 6px #0008;
+  border: 2px solid #fff;
+}
+
 </style>

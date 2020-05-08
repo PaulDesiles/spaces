@@ -53,8 +53,6 @@
 				:cursor="currentPoint"
 				:hovered="hoveredElement"
 			/>
-
-			<ParametersPanel />
 		</div>
 
 		<ContextMenu ref="contextMenu" />
@@ -77,7 +75,6 @@ import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/drawing/DrawingPoint.vue';
 import Guides from './components/Guides.vue';
 
-import ParametersPanel from './components/parameters/ParametersPanel.vue';
 import ContextMenu from './components/ContextMenu.vue';
 
 import {initBounds, Point, Intersection, Line} from './model/Geometry';
@@ -95,7 +92,6 @@ export default {
 		SvgViewport,
 		DrawingPoint,
 		Guides,
-		ParametersPanel,
 		ContextMenu
 	},
 	data() {

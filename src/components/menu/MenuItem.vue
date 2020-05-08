@@ -9,13 +9,17 @@
 			<img v-if="hasChildren" :class="arrowClass" src="./assets/arrow.svg" />
 		</a>
 		<CollapseTransition>
-			<ul v-if="opened" class="subMenu">
-				<MenuItem
-					v-for="child in children"
-					:key="child.label"
-					v-bind="child"
-				/>
-			</ul>
+			<div v-if="opened" class="children">
+				<slot>
+					<ul class="subMenu">
+						<MenuItem
+							v-for="child in children"
+							:key="child.label"
+							v-bind="child"
+						/>
+					</ul>
+				</slot>
+			</div>
 		</CollapseTransition>
 	</li>
 </template>
@@ -57,17 +61,18 @@ export default {
 			type: Array,
 			default: () => []
 		},
-		opened: Boolean
+		opened: Boolean,
+		invertArrow: Boolean
 	},
 	computed: {
 		linkClass() {
 			return this.isEnabled() ? '' : 'disabledLink';
 		},
 		arrowClass() {
-			return this.opened ? 'arrow turnedArrow' : 'arrow';
+			return (this.opened === this.invertArrow) ? 'arrow' : 'arrow turnedArrow';
 		},
 		hasChildren() {
-			return this.children && this.children.length > 0;
+			return (this.children && this.children.length > 0) || this.$slots.default;
 		}
 	},
 	methods: {
@@ -118,10 +123,13 @@ a:hover {
 	color: #318be7;
 }
 
+.children {
+	background: #0001;
+}
+
 .subMenu {
 	padding: 0;
 	margin: 0;
-	background: #0001;
 }
 
 .subMenu a:hover {
@@ -139,7 +147,7 @@ a:hover {
 
 .arrow {
 	width: 10px;
-	margin: -.5em 0 0 0;
+	margin: -5px 0 0 0;
 	top: 50%;
 	transition: transform .4s;
 }

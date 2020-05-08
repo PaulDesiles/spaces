@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div id="menu">
 		<h1>SPACES</h1>
 		<ul>
 			<MenuItem
@@ -10,11 +10,22 @@
 				@toggleOpening="toggleOpening(item)"
 			/>
 		</ul>
+
+		<div id="menuBottom">
+			<MenuItem
+				v-bind="parametersItem"
+				:opened="parametersItem === openedItem"
+				@toggleOpening="toggleOpening(parametersItem)"
+			>
+				<ParametersContent class="parameters" />
+			</MenuItem>
+		</div>
 	</div>
 </template>
 
 <script>
 import MenuItem from './MenuItem';
+import ParametersContent from '../parameters/ParametersContent';
 
 import iconNew from './assets/new.svg';
 import iconUndo from './assets/undo.svg';
@@ -23,11 +34,13 @@ import iconExport from './assets/export.svg';
 import iconGuides from './assets/guides.svg';
 import iconCurrent from './assets/current.svg';
 import iconNext from './assets/next.svg';
+import iconParams from './assets/parameters.svg';
 
 export default {
 	name: 'Menu',
 	components: {
-		MenuItem
+		MenuItem,
+		ParametersContent
 	},
 	data() {
 		return {
@@ -111,7 +124,12 @@ export default {
 						}
 					]
 				}
-			]
+			],
+			parametersItem: {
+				label: 'Parameters',
+				icon: iconParams,
+				invertArrow: false
+			}
 		};
 	},
 	methods: {
@@ -149,6 +167,9 @@ export default {
 </script>
 
 <style scoped>
+#menu {
+	position: relative;
+}
 
 h1 {
 	font-weight: normal;
@@ -160,6 +181,16 @@ h1 {
 ul {
 	padding: 0;
 	margin: 0;
+}
+
+#menuBottom {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+}
+
+.parameters {
+	padding: 10px 18px 10px 14px;
 }
 
 </style>

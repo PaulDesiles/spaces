@@ -55,8 +55,6 @@
 			/>
 		</div>
 
-		<ContextMenu ref="contextMenu" />
-
 		<Tutorial class="fullScreen" />
 		<ExportModal class="fullScreen" />
 	</div>
@@ -75,8 +73,6 @@ import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/drawing/DrawingPoint.vue';
 import Guides from './components/Guides.vue';
 
-import ContextMenu from './components/ContextMenu.vue';
-
 import {initBounds, Point, Intersection, Line} from './model/Geometry';
 import {constrainPointPosition} from './model/Constraint';
 import {getShapePath} from './model/SvgHelpers';
@@ -91,8 +87,7 @@ export default {
 		ExportModal,
 		SvgViewport,
 		DrawingPoint,
-		Guides,
-		ContextMenu
+		Guides
 	},
 	data() {
 		return {
@@ -105,8 +100,7 @@ export default {
 			eventListeners: [
 				{event: 'keydown', listener: this.keyDown},
 				{event: 'keyup', listener: this.keyUp},
-				{event: 'blur', listener: this.windowLostFocus},
-				{event: 'contextmenu', listener: this.openContextMenu}
+				{event: 'blur', listener: this.windowLostFocus}
 			]
 		};
 	},
@@ -221,8 +215,7 @@ export default {
 		},
 		mouseMove(event) {
 			this.mousePosition = this.getPosition(event);
-			if (!this.$refs.contextMenu.opened &&
-				this.mousePosition.x >= 0 &&
+			if (this.mousePosition.x >= 0 &&
 				this.mousePosition.x <= this.drawingSize.x &&
 				this.mousePosition.y >= 0 &&
 				this.mousePosition.y <= this.drawingSize.y)
@@ -231,12 +224,8 @@ export default {
 			}
 		},
 		mouseDown() {
-			if (this.$refs.contextMenu.opened) {
-				this.$refs.contextMenu.close();
-			} else {
-				// We want to react to mouseUp only if mouseDown was also captured
-				this.downBeforeUp = true;
-			}
+			// We want to react to mouseUp only if mouseDown was also captured
+			this.downBeforeUp = true;
 		},
 		mouseUp(event) {
 			if (this.downBeforeUp) {
@@ -262,34 +251,6 @@ export default {
 
 				this.$store.commit('addPoint', newPoint);
 			}
-		},
-		openContextMenu(event) {
-			event.preventDefault();
-			let actions = [];
-			if (this.hoveredElement instanceof Line) {
-				actions = [
-					{
-						id: 1,
-						title: 'current stroke // to this line',
-						onClick: () => {}
-					},
-					{
-						id: 2,
-						title: 'next stroke // to this line…',
-						onClick: () => {}
-					}
-				];
-			} else if (this.hoveredElement instanceof Intersection) {
-				actions = [
-					{
-						id: 3,
-						title: 'current stroke towards this point',
-						onClick: () => {}
-					}
-				];
-			}
-
-			this.$refs.contextMenu.initialize(actions, event.clientX, event.clientY);
 		},
 		keyDown(keyEvent) {
 			const key = keyEvent.key.toLowerCase();
@@ -318,11 +279,7 @@ export default {
 			} else if (key === 'enter') {
 				this.closeCurrentShape();
 			} else if (key === 'escape') {
-				if (this.$refs.contextMenu.opened) {
-					this.$refs.contextMenu.close();
-				} else {
-					this.cancelCurrentShape();
-				}
+				this.cancelCurrentShape();
 			} else if (key === ' ') {
 				this.$refs.svgViewport.stopMousePan();
 			}

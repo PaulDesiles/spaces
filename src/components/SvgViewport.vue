@@ -1,5 +1,9 @@
 <template>
-	<div id="container" :style="cursorStyle">
+	<div
+		id="container"
+		:style="cursorStyle"
+		@wheel.prevent="onWheel($event)"
+	>
 		<svg id="viewer" ref="viewer" xmlns="http://www.w3.org/2000/svg">
 			<g
 				ref="viewerContent"
@@ -48,8 +52,8 @@ class PanHandler {
 		this.panning = false;
 	}
 
-	// All events pass threw this method
-	// so "this" refers to current object
+	// All events pass through this method
+	// in order to have "this" refering to the current object
 	handleEvent(event) {
 		switch (event.type) {
 			case 'mousedown':
@@ -128,13 +132,12 @@ export default {
 		};
 	},
 	mounted() {
-		window.addEventListener('wheel', this, false);
+		// DIV don't throw Resize events : we need to listen on whole window
 		window.addEventListener('resize', this, false);
 		this.onResize();
 		this.centerDrawing();
 	},
 	beforeDestroy() {
-		window.removeEventListener('wheel', this, false);
 		window.removeEventListener('resize', this, false);
 	},
 	computed: {
@@ -242,9 +245,6 @@ export default {
 				case 'resize':
 					this.onResize(event);
 					break;
-				case 'wheel':
-					this.onWheel(event);
-					break;
 				default:
 					break;
 			}
@@ -256,13 +256,6 @@ export default {
 			this.availableHeight = rect.height;
 		},
 		onWheel(event) {
-			event.stopPropagation();
-			event.preventDefault();
-			if (!this.$refs.viewer) {
-				console.warn('not mounted yet');
-				return;
-			}
-
 			if (event.ctrlKey) {
 				let newZoom = this.zoom * (1 - (Math.sign(event.deltaY) * 0.1));
 				newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, newZoom));

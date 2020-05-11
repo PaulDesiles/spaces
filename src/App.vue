@@ -132,7 +132,7 @@ export default {
 	mounted() {
 		this.eventListeners.forEach(l => document.addEventListener(l.event, l.listener));
 	},
-	unmounted() {
+	beforeDestroy() {
 		this.eventListeners.forEach(l => document.removeEventListener(l.event, l.listener));
 	},
 	methods: {

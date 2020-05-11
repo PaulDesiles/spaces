@@ -118,6 +118,7 @@ export default {
 			x: 20,
 			y: 20,
 			zoom: 0.7,
+			offset: {x: 0, y: 0},
 			availableWidth: 1000,
 			availableHeight: 1000,
 			horizontalHandler: new PanHandler(this.hBarPanRatio, this.getPan, this.setPan, true),
@@ -125,6 +126,16 @@ export default {
 			mouseHandler: new PanHandler(undefined, this.getPan, this.setPan, false),
 			mousePanMode: false
 		};
+	},
+	mounted() {
+		window.addEventListener('wheel', this, false);
+		window.addEventListener('resize', this, false);
+		this.onResize();
+		this.centerDrawing();
+	},
+	beforeDestroy() {
+		window.removeEventListener('wheel', this, false);
+		window.removeEventListener('resize', this, false);
 	},
 	computed: {
 		drawingWidth() {
@@ -240,6 +251,7 @@ export default {
 		},
 		onResize() {
 			const rect = this.$refs.viewer.getBoundingClientRect();
+			this.offset = {x: rect.x, y: rect.y};
 			this.availableWidth = rect.width;
 			this.availableHeight = rect.height;
 		},
@@ -252,7 +264,7 @@ export default {
 			}
 
 			if (event.ctrlKey) {
-				let newZoom = this.zoom + (event.deltaY * -0.01);
+				let newZoom = this.zoom * (1 - (Math.sign(event.deltaY) * 0.1));
 				newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, newZoom));
 				if (newZoom !== this.zoom) {
 					const ctm = this.$refs.viewerContent.getScreenCTM();
@@ -268,12 +280,15 @@ export default {
 					const newCTM = ctm.multiply(modifier);
 
 					this.zoom = newCTM.a;
-					this.setPan(newCTM.e, newCTM.f);
+					this.setPan(
+						newCTM.e - this.offset.x,
+						newCTM.f - this.offset.y
+					);
 				}
 			} else {
 				this.setPan(
-					this.x + (event.deltaX * -3),
-					this.y + (event.deltaY * -3)
+					this.x + (Math.sign(event.deltaX) * -10),
+					this.y + (Math.sign(event.deltaY) * -10)
 				);
 			}
 		},
@@ -292,16 +307,6 @@ export default {
 				this.x = ((this.availableWidth - this.barsWidth - (this.zoom * this.drawingWidth)) / 2);
 			}
 		}
-	},
-	mounted() {
-		window.addEventListener('wheel', this, false);
-		window.addEventListener('resize', this, false);
-		this.onResize();
-		this.centerDrawing();
-	},
-	unmounted() {
-		window.removeEventListener('wheel', this, false);
-		window.removeEventListener('resize', this, false);
 	}
 };
 </script>

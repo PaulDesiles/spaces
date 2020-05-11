@@ -26,15 +26,17 @@
 <script>
 import MenuItem from './MenuItem';
 import ParametersContent from '../parameters/ParametersContent';
+import * as states from '../../store/states';
 
 import iconNew from './assets/new.svg';
 import iconUndo from './assets/undo.svg';
 import iconRedo from './assets/redo.svg';
+import iconPreview from './assets/preview.svg';
 import iconExport from './assets/export.svg';
 import iconGuides from './assets/guides.svg';
 import iconCurrent from './assets/current.svg';
 import iconNext from './assets/next.svg';
-import iconParams from './assets/parameters.svg';
+import iconParameters from './assets/parameters.svg';
 
 export default {
 	name: 'Menu',
@@ -64,6 +66,14 @@ export default {
 					shortcut: 'ctrl+Y',
 					isEnabled: this.canRedo,
 					onClick: this.redo
+				},
+				{
+					label: 'Preview result',
+					icon: iconPreview,
+					shortcut: 'R',
+					isEnabled: this.hasShape,
+					onPress: this.preview,
+					onRelease: this.stopPreview
 				},
 				{
 					label: 'Export',
@@ -127,8 +137,8 @@ export default {
 			],
 			parametersItem: {
 				label: 'Parameters',
-				icon: iconParams,
-				invertArrow: false
+				icon: iconParameters,
+				invertArrow: true
 			}
 		};
 	},
@@ -159,8 +169,14 @@ export default {
 		redo() {
 			this.$store.commit('redo');
 		},
+		preview() {
+			this.$store.commit('setInteractionState', states.PREVIEW);
+		},
+		stopPreview() {
+			this.$store.commit('setInteractionState', states.DRAWING);
+		},
 		export() {
-			this.$store.commit('setInteractionState', 'export');
+			this.$store.commit('setInteractionState', states.EXPORT);
 		}
 	}
 };

@@ -27,7 +27,6 @@
 <script>
 import {createSvgFileFromShapes} from '../../model/SvgHelpers';
 import iconLoading from './assets/loadingWheel.svg';
-console.log(iconLoading);
 
 export default {
 	name: 'Exporter',

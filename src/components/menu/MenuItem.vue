@@ -1,6 +1,12 @@
 <template>
 	<li>
-		<a :class="linkClass" @click="action()">
+		<a
+			:class="linkClass"
+			@click="action()"
+			@mousedown="onMouseDown($event)"
+			@mouseup="onMouseUpOrLeave($event)"
+			@mouseleave="onMouseUpOrLeave($event)"
+		>
 			<img :src="icon" />
 			<span>{{ label }}</span>
 			<i v-if="shortcut" class="shortcut">
@@ -21,11 +27,19 @@
 				</slot>
 			</div>
 		</CollapseTransition>
+
+		<Transition name="slide">
+			<span v-if="showTip" id="tip">
+				Hold !
+			</span>
+		</Transition>
 	</li>
 </template>
 
 <script>
 import {CollapseTransition} from 'vue2-transitions';
+
+const emptyFunction = function() { };
 
 export default {
 	name: 'MenuItem',
@@ -47,15 +61,19 @@ export default {
 		},
 		isEnabled: {
 			type: Function,
-			default() {
-				return () => true;
-			}
+			default: () => emptyFunction
 		},
 		onClick: {
 			type: Function,
-			default() {
-				return () => {};
-			}
+			default: () => emptyFunction
+		},
+		onPress: {
+			type: Function,
+			default: () => emptyFunction
+		},
+		onRelease: {
+			type: Function,
+			default: () => emptyFunction
 		},
 		children: {
 			type: Array,
@@ -63,6 +81,13 @@ export default {
 		},
 		opened: Boolean,
 		invertArrow: Boolean
+	},
+	data() {
+		return {
+			pressedTime: undefined,
+			showTip: false,
+			tipTimeout: undefined
+		};
 	},
 	computed: {
 		linkClass() {
@@ -82,6 +107,33 @@ export default {
 			} else if (this.onClick) {
 				this.onClick();
 			}
+		},
+		onMouseDown(event) {
+			if (this.onPress && this.onPress.name !== 'default') {
+				this.onPress();
+				this.pressedTime = event.timeStamp;
+				this.showTip = false;
+				if (this.tipTimeout) {
+					clearTimeout(this.tipTimeout);
+				}
+			}
+		},
+		onMouseUpOrLeave(event) {
+			if (this.pressedTime) {
+				this.onRelease();
+
+				if (event.timeStamp - this.pressedTime < 500) {
+					this.launchTip();
+				}
+
+				this.pressedTime = undefined;
+			}
+		},
+		launchTip() {
+			this.showTip = true;
+			this.tipTimeout = setTimeout(
+				() => this.showTip = false,
+				2000);
 		}
 	}
 };
@@ -94,6 +146,7 @@ export default {
 
 li {
 	list-style: none;
+	position: relative;
 }
 	li img {
 		width: 24px;
@@ -121,6 +174,10 @@ a {
 a:hover {
 	background: #fff6;
 	color: #318be7;
+}
+
+a:active {
+	background: #fff;
 }
 
 .children {
@@ -155,4 +212,34 @@ a:hover {
 .turnedArrow {
 	transform: rotate(180deg);
 }
+
+#tip {
+	display: block;
+	position: absolute;
+	right: -50px;
+	top: 50%;
+	margin-top: -12px;
+	width: 45px;
+	height: 24px;
+	text-align: center;
+	line-height: 24px;
+	font-size: 9pt;
+
+	background: #3336;
+	color: white;
+	border-radius: 3px;
+}
+
+.slide-enter-active, .slide-leave-active {
+	transition: opacity .3s ease, transform .2s ease;
+}
+
+.slide-enter, .slide-leave-to {
+	opacity: 0;
+}
+
+.slide-enter {
+	transform: translateX(-30px);
+}
+
 </style>

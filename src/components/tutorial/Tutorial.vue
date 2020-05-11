@@ -39,6 +39,7 @@
 
 <script>
 import Modal from '../modal/Modal';
+import * as states from '../../store/states';
 
 export default {
 	name: 'Tutorial',
@@ -47,7 +48,7 @@ export default {
 	},
 	methods: {
 		close() {
-			this.$store.commit('setInteractionState', 'drawing');
+			this.$store.commit('setInteractionState', states.DRAWING);
 		}
 	}
 };

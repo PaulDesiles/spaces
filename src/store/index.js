@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import parameters from './parameters';
 import {Shape, Point} from '../model/Geometry';
 import {getContrainedSnappingElements} from '../model/Constraint';
+import * as states from './states';
 
 Vue.use(Vuex);
 
@@ -10,11 +11,6 @@ Vue.use(Vuex);
 function distinct(value, index, self) {
 	return self.indexOf(value) === index;
 }
-
-// STATES
-const DRAWING_STATE = 'drawing';
-const TUTORIAL_STATE = 'tutorial';
-const EXPORT_STATE = 'export';
 
 const getters = {
 	lines(state) {
@@ -55,7 +51,7 @@ const getters = {
 		return state.redoStack.length > 0;
 	},
 	drawingState(state) {
-		return state.interactionState === DRAWING_STATE;
+		return state.interactionState === states.DRAWING;
 	}
 };
 
@@ -70,7 +66,7 @@ const debug = process.env.NODE_ENV !== 'production';
 export default new Vuex.Store({
 	strict: debug,
 	state: {
-		interactionState: TUTORIAL_STATE,
+		interactionState: states.TUTORIAL,
 		shapes: [],
 		currentShapePoints: [],
 		hoveredElement: undefined,

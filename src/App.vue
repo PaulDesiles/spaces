@@ -27,23 +27,22 @@
 						fill="black"
 					/>
 
-					<path
-						:d="currentPath"
-						stroke="black"
-						fill="none"
-						stroke-width="1"
-					/>
-
-					<Guides v-if="showGuides" />
-
-					<DrawingPoint
-						v-if="showStartPoint"
-						:point="startPoint"
-						:type="2"
-						:hovered="hoveredElement === startPoint"
-					/>
-
-					<DrawingPoint :point="currentPoint" :type="1" />
+					<template v-if="drawingState">
+						<path
+							:d="currentPath"
+							stroke="black"
+							fill="none"
+							stroke-width="1"
+						/>
+						<Guides />
+						<DrawingPoint
+							v-if="showStartPoint"
+							:point="startPoint"
+							:type="2"
+							:hovered="hoveredElement === startPoint"
+						/>
+						<DrawingPoint :point="currentPoint" :type="1" />
+					</template>
 				</g>
 			</SvgViewport>
 
@@ -62,6 +61,7 @@
 
 <script>
 import {mapState, mapGetters} from 'vuex';
+import * as states from './store/states';
 
 import DebugInfo from './components/debug/DebugInfo.vue';
 import DebugView from './components/debug/DebugView.vue';
@@ -92,7 +92,6 @@ export default {
 	data() {
 		return {
 			debugMode: false,
-			showGuides: true,
 			snapThreshold: 20,
 			mousePosition: new Point(),
 			currentPoint: new Point(),
@@ -123,7 +122,8 @@ export default {
 		...mapGetters([
 			'lines',
 			'intersections',
-			'constrainedElements'
+			'constrainedElements',
+			'drawingState'
 		])
 	},
 	created() {
@@ -234,28 +234,32 @@ export default {
 				return;
 			}
 
-			const snappedPoint = this.getSnappedPosition(this.getPosition(event));
+			if (this.drawingState) {
+				const snappedPoint = this.getSnappedPosition(this.getPosition(event));
 
-			if (this.showStartPoint && snappedPoint === this.startPoint) {
-				this.closeCurrentShape();
-			} else {
-				let newPoint = snappedPoint;
-				if (!(newPoint instanceof Intersection)) {
-					newPoint = new Intersection(snappedPoint.x, snappedPoint.y);
-					if (this.hoveredElement instanceof Line) {
-						newPoint.crossingLines.push(this.hoveredElement);
-						// Warning : the line is not yet aknowledge of this link
-						// it will be at shape creation
+				if (this.showStartPoint && snappedPoint === this.startPoint) {
+					this.closeCurrentShape();
+				} else {
+					let newPoint = snappedPoint;
+					if (!(newPoint instanceof Intersection)) {
+						newPoint = new Intersection(snappedPoint.x, snappedPoint.y);
+						if (this.hoveredElement instanceof Line) {
+							newPoint.crossingLines.push(this.hoveredElement);
+							// Warning : the line is not yet aknowledge of this link
+							// it will be at shape creation
+						}
 					}
-				}
 
-				this.$store.commit('addPoint', newPoint);
+					this.$store.commit('addPoint', newPoint);
+				}
 			}
 		},
 		keyDown(keyEvent) {
 			const key = keyEvent.key.toLowerCase();
 			if (key === 'control') {
 				this.toggleAngleSteps(true);
+			} else if (key === 'r' && !keyEvent.repeat) {
+				this.togglePreviewMode();
 			} else if (key === ' ' && !keyEvent.repeat) {
 				this.$refs.svgViewport.initMousePan();
 			}
@@ -274,8 +278,8 @@ export default {
 				this.$store.commit('redo');
 			} else if (key === 'd') {
 				this.debugMode = !this.debugMode;
-			} else if (key === 'h') {
-				this.showGuides = !this.showGuides;
+			} else if (key === 'r') {
+				this.togglePreviewMode();
 			} else if (key === 'enter') {
 				this.closeCurrentShape();
 			} else if (key === 'escape') {
@@ -290,6 +294,18 @@ export default {
 		toggleAngleSteps(activate) {
 			this.$store.commit('parameters/toggleAngleSteps', activate);
 			this.updateCurrentPoint();
+		},
+		togglePreviewMode() {
+			switch (this.$store.state.interactionState) {
+				case states.DRAWING:
+					this.$store.commit('setInteractionState', states.PREVIEW);
+					break;
+				case states.PREVIEW:
+					this.$store.commit('setInteractionState', states.DRAWING);
+					break;
+				default:
+					break;
+			}
 		}
 	}
 };

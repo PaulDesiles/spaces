@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import * as states from '../../store/states';
 import iconCross from './assets/cross.svg';
 
 export default {
@@ -33,7 +34,7 @@ export default {
 			this.$store.commit('setInteractionState', this.openedState);
 		},
 		close() {
-			this.$store.commit('setInteractionState', 'drawing');
+			this.$store.commit('setInteractionState', states.DRAWING);
 		}
 	}
 };

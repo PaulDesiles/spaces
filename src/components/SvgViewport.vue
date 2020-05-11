@@ -193,7 +193,7 @@ export default {
 		},
 		cursorStyle() {
 			return {
-				cursor: this.mousePanMode ? (this.mouseHandler.panning ? 'move ' : 'grab') : 'auto'
+				cursor: this.mousePanMode ? (this.mouseHandler.panning ? 'grabbing' : 'grab') : 'auto'
 			};
 		}
 	},

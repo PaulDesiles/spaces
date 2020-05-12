@@ -10,7 +10,14 @@
 </template>
 
 <script>
-import {PointType, Point} from '../../model/Geometry';
+import {Point} from '../../core/Point';
+
+const PointType = {
+	cursor: 1,
+	startPoint: 2,
+	guide: 3
+};
+Object.freeze(PointType);
 
 const blue = '#318be7';
 const grey = '#aaa';

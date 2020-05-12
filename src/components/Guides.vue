@@ -22,7 +22,8 @@ import {mapState, mapGetters} from 'vuex';
 
 import DrawingPoint from './drawing/DrawingPoint.vue';
 import DrawingLine from './drawing/DrawingLine.vue';
-import {Intersection, Line} from '../model/Geometry';
+import {Intersection} from '../core/Intersection';
+import {Line} from '../core/Line';
 
 export default {
 	name: 'Guides',

@@ -7,7 +7,9 @@
 </template>
 
 <script>
-import {Point, Intersection, Line} from '../../model/Geometry';
+import {Point} from '../../core/Point';
+import {Intersection} from '../../core/Intersection';
+import {Line} from '../../core/Line';
 
 export default {
 	name: 'DebugInfo',

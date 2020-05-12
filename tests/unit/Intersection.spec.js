@@ -1,9 +1,5 @@
-import {initBounds, Point, Intersection} from '../../src/model/Geometry';
-
-const size = 1000;
-beforeAll(() => {
-	initBounds({x: size, y: size});
-});
+import {Point} from '../../src/core/Point';
+import {Intersection} from '../../src/core/Intersection';
 
 describe('Intersection class', () => {
 	test('extends Point', () => {
@@ -22,13 +18,6 @@ describe('Intersection class', () => {
 		const i = new Intersection(10, 10);
 		expect(i.crossingLines).toBeInstanceOf(Array);
 		expect(i.crossingLines).toHaveLength(0);
-	});
-
-	test('bounds', () => {
-		const i1 = new Intersection(10, 10);
-		const i2 = new Intersection(2000, 200);
-		expect(i1.insideBounds).toBeTruthy();
-		expect(i2.insideBounds).toBeFalsy();
 	});
 
 	test('conversion from point', () => {

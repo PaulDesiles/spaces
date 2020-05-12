@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import {createSvgFileFromShapes} from '../../model/SvgHelpers';
+import {createSvgFileFromShapes} from '../../core/Helpers/SvgHelpers';
 import iconLoading from './assets/loadingWheel.svg';
 
 export default {

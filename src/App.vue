@@ -73,9 +73,11 @@ import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/drawing/DrawingPoint.vue';
 import Guides from './components/Guides.vue';
 
-import {initBounds, Point, Intersection, Line} from './model/Geometry';
-import {constrainPointPosition} from './model/Constraint';
-import {getShapePath} from './model/SvgHelpers';
+import {Point} from './core/Point';
+import {Intersection} from './core/Intersection';
+import {Line} from './core/Line';
+import {constrainPointPosition} from './core/Constraint';
+import {getShapePath} from './core/Helpers/SvgHelpers';
 
 export default {
 	name: 'App',
@@ -125,9 +127,6 @@ export default {
 			'constrainedElements',
 			'drawingState'
 		])
-	},
-	created() {
-		initBounds(this.drawingSize);
 	},
 	mounted() {
 		this.eventListeners.forEach(l => document.addEventListener(l.event, l.listener));

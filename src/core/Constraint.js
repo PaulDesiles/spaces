@@ -1,94 +1,8 @@
-import {Point} from './GeometryHelpers';
-import * as Helper from './GeometryHelpers';
-import {Intersection, getLineBounds, isInsideBounds} from './Geometry';
-
-// Not linked to Line YET on purpose
-// so as to keep its possibilities to minimum
-export class Segment {
-	constructor(A, B, associatedLine) {
-		this.A = A;
-		this.B = B;
-		this.associatedLine = associatedLine;
-		this.intersections = [A, B]; //to use getLineBounds...
-		this.initialize();
-	}
-
-	initialize() {
-		this.dx = this.B.x - this.A.x;
-		this.dy = this.B.y - this.A.y;
-		this.a = this.dy / this.dx;
-		this.b = this.A.y - (this.a * this.A.x);
-
-		this.y = x => {
-			if (this.dx === 0) {
-				return Infinity;
-			}
-
-			return (this.a * x) + this.b;
-		};
-
-		this.x = y => {
-			if (this.dx === 0) {
-				return this.A.x;
-			}
-
-			if (this.dy === 0) {
-				return Infinity;
-			}
-
-			return (y - this.b) / this.a;
-		};
-
-		// Pre-calc for projection
-		this.squaredLength = (this.dx ** 2) + (this.dy ** 2);
-	}
-
-	contains(p) {
-		const APx = p.x - this.A.x;
-		const APy = p.y - this.A.y;
-		return (Math.abs(APx) <= Math.abs(this.dx)) &&
-			(Math.abs(APy) <= Math.abs(this.dy)) &&
-			Helper.equiv(this.dx / this.dy, APx / APy);
-	}
-
-	// See https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-	getProjection(p) {
-		const t = (((p.x - this.A.x) * this.dx) + ((p.y - this.A.y) * this.dy)) / this.squaredLength;
-		if (t <= 0) {
-			return this.A;
-		}
-
-		if (t >= 1) {
-			return this.B;
-		}
-
-		return new Point(
-			this.A.x + (t * this.dx),
-			this.A.y + (t * this.dy)
-		);
-	}
-}
-
-class Vector {
-	constructor(A, B) {
-		this.dx = B.x - A.x;
-		this.dy = B.y - A.y;
-		this.length = Math.hypot(this.dx, this.dy);
-	}
-
-	angleWith(v) {
-		// 𝐴𝐵→⋅𝐵𝐶→=‖𝐴𝐵→‖‖𝐵𝐶→‖cos𝜃
-		const dotProduct = (this.dx * v.dx) + (this.dy * v.dy);
-		const div = dotProduct / (this.length * v.length);
-		// Calculation imprecisions may lead to results slightly above 1 / below -1
-		return Math.acos(Math.max(-1, Math.min(1, div)));
-	}
-
-	signedAngleWith(v) {
-		const crossProduct = (this.dx * v.dy) - (this.dy * v.dx);
-		return Math.sign(crossProduct) * this.angleWith(v);
-	}
-}
+import {Point, getPolarPoint} from './Point';
+import {Intersection} from './Intersection';
+import {Segment, constrainSegmentToBounds} from './Segment';
+import * as Geometry from './Helpers/GeometryHelpers';
+import {Vector} from './Helpers/MathHelpers';
 
 export function getContrainedSnappingElements(snappingPoints, snappingLines, currentShapePoints, parameters) {
 	if (currentShapePoints.length === 0) {
@@ -171,8 +85,8 @@ function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPo
 			);
 
 		snappingSegments = snappingSegments.map(s => {
-			const low = Helper.getIntersection(s.A, s.B, lowerAngleSegment.A, lowerAngleSegment.B, true);
-			const up = Helper.getIntersection(s.A, s.B, upperAngleSegment.A, upperAngleSegment.B, true);
+			const low = Geometry.getIntersection(s.A, s.B, lowerAngleSegment.A, lowerAngleSegment.B, true);
+			const up = Geometry.getIntersection(s.A, s.B, upperAngleSegment.A, upperAngleSegment.B, true);
 			const intersections = [low, up].filter(p => p);
 
 			if (intersections.length === 0) {
@@ -210,7 +124,7 @@ function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPo
 	snappingSegments
 		.forEach(s => {
 			if (s instanceof Segment) {
-				constrainSegmentToBounds(s);
+				constrainSegmentToBounds(s, parameters.drawingSize.x, parameters.drawingSize.y);
 			}
 		});
 
@@ -235,7 +149,7 @@ function getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoint
 	snappingLines
 		.forEach(l =>
 			stepSegments.forEach(s => {
-				const p = Helper.getIntersection(s.A, s.B, l.bounds[0], l.bounds[1], true);
+				const p = Geometry.getIntersection(s.A, s.B, l.bounds[0], l.bounds[1], true);
 
 				if (p instanceof Intersection) {
 					addPoint(p);
@@ -313,71 +227,15 @@ export function getStepSegments(lastPoints, lastAngle, parameters) {
 	return stepSegments;
 }
 
-export function getPolarPoint(angle, radius, center, drawingSize) {
-	if (radius === 0) {
-		return center;
-	}
-
-	const cos = Math.cos(angle);
-	const sin = Math.sin(angle);
-
-	let r = radius;
-	let x = (cos * r) + center.x;
-	if (drawingSize && (x < 0 || x > drawingSize.x)) {
-		x = Math.min(drawingSize.x, Math.max(0, x));
-		r = (x - center.x) / cos;
-	}
-
-	let y = (sin * r) + center.y;
-	if (drawingSize && (y < 0 || y > drawingSize.y)) {
-		y = Math.min(drawingSize.y, Math.max(0, y));
-		r = (y - center.y) / sin;
-		x = (cos * r) + center.x;
-	}
-
-	return new Point(x, y);
-}
-
-export function constrainSegmentToBounds(s) {
-	const outPoints = [];
-	if (!isInsideBounds(s.A)) {
-		outPoints.push(s.A);
-	}
-
-	if (!isInsideBounds(s.B)) {
-		outPoints.push(s.B);
-	}
-
-	if (outPoints.length > 0) {
-		const bounds = getLineBounds(s);
-
-		outPoints.forEach(p => {
-			let bound;
-			if (bounds.length !== 2) {
-				bound = {x: 0, y: 0};
-			} else if (p.getSquaredDistanceTo(bounds[0]) < p.getSquaredDistanceTo(bounds[1])) {
-				bound = bounds[0];
-			} else {
-				bound = bounds[1];
-			}
-
-			p.x = bound.x;
-			p.y = bound.y;
-		});
-
-		s.initialize();
-	}
-}
-
 function intersectLineWithDonut(l, center, radiusMin, radiusMax) {
-	const intersectionsWithMax = intersectLineWithCircle(l, center, radiusMax);
+	const intersectionsWithMax = Geometry.intersectLineWithCircle(l, center, radiusMax);
 	if (intersectionsWithMax.length <= 1) {
 		return intersectionsWithMax;
 	}
 
 	let intersectionsWithMin = [];
 	if (radiusMin > 0) {
-		intersectionsWithMin = intersectLineWithCircle(l, center, radiusMin);
+		intersectionsWithMin = Geometry.intersectLineWithCircle(l, center, radiusMin);
 	}
 
 	if (intersectionsWithMin.length <= 1) {
@@ -388,40 +246,6 @@ function intersectLineWithDonut(l, center, radiusMin, radiusMax) {
 		new Segment(intersectionsWithMax[0], intersectionsWithMin[0], l),
 		new Segment(intersectionsWithMax[1], intersectionsWithMin[1], l)
 	];
-}
-
-export function intersectLineWithCircle(l, center, radius) {
-	if (l.dx === 0) {
-		const x = l.intersections[0].x;
-		return resolve2ndDegreePolynom(
-			1,
-			-2 * center.y,
-			(center.y ** 2) + ((x - center.x) ** 2) - (radius ** 2)
-		)
-			.map(y => new Point(x, y));
-	}
-
-	return resolve2ndDegreePolynom(
-		1 + (l.a ** 2),
-		2 * ((l.a * (l.b - center.y)) - center.x),
-		(center.x ** 2) + ((l.b - center.y) ** 2) - (radius ** 2)
-	)
-		.map(x => new Point(x, l.y(x)));
-}
-
-export function resolve2ndDegreePolynom(A, B, C) {
-	const possibleXs = [];
-	const delta = (B ** 2) - (4 * A * C);
-	if (delta >= 0) {
-		const deltaSqrt = Math.sqrt(delta);
-		possibleXs.push((-B - deltaSqrt) / (2 * A));
-
-		if (delta > 0) {
-			possibleXs.push((-B + deltaSqrt) / (2 * A));
-		}
-	}
-
-	return possibleXs;
 }
 
 // Restrict point position to allowed regions by parameters

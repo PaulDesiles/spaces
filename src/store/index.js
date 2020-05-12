@@ -1,16 +1,14 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import parameters from './parameters';
-import {Shape, Point} from '../model/Geometry';
-import {getContrainedSnappingElements} from '../model/Constraint';
+import {Shape} from '../core/Shape';
+import {Point} from '../core/Point';
+import {getContrainedSnappingElements} from '../core/Constraint';
+import {distinct} from '../core/Helpers/ArrayHelpers';
+import {isInsideBounds} from '../core/Helpers/GeometryHelpers';
 import * as states from './states';
 
 Vue.use(Vuex);
-
-// Only first occurence of an object will be returned
-function distinct(value, index, self) {
-	return self.indexOf(value) === index;
-}
 
 const getters = {
 	lines(state) {
@@ -24,7 +22,7 @@ const getters = {
 			.map(l => l.intersections)
 			.flat()
 			.filter(distinct)
-			.filter(p => p.insideBounds);
+			.filter(p => isInsideBounds(p, state.parameters.drawingSize.x, state.parameters.drawingSize.y));
 	},
 	constrainedElements(state, getters) {
 		const points = [...getters.intersections];
@@ -56,7 +54,11 @@ const getters = {
 };
 
 const closeCurrentShape = function (state) {
-	const newShape = new Shape(state.currentShapePoints);
+	const newShape = new Shape(
+		state.currentShapePoints,
+		state.parameters.drawingSize.x,
+		state.parameters.drawingSize.y,
+		state.parameters.formsGap);
 	newShape.updateIntersections(getters.lines(state));
 	state.currentShapePoints = [];
 	state.shapes.push(newShape);

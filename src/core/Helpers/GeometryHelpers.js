@@ -1,72 +1,5 @@
-const epsylon = 0.001;
-
-export class Point {
-	constructor(x, y) {
-		this.x = x || 0;
-		this.y = y || 0;
-	}
-
-	getSquaredDistanceTo(p) {
-		const dx = p.x - this.x;
-		const dy = p.y - this.y;
-		return (dx ** 2) + (dy ** 2);
-	}
-
-	equiv(p) {
-		return equiv(this.x, p.x) && equiv(this.y, p.y);
-	}
-}
-
-export function equiv(x, y) {
-	return Math.abs(x - y) < epsylon;
-}
-
-// Loop over array to find its i-th element
-export function loopedGet(array, i) {
-	const l = array.length;
-	let index = i;
-	while (index < 0) {
-		index += l;
-	}
-
-	return array[index % l];
-}
-
-// Call a function to consecutive elements of an array (looping)
-export function forEachConsecutive(array, callback, startingIndex) {
-	const l = array.length;
-	const nbArguments = callback.length;
-	startingIndex = startingIndex || 0;
-	while (startingIndex < 0) {
-		startingIndex += l;
-	}
-
-	for (let i = startingIndex; i !== (l + startingIndex); ++i) {
-		const parameters = [];
-		for (let j = 0; j !== nbArguments; j++) {
-			parameters.push(array[(i + j) % l]);
-		}
-
-		callback(...parameters);
-	}
-}
-
-// Apply a transformation function to consecutive elements of an array (looping)
-export function mapConsecutive(array, transformator) {
-	const transformed = [];
-	const l = array.length;
-	const nbArguments = transformator.length;
-	for (let i = 0; i !== l; ++i) {
-		const parameters = [];
-		for (let j = 0; j !== nbArguments; j++) {
-			parameters.push(array[(i + j) % l]);
-		}
-
-		transformed.push(transformator(...parameters));
-	}
-
-	return transformed;
-}
+import {Point} from '../Point';
+import {equiv, resolve2ndDegreePolynom} from './MathHelpers';
 
 // To know which side of an edge is inside the form
 // > the right side of an edge (points[i], points[i+1]) will be inside if clockwise is true
@@ -151,7 +84,7 @@ export function getIntersection(A, B, C, D, insideSegment) {
 		return B;
 	}
 
-	// get the parameter K2 relative to CD
+	// Get the parameter K2 relative to CD
 	const I2 = (ABy * (-CAx)) - (ABx * (-CAy));
 	const J2 = -J;
 	const K2 = I2 / J2;
@@ -169,4 +102,30 @@ export function getIntersection(A, B, C, D, insideSegment) {
 	}
 
 	return new Point(A.x + (ABx * K), A.y + (ABy * K));
+}
+
+export function isInsideBounds(point, xmax, ymax) {
+	return point.x >= 0 &&
+		point.x <= xmax &&
+		point.y >= 0 &&
+		point.y <= ymax;
+}
+
+export function intersectLineWithCircle(l, center, radius) {
+	if (l.dx === 0) {
+		const x = l.intersections[0].x;
+		return resolve2ndDegreePolynom(
+			1,
+			-2 * center.y,
+			(center.y ** 2) + ((x - center.x) ** 2) - (radius ** 2)
+		)
+			.map(y => new Point(x, y));
+	}
+
+	return resolve2ndDegreePolynom(
+		1 + (l.a ** 2),
+		2 * ((l.a * (l.b - center.y)) - center.x),
+		(center.x ** 2) + ((l.b - center.y) ** 2) - (radius ** 2)
+	)
+		.map(x => new Point(x, l.y(x)));
 }

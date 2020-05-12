@@ -1,12 +1,10 @@
-import {Point, Intersection, Line, initBounds} from '../../src/model/Geometry';
-import {
-	Segment,
-	resolve2ndDegreePolynom,
-	intersectLineWithCircle,
-	constrainSegmentToBounds,
-	constrainDistance,
-	constrainAngle
-} from '../../src/model/Constraint';
+import {Point} from '../../src/core/Point';
+import {Intersection} from '../../src/core/Intersection';
+import {Line} from '../../src/core/Line';
+import {Segment, constrainSegmentToBounds} from '../../src/core/Segment';
+import {resolve2ndDegreePolynom} from '../../src/core/Helpers/MathHelpers';
+import {intersectLineWithCircle} from '../../src/core/Helpers/GeometryHelpers';
+import {constrainDistance, constrainAngle} from '../../src/core/Constraint';
 
 describe('polynom resolution', () => {
 	test('x²+2x+1', () => {
@@ -44,9 +42,11 @@ describe('line/circle intersections', () => {
 	const D = new Intersection(2, 2);
 	const E = new Intersection(6, 12);
 	const F = new Intersection(0, 4);
+	const size = 1000;
 
 	test('BC & circle(A,3)', () => {
-		const result = intersectLineWithCircle(new Line(B, C), A, 3);
+		const l = new Line(B, C, size, size);
+		const result = intersectLineWithCircle(l, A, 3);
 		expect(result).toHaveLength(2);
 		expect(result[0].x).toBeCloseTo(3);
 		expect(result[0].y).toBeCloseTo(10);
@@ -54,7 +54,8 @@ describe('line/circle intersections', () => {
 		expect(result[1].y).toBeCloseTo(5.2);
 	});
 	test('BC & circle(A,5)', () => {
-		const result = intersectLineWithCircle(new Line(B, C), A, 5);
+		const l = new Line(B, C, size, size);
+		const result = intersectLineWithCircle(l, A, 5);
 		expect(result).toHaveLength(2);
 		expect(result[0].x).toBeCloseTo(2.05);
 		expect(result[0].y).toBeCloseTo(11.91);
@@ -62,7 +63,8 @@ describe('line/circle intersections', () => {
 		expect(result[1].y).toBeCloseTo(3.29);
 	});
 	test('BC & circle(A,10)', () => {
-		const result = intersectLineWithCircle(new Line(B, C), A, 10);
+		const l = new Line(B, C, size, size);
+		const result = intersectLineWithCircle(l, A, 10);
 		expect(result).toHaveLength(2);
 		expect(result[0].x).toBeCloseTo(-0.23);
 		expect(result[0].y).toBeCloseTo(16.46);
@@ -70,11 +72,12 @@ describe('line/circle intersections', () => {
 		expect(result[1].y).toBeCloseTo(-1.26);
 	});
 	test('BD & circle(A,3) : out', () => {
-		const result = intersectLineWithCircle(new Line(B, D), A, 3);
+		const l = new Line(B, D, size, size);
+		const result = intersectLineWithCircle(l, A, 3);
 		expect(result).toHaveLength(0);
 	});
 	test('BF & circle(A,4): horizontal', () => {
-		const l = new Line(B, F);
+		const l = new Line(B, F, size, size);
 		const result = intersectLineWithCircle(l, A, 3.5);
 		expect(result).toHaveLength(2);
 		expect(result[0].x).toBeCloseTo(1.2);
@@ -83,7 +86,7 @@ describe('line/circle intersections', () => {
 		expect(result[1].y).toBeCloseTo(4);
 	});
 	test('BE & circle(A,3): vertical tangent', () => {
-		const l = new Line(B, E);
+		const l = new Line(B, E, size, size);
 		const result = intersectLineWithCircle(l, A, 3);
 		expect(result).toHaveLength(1);
 		expect(result[0].x).toBeCloseTo(6);
@@ -92,11 +95,9 @@ describe('line/circle intersections', () => {
 });
 
 describe('constrain segment to drawing bounds', () => {
-	initBounds({x:1000, y:600});
-
 	test('inside segment', () => {
 		const s = new Segment(new Point(20, 30), new Point(230, 400));
-		constrainSegmentToBounds(s);
+		constrainSegmentToBounds(s, 1000, 600);
 		expect(s.A.x).toBe(20);
 		expect(s.A.y).toBe(30);
 		expect(s.B.x).toBe(230);
@@ -105,7 +106,7 @@ describe('constrain segment to drawing bounds', () => {
 
 	test('one bound outside', () => {
 		const s = new Segment(new Point(-20, -30), new Point(230, 400));
-		constrainSegmentToBounds(s);
+		constrainSegmentToBounds(s, 1000, 600);
 		expect(s.A.x).toBeCloseTo(0);
 		expect(s.A.y).toBeCloseTo(4.4);
 		expect(s.B.x).toBe(230);
@@ -114,7 +115,7 @@ describe('constrain segment to drawing bounds', () => {
 
 	test('two bounds outside, threw drawing area', () => {
 		const s = new Segment(new Point(-20, 80), new Point(428, 1200));
-		constrainSegmentToBounds(s);
+		constrainSegmentToBounds(s, 1000, 600);
 		expect(s.A.x).toBeCloseTo(0);
 		expect(s.A.y).toBeCloseTo(130);
 		expect(s.B.x).toBeCloseTo(188);
@@ -123,7 +124,7 @@ describe('constrain segment to drawing bounds', () => {
 
 	test('two bounds outside, out of drawing area', () => {
 		const s = new Segment(new Point(-60, -20), new Point(-20, 80));
-		constrainSegmentToBounds(s);
+		constrainSegmentToBounds(s, 1000, 600);
 		expect(s.A.x).toBeCloseTo(0);
 		expect(s.A.y).toBeCloseTo(130);
 		expect(s.B.x).toBeCloseTo(0);
@@ -132,7 +133,7 @@ describe('constrain segment to drawing bounds', () => {
 
 	test('two bounds outside, no line intersections with drawing area', () => {
 		const s = new Segment(new Point(-20, -30), new Point(-60, -20));
-		constrainSegmentToBounds(s);
+		constrainSegmentToBounds(s, 1000, 600);
 		expect(s.A.x).toBeCloseTo(0);
 		expect(s.A.y).toBeCloseTo(0);
 		expect(s.B.x).toBeCloseTo(0);

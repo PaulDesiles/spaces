@@ -1,12 +1,16 @@
-import {initBounds, Point, Intersection, Line} from '../../src/model/Geometry';
+import {Point} from '../../src/core/Point';
+import {Intersection} from '../../src/core/Intersection';
+import {Line} from '../../src/core/Line';
+
+const size = 1000;
 
 describe('Line class', () => {
 	const A = new Intersection(20, 10);
 	const B = new Intersection(20, 50);
 	const C = new Intersection(30, 130);
 	const D = new Intersection(10, 140);
-	const l1 = new Line(A, B);
-	const l2 = new Line(C, D);
+	const l1 = new Line(A, B, size, size);
+	const l2 = new Line(C, D, size, size);
 
 	test('id generation', () => {
 		expect(l1.id).toBeDefined();
@@ -62,7 +66,7 @@ describe('Line class', () => {
 	// });
 
 	test('linkParallelLines', () => {
-		const l3 = new Line(new Intersection(40, 40), new Intersection(40, 60));
+		const l3 = new Line(new Intersection(40, 40), new Intersection(40, 60), size, size);
 		expect(Line.linkParallelLines).toBeInstanceOf(Function);
 
 		Line.linkParallelLines(l1, l3);
@@ -92,7 +96,7 @@ describe('Line class', () => {
 	});
 
 	test('getKnownIntersectionWith', () => {
-		const l3 = new Line(B, C);
+		const l3 = new Line(B, C, size, size);
 		expect(l1.getKnownIntersectionWith).toBeInstanceOf(Function);
 		expect(l1.getKnownIntersectionWith(l2)).toBeUndefined();
 		expect(l1.getKnownIntersectionWith(l3)).toBe(B);
@@ -106,15 +110,14 @@ describe('Line class', () => {
 });
 
 describe('Line Bounds', () => {
-	initBounds({x:1000, y:1000});
 	const A = new Intersection(10, 10);
 	const B = new Intersection(30, 30);
 	const C = new Intersection(30, 10);
 	const D = new Intersection(10, 30);
 
-	const AB = new Line(A, B);
-	const AC = new Line(A, C);
-	const AD = new Line(A, D);
+	const AB = new Line(A, B, size, size);
+	const AC = new Line(A, C, size, size);
+	const AD = new Line(A, D, size, size);
 
 	test('return type', () => {
 		expect(AB.bounds).toBeInstanceOf(Array);

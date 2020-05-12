@@ -36,13 +36,11 @@
 <script>
 import {mapState, mapGetters} from 'vuex';
 
-import {Point, Line} from '../../model/Geometry';
-import {Segment, getStepSegments, getPolarPoint} from '../../model/Constraint';
-
-// Only first occurence of an object will be returned
-function distinct(value, index, self) {
-	return self.indexOf(value) === index;
-}
+import {Point, getPolarPoint} from '../../core/Point';
+import {Line} from '../../core/Line';
+import {Segment} from '../../core/Segment';
+import {getStepSegments} from '../../core/Constraint';
+import {distinct} from '../../core/Helpers/ArrayHelpers';
 
 export default {
 	name: 'DebugView',

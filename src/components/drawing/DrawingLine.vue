@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import {Point} from '../../model/Geometry';
+import {Point} from '../../core/Point';
 
 export default {
 	name: 'DrawingLine',

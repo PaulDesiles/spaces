@@ -1,19 +1,25 @@
-import {initBounds, Intersection, Shape} from '../../src/model/Geometry';
+import {Intersection} from '../../src/core/Intersection';
+import {Shape} from '../../src/core/Shape';
+
+const parameters = [
+	1000,	// Xmax
+	1000,	// Ymax
+	10		// FormsGap
+];
 
 describe('Shape class', () => {
-	initBounds({x:1000, y:1000});
-
 	const A = new Intersection(150, 150);
 	const B = new Intersection(180, 130);
 	const C = new Intersection(160, 180);
-	const s1 = new Shape([A, B, C]);
+	const s1 = new Shape([A, B, C], ...parameters);
 
 	test('id generation', () => {
 		const stmp = new Shape([
 			new Intersection(0, 0),
 			new Intersection(10, 10),
 			new Intersection(30, 0)
-		]);
+		],
+		...parameters);
 
 		expect(s1.id).toBeDefined();
 		expect(stmp.id).toBeDefined();
@@ -65,18 +71,16 @@ describe('Shape class', () => {
 });
 
 describe('2nd shape', () => {
-	initBounds(1000, 1000);
-
 	const A = new Intersection(150, 150);
 	const B = new Intersection(180, 130);
 	const C = new Intersection(160, 180);
-	const s1 = new Shape([A, B, C]);
+	const s1 = new Shape([A, B, C], ...parameters);
 
 	const l1 = s1.spacedLines[0];
 	const D = l1.intersections[0];
 	const E = l1.intersections[1];
 	const F = new Intersection(200, 0);
-	const s2 = new Shape([E, D, F]);
+	const s2 = new Shape([E, D, F], ...parameters);
 
 	test('second shape defined', () => {
 		expect(s2.points).toHaveLength(3);

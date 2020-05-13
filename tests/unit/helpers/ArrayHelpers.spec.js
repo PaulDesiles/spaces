@@ -1,4 +1,4 @@
-import * as Helper from '../../src/core/Helpers/ArrayHelpers';
+import * as Helper from '../../../src/core/Helpers/ArrayHelpers';
 
 describe('loopedGet', () => {
 	const a = [0, 1, 2];
@@ -176,5 +176,101 @@ describe('mapConsecutive', () => {
 		expect(result[0]).toBe('abc');
 		expect(result[1]).toBe('bca');
 		expect(result[2]).toBe('cab');
+	});
+});
+
+describe('removeIfAny', () => {
+	test('empty array', () => {
+		const array = [];
+		Helper.removeIfAny(array, 3);
+		expect(array).toHaveLength(0);
+	});
+
+	test('no occurence', () => {
+		const array = [1, 2, 3];
+		Helper.removeIfAny(array, 4);
+		expect(array).toHaveLength(3);
+		expect(array[0]).toBe(1);
+		expect(array[1]).toBe(2);
+		expect(array[2]).toBe(3);
+	});
+
+	test('one occurence (first index)', () => {
+		const array = [1, 2, 3];
+		Helper.removeIfAny(array, 1);
+		expect(array).toHaveLength(2);
+		expect(array[0]).toBe(2);
+		expect(array[1]).toBe(3);
+	});
+	test('one occurence', () => {
+		const array = [1, 2, 3, 4];
+		Helper.removeIfAny(array, 2);
+		expect(array).toHaveLength(3);
+		expect(array[0]).toBe(1);
+		expect(array[1]).toBe(3);
+		expect(array[2]).toBe(4);
+	});
+	test('one occurence (last index)', () => {
+		const array = [1, 2, 3];
+		Helper.removeIfAny(array, 3);
+		expect(array).toHaveLength(2);
+		expect(array[0]).toBe(1);
+		expect(array[1]).toBe(2);
+	});
+
+	test('two occurences', () => {
+		const array = [1, 2, 1];
+		Helper.removeIfAny(array, 1);
+		expect(array).toHaveLength(2);
+		expect(array[0]).toBe(2);
+		expect(array[1]).toBe(1);
+	});
+});
+
+describe('distinct', () => {
+	test('empty array', () => {
+		const array = [];
+		const result = array.filter(Helper.distinct);
+		expect(result).toHaveLength(0);
+	});
+
+	test('no duplicates', () => {
+		const array = [1, 2, 3, 4];
+		const result = array.filter(Helper.distinct);
+		expect(result).toHaveLength(4);
+		expect(result[0]).toBe(1);
+		expect(result[1]).toBe(2);
+		expect(result[2]).toBe(3);
+		expect(result[3]).toBe(4);
+	});
+
+	test('one duplicate', () => {
+		const array = [1, 2, 3, 2, 4];
+		const result = array.filter(Helper.distinct);
+		expect(result).toHaveLength(4);
+		expect(result[0]).toBe(1);
+		expect(result[1]).toBe(2);
+		expect(result[2]).toBe(3);
+		expect(result[3]).toBe(4);
+	});
+
+	test('two duplicates', () => {
+		const array = [1, 2, 3, 2, 2, 4];
+		const result = array.filter(Helper.distinct);
+		expect(result).toHaveLength(4);
+		expect(result[0]).toBe(1);
+		expect(result[1]).toBe(2);
+		expect(result[2]).toBe(3);
+		expect(result[3]).toBe(4);
+	});
+
+	test('multiple duplicates', () => {
+		const array = [1, 1, 2, 3, 2, 2, 4, 4, 3, 4, 1];
+		const result = array.filter(Helper.distinct);
+		expect(result).toHaveLength(4);
+		expect(result[0]).toBe(1);
+		expect(result[1]).toBe(2);
+		expect(result[2]).toBe(3);
+		expect(result[3]).toBe(4);
 	});
 });

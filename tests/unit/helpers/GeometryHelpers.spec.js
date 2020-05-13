@@ -1,49 +1,7 @@
-import {Point} from '../../src/core/Point';
-import {equiv} from '../../src/core/Helpers/MathHelpers';
-import * as Helper from '../../src/core/Helpers/GeometryHelpers';
-
-describe('Point class', () => {
-	test('default constructor', () => {
-		const p = new Point();
-		expect(p).toEqual({x: 0, y: 0});
-	});
-
-	test('constructor', () => {
-		const p = new Point(1, 2);
-		expect(p).toEqual({x: 1, y: 2});
-	});
-
-	const p1 = new Point(10, 2);
-	const p2 = new Point(10, 10);
-	const p3 = new Point(15, 15);
-	const p4 = new Point(25, 15);
-
-	test('computes distance', () => {
-		expect(p2.getSquaredDistanceTo(p3)).toBeCloseTo(50);
-	});
-
-	test('computes distance verticaly', () => {
-		expect(p1.getSquaredDistanceTo(p2)).toBeCloseTo(64);
-	});
-
-	test('computes distance horizontaly', () => {
-		expect(p3.getSquaredDistanceTo(p4)).toBeCloseTo(100);
-	});
-});
-
-describe('equiv', () => {
-	test('same numbers', () => {
-		expect(equiv(123.4, 123.4)).toBeTruthy();
-	});
-
-	test('close numbers', () => {
-		expect(equiv(12.3456, 12.3457)).toBeTruthy();
-	});
-
-	test('different numbers', () => {
-		expect(equiv(12.3456, 12.456)).toBeFalsy();
-	});
-});
+import {Point} from '../../../src/core/Point';
+import {Intersection} from '../../../src/core/Intersection';
+import {Line} from '../../../src/core/Line';
+import * as Helper from '../../../src/core/Helpers/GeometryHelpers';
 
 describe('isFormClockwiseOriented', () => {
 	const A = {x: 0, y: 0};
@@ -193,5 +151,87 @@ describe('getIntersection', () => {
 		expect(result).toHaveLength(2);
 		expect(result[0]).toBe(E);
 		expect(result[1]).toBe(B);
+	});
+});
+
+describe('isInsideBounds', () => {
+	test('inside', () => {
+		const p = {x: 20, y: 30};
+		const isInside = Helper.isInsideBounds(p, 100, 100);
+		expect(isInside).toBeTruthy();
+	});
+	test('outside X', () => {
+		const p = {x: 120, y: 30};
+		const isInside = Helper.isInsideBounds(p, 100, 100);
+		expect(isInside).toBeFalsy();
+	});
+	test('outside Y', () => {
+		const p = {x: 20, y: 130};
+		const isInside = Helper.isInsideBounds(p, 100, 100);
+		expect(isInside).toBeFalsy();
+	});
+	test('outside both', () => {
+		const p = {x: 120, y: 130};
+		const isInside = Helper.isInsideBounds(p, 100, 100);
+		expect(isInside).toBeFalsy();
+	});
+});
+
+describe('line/circle intersections', () => {
+	const A = new Intersection(3, 7);
+	const B = new Intersection(6, 4);
+	const C = new Intersection(7, 2);
+	const D = new Intersection(2, 2);
+	const E = new Intersection(6, 12);
+	const F = new Intersection(0, 4);
+	const size = 1000;
+
+	test('BC & circle(A,3)', () => {
+		const l = new Line(B, C, size, size);
+		const result = Helper.intersectLineWithCircle(l, A, 3);
+		expect(result).toHaveLength(2);
+		expect(result[0].x).toBeCloseTo(3);
+		expect(result[0].y).toBeCloseTo(10);
+		expect(result[1].x).toBeCloseTo(5.4);
+		expect(result[1].y).toBeCloseTo(5.2);
+	});
+	test('BC & circle(A,5)', () => {
+		const l = new Line(B, C, size, size);
+		const result = Helper.intersectLineWithCircle(l, A, 5);
+		expect(result).toHaveLength(2);
+		expect(result[0].x).toBeCloseTo(2.05);
+		expect(result[0].y).toBeCloseTo(11.91);
+		expect(result[1].x).toBeCloseTo(6.35);
+		expect(result[1].y).toBeCloseTo(3.29);
+	});
+	test('BC & circle(A,10)', () => {
+		const l = new Line(B, C, size, size);
+		const result = Helper.intersectLineWithCircle(l, A, 10);
+		expect(result).toHaveLength(2);
+		expect(result[0].x).toBeCloseTo(-0.23);
+		expect(result[0].y).toBeCloseTo(16.46);
+		expect(result[1].x).toBeCloseTo(8.63);
+		expect(result[1].y).toBeCloseTo(-1.26);
+	});
+	test('BD & circle(A,3) : out', () => {
+		const l = new Line(B, D, size, size);
+		const result = Helper.intersectLineWithCircle(l, A, 3);
+		expect(result).toHaveLength(0);
+	});
+	test('BF & circle(A,4): horizontal', () => {
+		const l = new Line(B, F, size, size);
+		const result = Helper.intersectLineWithCircle(l, A, 3.5);
+		expect(result).toHaveLength(2);
+		expect(result[0].x).toBeCloseTo(1.2);
+		expect(result[0].y).toBeCloseTo(4);
+		expect(result[1].x).toBeCloseTo(4.8);
+		expect(result[1].y).toBeCloseTo(4);
+	});
+	test('BE & circle(A,3): vertical tangent', () => {
+		const l = new Line(B, E, size, size);
+		const result = Helper.intersectLineWithCircle(l, A, 3);
+		expect(result).toHaveLength(1);
+		expect(result[0].x).toBeCloseTo(6);
+		expect(result[0].y).toBeCloseTo(7);
 	});
 });

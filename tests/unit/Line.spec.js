@@ -3,15 +3,14 @@ import {Intersection} from '../../src/core/Intersection';
 import {Line} from '../../src/core/Line';
 
 const size = 1000;
+const A = new Intersection(20, 10);
+const B = new Intersection(20, 50);
+const C = new Intersection(30, 130);
+const D = new Intersection(10, 140);
+const l1 = new Line(A, B, size, size);
+const l2 = new Line(C, D, size, size);
 
-describe('Line class', () => {
-	const A = new Intersection(20, 10);
-	const B = new Intersection(20, 50);
-	const C = new Intersection(30, 130);
-	const D = new Intersection(10, 140);
-	const l1 = new Line(A, B, size, size);
-	const l2 = new Line(C, D, size, size);
-
+describe('constructor', () => {
 	test('id generation', () => {
 		expect(l1.id).toBeDefined();
 		expect(l2.id).toBeDefined();
@@ -30,81 +29,163 @@ describe('Line class', () => {
 		expect(l1.parallels).toHaveLength(0);
 	});
 
-	test('function y(x)', () => {
-		expect(l1.y).toBeInstanceOf(Function);
+	test('linkedShapes', () => {
+		expect(l1.linkedShapes).toBeInstanceOf(Array);
+		expect(l1.linkedShapes).toHaveLength(0);
+	});
+});
 
+describe('y(x)', () => {
+	test('definition', () => {
+		expect(l1.y).toBeInstanceOf(Function);
+	});
+
+	test('y of horizontal line', () => {
 		expect(l1.y(100)).toBeDefined();
 		expect(l1.y(100)).toBe(Infinity);
+	});
 
+	test('y of ordinary line', () => {
 		expect(l2.y(90)).toBeDefined();
 		expect(l2.y(90)).toBe(100);
 	});
+});
 
-	test('function x(y)', () => {
+describe('x(y)', () => {
+	test('definition', () => {
 		expect(l1.x).toBeInstanceOf(Function);
+	});
 
+	test('x of horizontal line', () => {
 		expect(l1.x(20)).toBeDefined();
 		expect(l1.x(20)).toBe(20);
+	});
 
+	test('x of ordinary line', () => {
 		expect(l2.x(100)).toBeDefined();
 		expect(l2.x(100)).toBe(90);
 	});
+});
 
-	// Old Bounds Tests
-	// test('bounds', () => {
-	// 	expect(l1.bounds).toBeInstanceOf(Array);
-	// 	expect(l1.bounds).toHaveLength(2);
+describe('addPoint', () => {
+	test('definition', () => {
+		expect(l1.addPoint).toBeInstanceOf(Function);
+	});
 
-	// 	const isOnBounds = b =>
-	// 		b.x === 0 ||
-	// 		b.x === 1000 ||
-	// 		b.y === 0 ||
-	// 		b.y === 1000;
+	const M = new Intersection(80, 80);
+	test('unknown intersection', () => {
+		l1.addPoint(M);
+		expect(l1.intersections.includes(M)).toBeTruthy();
+		expect(M.crossingLines.includes(l1)).toBeTruthy();
+	});
 
-	// 	expect(l1.bounds.every(isOnBounds)).toBeTruthy();
-	// 	expect(l2.bounds.every(isOnBounds)).toBeTruthy();
-	// });
+	test('known intersection', () => {
+		const oldIntersectionLength = l1.intersections.length;
+		const oldLinesLength = M.crossingLines.length;
+		l1.addPoint(M);
+		expect(l1.intersections.includes(M)).toBeTruthy();
+		expect(M.crossingLines.includes(l1)).toBeTruthy();
+		expect(l1.intersections).toHaveLength(oldIntersectionLength);
+		expect(M.crossingLines).toHaveLength(oldLinesLength);
+	});
 
-	test('linkParallelLines', () => {
-		const l3 = new Line(new Intersection(40, 40), new Intersection(40, 60), size, size);
+	test('avoid non-Intersection points', () => {
+		const N = new Point(80, 80);
+		l1.addPoint(N);
+		expect(l1.intersections.includes(N)).toBeFalsy();
+		expect(N.crossingLines).toBeUndefined();
+	});
+});
+
+describe('linkParallelLines', () => {
+	test('declaration', () => {
 		expect(Line.linkParallelLines).toBeInstanceOf(Function);
+	});
 
+	const l3 = new Line(new Intersection(40, 40), new Intersection(40, 60), size, size);
+
+	test('new line', () => {
 		Line.linkParallelLines(l1, l3);
+		expect(l1.parallels).toHaveLength(1);
 		expect(l1.parallels).toContain(l3);
+		expect(l3.parallels).toHaveLength(1);
 		expect(l3.parallels).toContain(l1);
 	});
 
-	test('includes', () => {
+	test('existing line', () => {
+		Line.linkParallelLines(l1, l3);
+		expect(l1.parallels).toHaveLength(1);
+		expect(l1.parallels).toContain(l3);
+		expect(l3.parallels).toHaveLength(1);
+		expect(l3.parallels).toContain(l1);
+	});
+});
+
+describe('includes', () => {
+	test('declaration', () => {
 		expect(l1.includes).toBeInstanceOf(Function);
+	});
+
+	test('bounds', () => {
 		expect(l1.includes(A)).toBeTruthy();
 		expect(l1.includes(B)).toBeTruthy();
-		expect(l1.includes(C)).toBeFalsy();
-		expect(l1.includes(D)).toBeFalsy();
+	});
 
+	test('inside points', () => {
 		expect(l1.includes(new Point(20, 400))).toBeTruthy();
 		expect(l2.includes(new Point(90, 100))).toBeTruthy();
 	});
 
-	test('getProjection', () => {
-		expect(l1.getProjection).toBeInstanceOf(Function);
+	test('outside points', () => {
+		expect(l1.includes(C)).toBeFalsy();
+		expect(l1.includes(D)).toBeFalsy();
+	});
+});
 
+describe('getProjection', () => {
+	test('declaration', () => {
+		expect(l1.getProjection).toBeInstanceOf(Function);
+	});
+
+	test('projection on horizontal line', () => {
 		expect(l1.getProjection(new Point(20, 400))).toMatchObject({x: 20, y: 400});
 		expect(l1.getProjection(new Point(40, 200))).toMatchObject({x: 20, y: 200});
+	});
 
+	test('projection on ordinary line', () => {
 		expect(l2.getProjection(new Point(90, 100))).toMatchObject({x: 90, y: 100});
 		expect(l2.getProjection(new Point(30, 80))).toMatchObject({x: 50, y: 120});
 	});
+});
 
-	test('getKnownIntersectionWith', () => {
-		const l3 = new Line(B, C, size, size);
+describe('getKnownIntersectionWith', () => {
+	const l3 = new Line(B, C, size, size);
+
+	test('declaration', () => {
 		expect(l1.getKnownIntersectionWith).toBeInstanceOf(Function);
-		expect(l1.getKnownIntersectionWith(l2)).toBeUndefined();
-		expect(l1.getKnownIntersectionWith(l3)).toBe(B);
 	});
 
-	test('getOrCreateIntersectionWith', () => {
-		expect(l1.getKnownIntersectionWith).toBeInstanceOf(Function);
+	test('unknown intersection', () => {
 		expect(l1.getKnownIntersectionWith(l2)).toBeUndefined();
+	});
+
+	test('known intersection', () => {
+		expect(l1.getKnownIntersectionWith(l3)).toBe(B);
+	});
+});
+
+describe('getOrCreateIntersectionWith', () => {
+	test('declaration', () => {
+		expect(l1.getKnownIntersectionWith).toBeInstanceOf(Function);
+	});
+
+	test('new intersection', () => {
+		expect(l1.getKnownIntersectionWith(l2)).toBeUndefined();
+		expect(l1.getOrCreateIntersectionWith(l2)).toMatchObject({x: 20, y: 135});
+	});
+
+	test('known intersection', () => {
+		expect(l1.getKnownIntersectionWith(l2)).toMatchObject({x: 20, y: 135});
 		expect(l1.getOrCreateIntersectionWith(l2)).toMatchObject({x: 20, y: 135});
 	});
 });

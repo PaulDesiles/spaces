@@ -7,7 +7,7 @@ const parameters = [
 	10		// FormsGap
 ];
 
-describe('Shape class', () => {
+describe('constructor', () => {
 	const A = new Intersection(150, 150);
 	const B = new Intersection(180, 130);
 	const C = new Intersection(160, 180);

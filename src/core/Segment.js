@@ -45,11 +45,12 @@ export class Segment {
 	}
 
 	contains(p) {
-		const APx = p.x - this.A.x;
-		const APy = p.y - this.A.y;
-		return (Math.abs(APx) <= Math.abs(this.dx)) &&
-			(Math.abs(APy) <= Math.abs(this.dy)) &&
-			equiv(this.dx / this.dy, APx / APy);
+		const crossproduct = ((p.y - this.A.y) * this.dx) - ((p.x - this.A.x) * this.dy);
+		return equiv(Math.abs(crossproduct), 0) &&
+			p.x >= Math.min(this.A.x, this.B.x) &&
+			p.x <= Math.max(this.A.x, this.B.x) &&
+			p.y >= Math.min(this.A.y, this.B.y) &&
+			p.y <= Math.max(this.A.y, this.B.y);
 	}
 
 	// See https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment

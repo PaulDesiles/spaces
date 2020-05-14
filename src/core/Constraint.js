@@ -27,7 +27,7 @@ export function getContrainedSnappingElements(snappingPoints, snappingLines, cur
 	return getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoints, lastAngle, parameters);
 }
 
-function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPoints, lastAngle, parameters) {
+export function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPoints, lastAngle, parameters) {
 	// Apply length constraint to points
 	const min2 = parameters.minStroke ** 2;
 	const max2 = parameters.maxStroke ** 2;
@@ -134,7 +134,7 @@ function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPo
 	};
 }
 
-function getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoints, lastAngle, parameters) {
+export function getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoints, lastAngle, parameters) {
 	const stepSegments = getStepSegments(lastPoints, lastAngle, parameters);
 
 	const points = snappingPoints.filter(p => p !== lastPoints[0] && stepSegments.some(s => s.contains(p)));
@@ -227,7 +227,7 @@ export function getStepSegments(lastPoints, lastAngle, parameters) {
 	return stepSegments;
 }
 
-function intersectLineWithDonut(l, center, radiusMin, radiusMax) {
+export function intersectLineWithDonut(l, center, radiusMin, radiusMax) {
 	const intersectionsWithMax = Geometry.intersectLineWithCircle(l, center, radiusMax);
 	if (intersectionsWithMax.length <= 1) {
 		return intersectionsWithMax;

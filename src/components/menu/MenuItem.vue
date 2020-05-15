@@ -132,14 +132,18 @@ export default {
 		launchTip() {
 			this.showTip = true;
 			this.tipTimeout = setTimeout(
-				() => this.showTip = false,
+				() => {
+					this.showTip = false;
+				},
 				2000);
 		}
 	}
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '~@/global.scss';
+
 * {
 	font-size: 14px;
 }
@@ -147,16 +151,17 @@ export default {
 li {
 	list-style: none;
 	position: relative;
-}
-	li img {
+
+	img {
 		width: 24px;
 		margin-right: 8px;
 		vertical-align: middle;
 	}
 
-	li span {
+	span {
 		vertical-align: middle;
 	}
+}
 
 a {
 	display: block;
@@ -164,20 +169,20 @@ a {
 	cursor: pointer;
 	padding: 8px 10px;
 	position: relative;
+
+	&:hover {
+		background: #fff6;
+		color: $blue;
+	}
+
+	&:active {
+		background: #fff;
+	}
 }
 
 .disabledLink {
 	opacity: 0.4;
     pointer-events: none;
-}
-
-a:hover {
-	background: #fff6;
-	color: #318be7;
-}
-
-a:active {
-	background: #fff;
 }
 
 .children {
@@ -187,22 +192,24 @@ a:active {
 .subMenu {
 	padding: 0;
 	margin: 0;
+
+	a:hover {
+		background: #0001;
+	}
 }
 
-.subMenu a:hover {
-	background: #0001;
-}
-
-.arrow, .shortcut {
+@mixin right-item {
 	position: absolute;
 	right: 10px;
 }
 
 .shortcut {
+	@include right-item;
 	opacity: 0.3;
 }
 
 .arrow {
+	@include right-item;
 	width: 10px;
 	margin: -5px 0 0 0;
 	top: 50%;

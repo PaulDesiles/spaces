@@ -310,7 +310,7 @@ export default {
 };
 </script>
 
-<style>
+<style >
 body {
 	margin: 0px;
 	font-family: Arial, Helvetica;
@@ -343,40 +343,6 @@ html, body, #app {
 .fullScreen {
 	grid-column: 1 / 3;
 	z-index: 20;
-}
-
-/**** common styles ****/
-
-.buttonLink {
-	display: inline-block;
-	box-sizing: border-box;
-	line-height: 24px;
-	min-width: 80px;
-	padding: 0 15px;
-	font-size: 11pt;
-	text-decoration: none;
-	text-align: center;
-	user-select: none;
-	background: #318be7;
-	color: white;
-	border-radius: 14px;
-	border: 2px solid transparent;
-	box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3);
-	transition: background 0.2s;
-	cursor: pointer;
-}
-
-.buttonLink:hover {
-	background: #559feb;
-}
-
-.buttonLink:focus {
-	outline: none;
-	border-color: #106bc8;
-}
-
-.buttonLink:active {
-	background: #106bc8;
 }
 
 </style>

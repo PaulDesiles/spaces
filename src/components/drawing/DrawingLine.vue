@@ -4,8 +4,7 @@
 		:y1="p1.y"
 		:x2="p2.x"
 		:y2="p2.y"
-		stroke-width="1"
-		:stroke="strokeColor"
+		:class="lineClass"
 	/>
 </template>
 
@@ -26,9 +25,22 @@ export default {
 		hovered: Boolean
 	},
 	computed: {
-		strokeColor() {
-			return this.hovered ? '#318be7' : '#0005';
+		lineClass() {
+			return this.hovered ? 'hoveredLine' : '';
 		}
 	}
 };
 </script>
+
+<style lang="scss" scoped>
+@import '~@/global.scss';
+
+line {
+	stroke-width: 1;
+	stroke: #0005;
+}
+
+.hoveredLine {
+	stroke: $blue;
+}
+</style>

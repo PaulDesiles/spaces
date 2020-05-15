@@ -54,7 +54,9 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '~@/global.scss';
+
 #drawing {
 	height: 60px;
 	float: left;
@@ -77,16 +79,16 @@ li {
 	clear: both;
 	list-style: none;
 	margin: 8px 0;
-}
 
-	li img {
+	img {
 		float: left;
 		width: 20px;
 		margin-right: 8px;
 	}
+}
 
 i {
-	color: #318be7;
+	color: $blue;
 	font-style:normal;
 }
 

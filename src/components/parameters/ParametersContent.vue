@@ -92,7 +92,9 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '~@/global.scss';
+
 span {
 	font-size: 9pt;
 	opacity: 0.6;
@@ -112,23 +114,23 @@ span {
 	color: #000a;
 	width: 33%;
 	border: 2px solid transparent;
-}
 
-.option:hover {
-	background: #559feb;
-}
+	&:hover {
+		background: $light-blue;
+	}
 
-.option:focus {
-	outline: none;
-	border-color: #106bc8;
-}
+	&:focus {
+		outline: none;
+		border-color: $dark-blue;
+	}
 
-.option::-moz-focus-inner {
-  border: 0;
+	&::-moz-focus-inner {
+		border: 0;
+	}
 }
 
 .selectedOption {
-	background: #318be7;
+	background: $blue;
 	color: #fff;
 }
 
@@ -140,107 +142,102 @@ input[type=range] {
 	background: transparent;
 }
 input[type=range]:focus {
-  outline: none;
+	outline: none;
+}
+
+@mixin track {
+	width: 100%;
+	height: 4px;
+	cursor: pointer;
+	animate: 0.2s;
+}
+
+@mixin track-color {
+	background: #0006;
+	border-radius: 4px;
+	border: 0px solid #000;
+}
+
+@mixin focused-track-color {
+	background: $blue;
+}
+
+@mixin thumb {
+	box-shadow: 0px 0px 6px #fff;
+	height: 14px;
+	width: 14px;
+	border-radius: 14px;
+	background: $blue;
+	cursor: pointer;
+}
+
+@mixin focused-thumb {
+	box-shadow: 0px 0px 6px #0008;
+	border: 2px solid #fff;
 }
 
 /* Webkit */
 input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 4px;
-  cursor: pointer;
-  animate: 0.2s;
-  background: #0005;
-  border-radius: 4px;
-  border: 0px solid #000;
+	@include track;
+	@include track-color;
 }
 input[type=range]::-webkit-slider-thumb {
-  box-shadow: 0px 0px 6px #fff;
-  height: 14px;
-  width: 14px;
-  border-radius: 14px;
-  background: #318BE7;
-  cursor: pointer;
-  -webkit-appearance: none;
-  margin-top: -5px;
+	@include thumb;
+	-webkit-appearance: none;
+	margin-top: -5px;
 }
 input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #318BE7;
+	@include focused-track-color;
 }
 input[type=range]:focus::-webkit-slider-thumb {
-  box-shadow: 0px 0px 6px #0008;
-  border: 2px solid #fff;
+	@include focused-thumb;
 }
 
 /* Firefox */
 input[type=range]::-moz-range-track {
-  width: 100%;
-  height: 4px;
-  cursor: pointer;
-  animate: 0.2s;
-  background: #0006;
-  border-radius: 4px;
-  border: 0px solid #000;
-}
-input[type=range]:focus::-moz-range-track {
-  background: #318BE7;
+	@include track;
+	@include track-color;
 }
 input[type=range]::-moz-focus-outer {
-    border: 0;
+	border: 0;
 }
-
 input[type=range]::-moz-range-thumb {
-  box-shadow: 0px 0px 6px #fff;
-  height: 14px;
-  width: 14px;
-  border-radius: 14px;
-  border: none;
-  background: #318BE7;
-  cursor: pointer;
-  box-sizing: border-box;
+	@include thumb;
+	border: none;
+	box-sizing: border-box;
+}
+input[type=range]:focus::-moz-range-track {
+	@include focused-track-color;
 }
 input[type=range]:focus::-moz-range-thumb {
-  box-shadow: 0px 0px 6px #0008;
-  border: 2px solid #fff;
+	@include focused-thumb;
 }
 
 /* MS */
 input[type=range]::-ms-track {
-  width: 100%;
-  height: 4px;
-  cursor: pointer;
-  animate: 0.2s;
-  background: transparent;
-  border-color: transparent;
-  color: transparent;
+	@include track;
+	background: transparent;
+	border-color: transparent;
+	color: transparent;
 }
 input[type=range]::-ms-fill-lower {
-  background: #0006;
-  border: 0px solid #000;
-  border-radius: 8px;
+	@include track-color;
 }
 input[type=range]::-ms-fill-upper {
-  background: #0006;
-  border: 0px solid #000;
-  border-radius: 8px;
-}
-input[type=range]:focus::-ms-fill-lower {
-  background: #318BE7;
-}
-input[type=range]:focus::-ms-fill-upper {
-  background: #318BE7;
+	@include track-color;
 }
 input[type=range]::-ms-thumb {
-  margin-top: 1px;
-  box-shadow: 0px 0px 6px #fff;
-  height: 14px;
-  width: 14px;
-  border-radius: 14px;
-  background: #318BE7;
-  cursor: pointer;
+	@include thumb;
+	margin-top: 1px;
+}
+input[type=range]:focus::-ms-fill-lower {
+	@include focused-track-color;
+}
+input[type=range]:focus::-ms-fill-upper {
+	@include focused-track-color;
 }
 input[type=range]:focus::-ms-thumb {
-  box-shadow: 0px 0px 6px #0008;
-  border: 2px solid #fff;
+	@include focused-thumb;
 }
 
 </style>

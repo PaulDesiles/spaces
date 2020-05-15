@@ -3,9 +3,7 @@
 		:cx="point.x"
 		:cy="point.y"
 		:r="size"
-		:stroke="strokeColor"
-		stroke-width="1"
-		:fill="fillColor"
+		:class="circleClass"
 	/>
 </template>
 
@@ -19,25 +17,14 @@ const PointType = {
 };
 Object.freeze(PointType);
 
-const blue = '#318be7';
-const grey = '#aaa';
-const transp = 'transparent';
-class PointTypeProperties {
-	constructor(size, color, filled, sizeOnHover, colorOnHover) {
-		this.size = size;
-		this.stroke = filled ? transp : color;
-		this.fill = filled ? color : transp;
-
-		this.sizeOnHover = sizeOnHover || size;
-		this.strokeOnHover = filled ? transp : (colorOnHover || color);
-		this.fillOnHover = filled ? (colorOnHover || color) : transp;
+function getClass(type) {
+	switch (type) {
+		case 1: return 'cursor';
+		case 2: return 'startPoint';
+		case 3: return 'guide';
+		default: return '';
 	}
 }
-
-const props = new Map();
-props.set(PointType.cursor, new PointTypeProperties(5, blue, false));
-props.set(PointType.startPoint, new PointTypeProperties(5, blue, true, 7, blue + '99'));
-props.set(PointType.guide, new PointTypeProperties(3, grey, true, 3, transp));
 
 export default {
 	name: 'DrawingPoint',
@@ -54,26 +41,50 @@ export default {
 	},
 	computed: {
 		size() {
-			if (this.hovered) {
-				return props.get(this.type).sizeOnHover;
+			switch (this.type) {
+				case 1: return 5;
+				case 2: return this.hovered ? 7 : 5;
+				case 3: return 3;
+				default: return 0;
 			}
-
-			return props.get(this.type).size;
 		},
-		strokeColor() {
-			if (this.hovered) {
-				return props.get(this.type).strokeOnHover;
-			}
-
-			return props.get(this.type).stroke;
-		},
-		fillColor() {
-			if (this.hovered) {
-				return props.get(this.type).fillOnHover;
-			}
-
-			return props.get(this.type).fill;
+		circleClass() {
+			return getClass(this.type) + (this.hovered ? 'Hovered' : '');
 		}
 	}
 };
 </script>
+
+<style lang="scss" scoped>
+@import '~@/global.scss';
+
+$gray: #aaa;
+
+circle {
+	stroke-width: 1;
+}
+
+.cursor {
+	stroke: $blue;
+	fill: transparent;
+}
+
+.startPoint {
+	stroke: $blue;
+	fill: $blue;
+
+	&Hovered {
+		fill: $tranparent-blue;
+	}
+}
+
+.guide {
+	stroke: $gray;
+	fill: $gray;
+
+	&Hovered {
+		fill: transparent;
+	}
+}
+
+</style>

@@ -1,0 +1,36 @@
+$blue: #318be7;
+$light-blue: #559feb;
+$dark-blue: #106bc8;
+$tranparent-blue: #318be799;
+
+.buttonLink {
+	display: inline-block;
+	box-sizing: border-box;
+	line-height: 24px;
+	min-width: 80px;
+	padding: 0 15px;
+	font-size: 11pt;
+	text-decoration: none;
+	text-align: center;
+	user-select: none;
+	background: $blue;
+	color: white;
+	border-radius: 14px;
+	border: 2px solid transparent;
+	box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3);
+	transition: background 0.2s;
+	cursor: pointer;
+
+	&:hover {
+		background:$light-blue;
+	}
+
+	&:focus {
+		outline: none;
+		border-color: $dark-blue;
+	}
+
+	&:active {
+		background: $dark-blue;
+	}
+}

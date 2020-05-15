@@ -14,6 +14,10 @@ const deg30 = Math.PI / 6;
 const deg40 = Math.PI / 4.5;
 const deg45 = Math.PI / 4;
 
+const getAngle = function (m, n) {
+	return Math.atan2(n.y - m.y, n.x - m.x);
+};
+
 describe('constrain point in distance bounds', () => {
 	test('constrain distance : in bounds', () => {
 		expect(Helper.constrainDistance(p2, p3, 2, 10)).toBe(p3);
@@ -429,10 +433,6 @@ describe('step Segments', () => {
 		expect(result[7].B.y).toBeCloseTo(bounds[7].y);
 	});
 
-	const getAngle = function (m, n) {
-		return Math.atan2(n.y - m.y, n.x - m.x);
-	};
-
 	test('minAngle 10° from horizontal', () => {
 		const result = Helper.getStepSegments([p4, p3], getAngle(p4, p3), {
 			minStroke: 0,
@@ -554,8 +554,333 @@ describe('step Segments', () => {
 	});
 });
 
-/* TODO
-getIntersectionsWithAngleSteps
-getIntersectionsWithAllowedRegion
-getContrainedSnappingElements
-*/
+describe('points intersections with angle steps', () => {
+	const lastPoints = [p4, p2];
+	const angle = getAngle(p4, p2);
+	const parameters = {
+		minStroke: 5,
+		maxStroke: 60,
+		minAngle: deg30,
+		angleStep: deg45,
+		drawingSize: {x: 150, y: 100}
+	};
+
+	test('outside point', () => {
+		const P = new Point(5, 25);
+		const snapping = Helper.getIntersectionsWithAngleSteps([P], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(0);
+	});
+
+	test('on segment in dead angle', () => {
+		const P = new Point(15, 5);
+		const snapping = Helper.getIntersectionsWithAngleSteps([P], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(0);
+	});
+
+	test('on a segment', () => {
+		const P = new Point(35, 25);
+		const snapping = Helper.getIntersectionsWithAngleSteps([P], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(1);
+		expect(snapping.points[0]).toBe(P);
+		expect(snapping.segments).toHaveLength(0);
+	});
+
+	test('on segment outside max', () => {
+		const P = new Point(100, 90);
+		const snapping = Helper.getIntersectionsWithAngleSteps([P], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(0);
+	});
+
+	test('on segment inside min', () => {
+		const P = new Point(26, 16);
+		const snapping = Helper.getIntersectionsWithAngleSteps([P], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(0);
+	});
+
+	test('on horizontal segment', () => {
+		const P = new Point(40, 15);
+		const snapping = Helper.getIntersectionsWithAngleSteps([P], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(1);
+		expect(snapping.points[0]).toBe(P);
+		expect(snapping.segments).toHaveLength(0);
+	});
+
+	test('on vertical segment', () => {
+		const P = new Point(25, 60);
+		const snapping = Helper.getIntersectionsWithAngleSteps([P], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(1);
+		expect(snapping.points[0]).toBe(P);
+		expect(snapping.segments).toHaveLength(0);
+	});
+
+	test('last point', () => {
+		const snapping = Helper.getIntersectionsWithAngleSteps([p4], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(0);
+	});
+});
+
+describe('lines intersections with angle steps', () => {
+	const lastPoints = [p4, p2];
+	const angle = getAngle(p4, p2);
+	const parameters = {
+		minStroke: 5,
+		maxStroke: 60,
+		minAngle: deg30,
+		angleStep: deg45,
+		drawingSize: {x: 150, y: 100}
+	};
+
+	test('line outside max circle', () => {
+		const M = new Intersection(20, 90);
+		const N = new Intersection(120, 60);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAngleSteps([], [line], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(0);
+	});
+
+	test('line tangent to max circle', () => {
+		const M = new Intersection(10, 75);
+		const N = new Intersection(60, 75);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAngleSteps([], [line], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(1);
+		expect(snapping.points[0].x).toBeCloseTo(25);
+		expect(snapping.points[0].y).toBeCloseTo(75);
+		expect(snapping.segments).toHaveLength(0);
+	});
+
+	test('line intersects max circle', () => {
+		const M = new Intersection(20, 70);
+		const N = new Intersection(100, 40);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAngleSteps([], [line], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(2);
+		expect(snapping.points[0].x).toBeCloseTo(63.64);
+		expect(snapping.points[0].y).toBeCloseTo(53.64);
+		expect(snapping.points[1].x).toBeCloseTo(25);
+		expect(snapping.points[1].y).toBeCloseTo(68.13);
+		expect(snapping.segments).toHaveLength(0);
+	});
+
+	test('line intersects max & min', () => {
+		const M = new Intersection(6, 30);
+		const N = new Intersection(35, 10);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAngleSteps([], [line], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(1);
+		expect(snapping.points[0].x).toBeCloseTo(18.89);
+		expect(snapping.points[0].y).toBeCloseTo(21.11);
+		expect(snapping.segments).toHaveLength(0);
+	});
+
+	test('line colinear to angle step', () => {
+		const M = new Intersection(35, 25);
+		const N = new Intersection(60, 50);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAngleSteps([], [line], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(1);
+		expect(snapping.segments[0].A.x).toBeCloseTo(67.43);
+		expect(snapping.segments[0].A.y).toBeCloseTo(57.43);
+		expect(snapping.segments[0].B.x).toBeCloseTo(28.54);
+		expect(snapping.segments[0].B.y).toBeCloseTo(18.54);
+	});
+
+	test('line colinear to vertical angle step', () => {
+		const M = new Intersection(25, 80);
+		const N = new Intersection(25, 40);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAngleSteps([], [line], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(2);
+		expect(snapping.segments[0].A.x).toBeCloseTo(25);
+		expect(snapping.segments[0].A.y).toBeCloseTo(75);
+		expect(snapping.segments[0].B.x).toBeCloseTo(25);
+		expect(snapping.segments[0].B.y).toBeCloseTo(20);
+
+		expect(snapping.segments[1].A.x).toBeCloseTo(25);
+		expect(snapping.segments[1].A.y).toBeCloseTo(10);
+		expect(snapping.segments[1].B.x).toBeCloseTo(25);
+		expect(snapping.segments[1].B.y).toBeCloseTo(0);
+	});
+});
+
+describe('points intersections with regions', () => {
+	const lastPoints = [p4, p2];
+	const angle = getAngle(p4, p2);
+	const parameters = {
+		minStroke: 5,
+		maxStroke: 60,
+		minAngle: deg30,
+		angleStep: deg45,
+		drawingSize: {x: 150, y: 100}
+	};
+
+	test('outside max', () => {
+		const P = new Point(60, 80);
+		const snapping = Helper.getIntersectionsWithAllowedRegion([P], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(0);
+	});
+	test('inside max', () => {
+		const P = new Point(40, 30);
+		const snapping = Helper.getIntersectionsWithAllowedRegion([P], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(1);
+		expect(snapping.points[0]).toBe(P);
+		expect(snapping.segments).toHaveLength(0);
+	});
+	test('inside min', () => {
+		const P = new Point(28, 14);
+		const snapping = Helper.getIntersectionsWithAllowedRegion([P], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(0);
+	});
+	test('inside dead angle', () => {
+		const snapping = Helper.getIntersectionsWithAllowedRegion([p3], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(0);
+	});
+	test('on dead angle upper limit', () => {
+		const P = new Point(9.51, 18.17);
+		const snapping = Helper.getIntersectionsWithAllowedRegion([P], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(1);
+		expect(snapping.points[0]).toBe(P);
+		expect(snapping.segments).toHaveLength(0);
+	});
+	test('on dead angle lower limit', () => {
+		const P = new Point(14.51, 3.17);
+		const snapping = Helper.getIntersectionsWithAllowedRegion([P], [], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(1);
+		expect(snapping.points[0]).toBe(P);
+		expect(snapping.segments).toHaveLength(0);
+	});
+});
+
+
+describe('line intersections with regions', () => {
+	const lastPoints = [p4, p2];
+	const angle = getAngle(p4, p2);
+	const parameters = {
+		minStroke: 5,
+		maxStroke: 60,
+		minAngle: deg30,
+		angleStep: deg45,
+		drawingSize: {x: 150, y: 100}
+	};
+
+	test('line outside max circle', () => {
+		const M = new Intersection(20, 90);
+		const N = new Intersection(120, 60);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAllowedRegion([], [line], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(0);
+	});
+
+	test('line tangent to max circle', () => {
+		const M = new Intersection(10, 75);
+		const N = new Intersection(60, 75);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAllowedRegion([], [line], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(1);
+		expect(snapping.points[0].x).toBeCloseTo(25);
+		expect(snapping.points[0].y).toBeCloseTo(75);
+		expect(snapping.segments).toHaveLength(0);
+	});
+
+	test('line intersects max circle', () => {
+		const M = new Intersection(20, 70);
+		const N = new Intersection(100, 40);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAllowedRegion([], [line], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(1);
+		expect(snapping.segments[0].A.x).toBeCloseTo(11.05);
+		expect(snapping.segments[0].A.y).toBeCloseTo(73.36);
+		expect(snapping.segments[0].B.x).toBeCloseTo(73.88);
+		expect(snapping.segments[0].B.y).toBeCloseTo(49.79);
+	});
+
+	test('line intersects bound & max circle', () => {
+		const M = new Intersection(20, 60);
+		const N = new Intersection(100, 40);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAllowedRegion([], [line], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(1);
+		expect(snapping.segments[0].A.x).toBeCloseTo(0);
+		expect(snapping.segments[0].A.y).toBeCloseTo(65);
+		expect(snapping.segments[0].B.x).toBeCloseTo(76.44);
+		expect(snapping.segments[0].B.y).toBeCloseTo(45.89);
+	});
+
+	test('line tangent to min circle', () => {
+		const M = new Intersection(5, 20);
+		const N = new Intersection(100, 20);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAllowedRegion([], [line], lastPoints, angle, {
+			minStroke: 5,
+			maxStroke: 60,
+			minAngle: deg10,
+			angleStep: deg45,
+			drawingSize: {x: 150, y: 100}
+		});
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(1);
+		expect(snapping.segments[0].A.x).toBeCloseTo(0);
+		expect(snapping.segments[0].A.y).toBeCloseTo(20);
+		expect(snapping.segments[0].B.x).toBeCloseTo(84.79);
+		expect(snapping.segments[0].B.y).toBeCloseTo(20);
+	});
+
+	test('line tangent to min circle intersecting dead angle', () => {
+		const M = new Intersection(5, 20);
+		const N = new Intersection(100, 20);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAllowedRegion([], [line], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(1);
+		expect(snapping.segments[0].A.x).toBeCloseTo(84.79);
+		expect(snapping.segments[0].A.y).toBeCloseTo(20);
+		expect(snapping.segments[0].B.x).toBeCloseTo(0.57);
+		expect(snapping.segments[0].B.y).toBeCloseTo(20);
+	});
+
+	test('line inside min circle', () => {
+		const M = new Intersection(10, 21);
+		const N = new Intersection(60, 11);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAllowedRegion([], [line], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(2);
+
+		expect(snapping.segments[0].A.x).toBeCloseTo(0);
+		expect(snapping.segments[0].A.y).toBeCloseTo(23);
+		expect(snapping.segments[0].B.x).toBeCloseTo(21.61);
+		expect(snapping.segments[0].B.y).toBeCloseTo(18.68);
+
+		expect(snapping.segments[1].A.x).toBeCloseTo(84.34);
+		expect(snapping.segments[1].A.y).toBeCloseTo(6.13);
+		expect(snapping.segments[1].B.x).toBeCloseTo(29.54);
+		expect(snapping.segments[1].B.y).toBeCloseTo(17.09);
+	});
+
+	test('line inside min circle through dead angle', () => {
+		const M = new Intersection(14, 16);
+		const N = new Intersection(60, 13);
+		const line = new Line(M, N, parameters.drawingSize.x, parameters.drawingSize.y);
+		const snapping = Helper.getIntersectionsWithAllowedRegion([], [line], lastPoints, angle, parameters);
+		expect(snapping.points).toHaveLength(0);
+		expect(snapping.segments).toHaveLength(1);
+		expect(snapping.segments[0].A.x).toBeCloseTo(84.89);
+		expect(snapping.segments[0].A.y).toBeCloseTo(11.38);
+		expect(snapping.segments[0].B.x).toBeCloseTo(30);
+		expect(snapping.segments[0].B.y).toBeCloseTo(14.96);
+	});
+});

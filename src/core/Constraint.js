@@ -4,6 +4,7 @@ import {Segment, constrainSegmentToBounds} from './Segment';
 import * as Geometry from './Helpers/GeometryHelpers';
 import {Vector} from './Helpers/MathHelpers';
 
+// Restricts snapping elements to allowed regions
 export function getContrainedSnappingElements(snappingPoints, snappingLines, currentShapePoints, parameters) {
 	if (currentShapePoints.length === 0) {
 		return {
@@ -27,6 +28,7 @@ export function getContrainedSnappingElements(snappingPoints, snappingLines, cur
 	return getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoints, lastAngle, parameters);
 }
 
+// Restricts snapping elements to min/max stroke torus (exluding minAngle dead zone)
 export function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines, lastPoints, lastAngle, parameters) {
 	// Apply length constraint to points
 	const min2 = parameters.minStroke ** 2;
@@ -134,6 +136,7 @@ export function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines,
 	};
 }
 
+// Restricts snapping elements to angle steps segments from lastPoint (excluding minAngle dead zone)
 export function getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoints, lastAngle, parameters) {
 	const stepSegments = getStepSegments(lastPoints, lastAngle, parameters);
 
@@ -175,6 +178,9 @@ export function getIntersectionsWithAngleSteps(snappingPoints, snappingLines, la
 	return {points, segments};
 }
 
+// Projects lines for every step angle from the last point
+// excluding parts inside minStroke radius and outside maxStroke radius
+// and parts outside drawing bounds
 export function getStepSegments(lastPoints, lastAngle, parameters) {
 	let pointRespectMinAngle = _ => true;
 

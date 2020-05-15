@@ -111,6 +111,7 @@ describe('getIntersection', () => {
 	const F = {x: 35, y: 35};
 	const G = {x: 40, y: 30};
 	const H = {x: 50, y: 30};
+	const I = {x: 30, y: 0};
 
 	test('return type', () => {
 		const result = Helper.getIntersection(A, B, C, D);
@@ -123,8 +124,7 @@ describe('getIntersection', () => {
 	});
 	test('OB X AD', () => {
 		const result = Helper.getIntersection(O, B, A, D);
-		expect(result.x).toBeCloseTo(10);
-		expect(result.y).toBeCloseTo(10);
+		expect(result).toBe(A);
 	});
 	test('AB X AD', () => {
 		const result = Helper.getIntersection(A, B, A, D);
@@ -145,12 +145,55 @@ describe('getIntersection', () => {
 		const result = Helper.getIntersection(A, B, C, H);
 		expect(result).not.toBeDefined();
 	});
-	test('AB X EF : collinears', () => {
+	test('AB X EF : collinears (line)', () => {
 		const result = Helper.getIntersection(A, B, E, F);
+		expect(result).toBeInstanceOf(Array);
+		expect(result).toHaveLength(2);
+		expect(result[0]).toBe(A);
+		expect(result[1]).toBe(B);
+	});
+	test('AB X EF : collinears (segment)', () => {
+		const result = Helper.getIntersection(A, B, E, F, true);
 		expect(result).toBeInstanceOf(Array);
 		expect(result).toHaveLength(2);
 		expect(result[0]).toBe(E);
 		expect(result[1]).toBe(B);
+	});
+	test('DH X BG : vertical collinears', () => {
+		const result = Helper.getIntersection(D, H, B, G, true);
+		expect(result).toBeInstanceOf(Array);
+		expect(result).toHaveLength(2);
+		expect(result[0]).toBe(B);
+		expect(result[1]).toBe(G);
+	});
+	test('IC X BC : horizontal collinears', () => {
+		const result = Helper.getIntersection(I, C, B, C, true);
+		expect(result).toBe(C);
+	});
+	test('IB X BC : horizontal collinears', () => {
+		const result = Helper.getIntersection(I, B, B, C, true);
+		expect(result).toBeInstanceOf(Array);
+		expect(result).toHaveLength(2);
+		expect(result[0]).toBe(C);
+		expect(result[1]).toBe(B);
+	});
+	test('BI X BC : horizontal collinears', () => {
+		const result = Helper.getIntersection(B, I, B, C, true);
+		expect(result).toBeInstanceOf(Array);
+		expect(result).toHaveLength(2);
+		expect(result[0]).toBe(B);
+		expect(result[1]).toBe(C);
+	});
+	test('Nearly vertical collinears', () => {
+		const X1 = {x: 25.000000000000004, y: 75};
+		const X2 = {x: 25, y: 20};
+		const X3 = {x: 25, y: 0};
+		const X4 = {x: 25, y: 100};
+
+		const result = Helper.getIntersection(X1, X2, X3, X4, true);
+		expect(result).toHaveLength(2);
+		expect(result[0]).toBe(X1);
+		expect(result[1]).toBe(X2);
 	});
 });
 

@@ -55,15 +55,29 @@ export function getIntersection(A, B, C, D, insideSegment) {
 	if (equiv(J, 0)) {
 		if (equiv(I, 0)) {
 			// AB and CD are collinear
-			// find the two inner points by comparing their parameter 't'
-			// in the line's parametric equation
 
-			const sortedPoints = [A, B, C, D]
-				.map(p => ({point: p, t: (p.x - A.x) / ABx}))
-				.sort((a, b) => a.t - b.t)
-				.map(p => p.point);
+			if (insideSegment) {
+				// Find the two inner points by comparing their parameter 't'
+				// in the line's parametric equation
 
-			return [sortedPoints[1], sortedPoints[2]];
+				const getT = equiv(A.x, B.x) ?
+					(p => (p.y - A.y) / ABy) :
+					(p => (p.x - A.x) / ABx);
+
+				const sortedPoints = [A, B, C, D]
+					.map(p => ({point: p, t: getT(p)}))
+					.sort((a, b) => a.t - b.t)
+					.map(p => p.point);
+
+				if (sortedPoints[1] === sortedPoints[2]) {
+					return sortedPoints[1];
+				}
+
+				return [sortedPoints[1], sortedPoints[2]];
+			}
+
+			// Avoid intersections calculations since we already know the line
+			return [A, B];
 		}
 
 		// AB parallel to CD

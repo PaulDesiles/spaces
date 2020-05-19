@@ -1,6 +1,6 @@
 import {Point, getPolarPoint} from './Point';
 import {Intersection} from './Intersection';
-import {Segment, constrainSegmentToBounds} from './Segment';
+import {Segment} from './Segment';
 import * as Geometry from './Helpers/GeometryHelpers';
 import {Vector} from './Helpers/MathHelpers';
 
@@ -126,7 +126,7 @@ export function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines,
 	snappingSegments
 		.forEach(s => {
 			if (s instanceof Segment) {
-				constrainSegmentToBounds(s, parameters.drawingSize.x, parameters.drawingSize.y);
+				s.constrainToBounds(parameters.drawingSize.x, parameters.drawingSize.y);
 			}
 		});
 
@@ -140,7 +140,7 @@ export function getIntersectionsWithAllowedRegion(snappingPoints, snappingLines,
 export function getIntersectionsWithAngleSteps(snappingPoints, snappingLines, lastPoints, lastAngle, parameters) {
 	const stepSegments = getStepSegments(lastPoints, lastAngle, parameters);
 
-	const points = snappingPoints.filter(p => p !== lastPoints[0] && stepSegments.some(s => s.contains(p)));
+	const points = snappingPoints.filter(p => p !== lastPoints[0] && stepSegments.some(s => s.includes(p)));
 	const segments = [];
 
 	const addPoint = p => {

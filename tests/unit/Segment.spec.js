@@ -1,7 +1,7 @@
 import {Point} from '../../src/core/Point';
-import {Segment, constrainSegmentToBounds} from '../../src/core/Segment';
+import {Segment} from '../../src/core/Segment';
 
-describe('contains point', () => {
+describe('includes point', () => {
 	const A = new Point(20, 20);
 	const B = new Point(40, 40);
 	const C = new Point(20, 40);
@@ -12,37 +12,37 @@ describe('contains point', () => {
 
 	test('inside segment', () => {
 		const p = new Point(30, 30);
-		expect(AB.contains(p)).toBeTruthy();
+		expect(AB.includes(p)).toBeTruthy();
 	});
 	test('segment bound', () => {
 		const p = new Point(20, 20);
-		expect(AB.contains(p)).toBeTruthy();
+		expect(AB.includes(p)).toBeTruthy();
 	});
 	test('on line but out of bounds', () => {
 		const p = new Point(10, 10);
-		expect(AB.contains(p)).toBeFalsy();
+		expect(AB.includes(p)).toBeFalsy();
 	});
 	test('outside segment', () => {
 		const p = new Point(20, 30);
-		expect(AB.contains(p)).toBeFalsy();
+		expect(AB.includes(p)).toBeFalsy();
 	});
 
 	test('inside horizontal segment', () => {
 		const p = new Point(20, 30);
-		expect(AC.contains(p)).toBeTruthy();
+		expect(AC.includes(p)).toBeTruthy();
 	});
 	test('outside horizontal segment', () => {
 		const p = new Point(40, 30);
-		expect(AC.contains(p)).toBeFalsy();
+		expect(AC.includes(p)).toBeFalsy();
 	});
 
 	test('inside vertical segment', () => {
 		const p = new Point(30, 20);
-		expect(AD.contains(p)).toBeTruthy();
+		expect(AD.includes(p)).toBeTruthy();
 	});
 	test('outside vertical segment', () => {
 		const p = new Point(30, 40);
-		expect(AD.contains(p)).toBeFalsy();
+		expect(AD.includes(p)).toBeFalsy();
 	});
 });
 
@@ -105,7 +105,7 @@ describe('project point', () => {
 describe('constrain segment to drawing bounds', () => {
 	test('inside segment', () => {
 		const s = new Segment(new Point(20, 30), new Point(230, 400));
-		constrainSegmentToBounds(s, 1000, 600);
+		s.constrainToBounds(1000, 600);
 		expect(s.A.x).toBe(20);
 		expect(s.A.y).toBe(30);
 		expect(s.B.x).toBe(230);
@@ -114,16 +114,16 @@ describe('constrain segment to drawing bounds', () => {
 
 	test('one bound outside', () => {
 		const s = new Segment(new Point(-20, -30), new Point(230, 400));
-		constrainSegmentToBounds(s, 1000, 600);
+		s.constrainToBounds(1000, 600);
 		expect(s.A.x).toBeCloseTo(0);
 		expect(s.A.y).toBeCloseTo(4.4);
 		expect(s.B.x).toBe(230);
 		expect(s.B.y).toBe(400);
 	});
 
-	test('two bounds outside, threw drawing area', () => {
+	test('two bounds outside, through drawing area', () => {
 		const s = new Segment(new Point(-20, 80), new Point(428, 1200));
-		constrainSegmentToBounds(s, 1000, 600);
+		s.constrainToBounds(1000, 600);
 		expect(s.A.x).toBeCloseTo(0);
 		expect(s.A.y).toBeCloseTo(130);
 		expect(s.B.x).toBeCloseTo(188);
@@ -132,7 +132,7 @@ describe('constrain segment to drawing bounds', () => {
 
 	test('two bounds outside, out of drawing area', () => {
 		const s = new Segment(new Point(-60, -20), new Point(-20, 80));
-		constrainSegmentToBounds(s, 1000, 600);
+		s.constrainToBounds(1000, 600);
 		expect(s.A.x).toBeCloseTo(0);
 		expect(s.A.y).toBeCloseTo(130);
 		expect(s.B.x).toBeCloseTo(0);
@@ -141,7 +141,7 @@ describe('constrain segment to drawing bounds', () => {
 
 	test('two bounds outside, no line intersections with drawing area', () => {
 		const s = new Segment(new Point(-20, -30), new Point(-60, -20));
-		constrainSegmentToBounds(s, 1000, 600);
+		s.constrainToBounds(1000, 600);
 		expect(s.A.x).toBeCloseTo(0);
 		expect(s.A.y).toBeCloseTo(0);
 		expect(s.B.x).toBeCloseTo(0);

@@ -28,6 +28,11 @@
 				</li>
 			</ul>
 
+			<template v-if="hasTactileScreen">
+				<h2>Please note that you'll need a MOUSE !</h2>
+				<span>This is a precision and productivity tool, hence it's not optimized for tactile use or phone screen size...</span>
+			</template>
+
 			<div id="lastLine">
 				<a class="buttonLink" @click="close()">
 					Start
@@ -45,6 +50,11 @@ export default {
 	name: 'Tutorial',
 	components: {
 		Modal
+	},
+	computed: {
+		hasTactileScreen() {
+			return navigator.maxTouchPoints > 0;
+		}
 	},
 	methods: {
 		close() {
@@ -90,6 +100,13 @@ li {
 i {
 	color: $blue;
 	font-style:normal;
+}
+
+h2 {
+	margin: 20px 0 0 0;
+	font-size: 14px;
+	font-weight: bold;
+	color: #ff541f;
 }
 
 #lastLine {

@@ -1,5 +1,5 @@
 <template>
-	<Modal opened-state="new" :small="true">
+	<Modal opened-state="new" small @validateModal="validate($event)">
 		<h1>New drawing</h1>
 
 		<form id="newDrawingForm" ref="form" action="#" />
@@ -105,6 +105,10 @@ export default {
 				height: this.height,
 				gap: this.gap
 			});
+		},
+		validate(event) {
+			event.handled = true;
+			this.create();
 		}
 	}
 };

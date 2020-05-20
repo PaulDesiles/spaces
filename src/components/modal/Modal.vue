@@ -44,7 +44,46 @@ export default {
 		},
 		close() {
 			this.$store.commit('setInteractionState', states.DRAWING);
+		},
+		validate() {
+			const eventArguments = {handled: false};
+			this.$emit('validateModal', eventArguments);
+
+			if (!eventArguments.handled) {
+				this.close();
+			}
+		},
+		toggleKeysListening(activate) {
+			if (this.listening !== activate) {
+				this.listening = activate;
+				const method = activate ? document.addEventListener : document.removeEventListener;
+				method('keyup', this.keyUp);
+			}
+		},
+		keyUp(event) {
+			const key = event.key.toLowerCase();
+
+			if (key === 'enter') {
+				this.validate();
+				event.preventDefault();
+			} else if (key === 'escape') {
+				this.close();
+				event.preventDefault();
+			}
 		}
+	},
+	watch: {
+		opened() {
+			this.toggleKeysListening(this.opened);
+		}
+	},
+	mounted() {
+		if (this.opened) {
+			this.toggleKeysListening(true);
+		}
+	},
+	beforeDestroy() {
+		this.toggleKeysListening(false);
 	}
 };
 </script>

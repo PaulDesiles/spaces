@@ -1,5 +1,5 @@
 <template>
-	<Modal opened-state="export" small="true">
+	<Modal opened-state="export" small>
 		<Exporter />
 	</Modal>
 </template>

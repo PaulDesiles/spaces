@@ -51,7 +51,7 @@ export default {
 				{
 					label: 'New',
 					icon: iconNew,
-					onClick: this.reset
+					onClick: this.new
 				},
 				{
 					label: 'Undo',
@@ -160,8 +160,8 @@ export default {
 			return this.$store.state.shapes.length > 0;
 		},
 
-		reset() {
-			this.$store.commit('reset');
+		new() {
+			this.$store.commit('setInteractionState', states.NEW);
 		},
 		undo() {
 			this.$store.commit('undo');

@@ -63,7 +63,9 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '~@/global.scss';
+
 h1 {
 	font-size: 17pt;
 	font-weight: normal;

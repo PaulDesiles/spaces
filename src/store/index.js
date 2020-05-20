@@ -120,11 +120,17 @@ export default new Vuex.Store({
 				}
 			}
 		},
-		reset(state) {
+		newDrawing(state, parameters) {
 			state.shapes = [];
 			state.currentShapePoints = [];
 			state.hoveredElement = undefined;
 			state.redoStack = [];
+
+			state.parameters.drawingSize.x = parameters.width;
+			state.parameters.drawingSize.y = parameters.height;
+			state.parameters.formsGap = parameters.gap;
+
+			state.interactionState = states.DRAWING;
 		}
 	},
 	getters

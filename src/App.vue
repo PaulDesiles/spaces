@@ -56,6 +56,7 @@
 
 		<Tutorial class="fullScreen" />
 		<ExportModal class="fullScreen" />
+		<New class="fullScreen" />
 	</div>
 </template>
 
@@ -68,6 +69,7 @@ import DebugView from './components/debug/DebugView.vue';
 import Tutorial from './components/tutorial/Tutorial.vue';
 import Menu from './components/menu/Menu.vue';
 import ExportModal from './components/exporter/ExportModal.vue';
+import New from './components/new/New.vue';
 
 import SvgViewport from './components/SvgViewport.vue';
 import DrawingPoint from './components/drawing/DrawingPoint.vue';
@@ -87,6 +89,7 @@ export default {
 		Tutorial,
 		Menu,
 		ExportModal,
+		New,
 		SvgViewport,
 		DrawingPoint,
 		Guides

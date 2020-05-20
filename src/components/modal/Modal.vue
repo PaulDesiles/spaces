@@ -1,7 +1,7 @@
 <template>
 	<Transition name="fade">
 		<div v-if="opened" id="overlay" @click="close()">
-			<div class="contentPanel" @click.stop>
+			<div :class="panelClass" @click.stop>
 				<slot />
 				<img id="close" :src="closeIcon" @click="close()" />
 			</div>
@@ -19,7 +19,8 @@ export default {
 		openedState: {
 			type: String,
 			default: ''
-		}
+		},
+		small: Boolean
 	},
 	computed: {
 		opened() {
@@ -27,6 +28,14 @@ export default {
 		},
 		closeIcon() {
 			return iconCross;
+		},
+		panelClass() {
+			const classes = ['contentPanel'];
+			if (this.small) {
+				classes.push('smallPanel');
+			}
+
+			return classes;
 		}
 	},
 	methods: {
@@ -60,6 +69,10 @@ export default {
 	box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.3);
 	border-radius: 3px;
 	position: relative;
+}
+
+.smallPanel {
+	width: 220px;
 }
 
 .fade-enter-active, .fade-leave-active {

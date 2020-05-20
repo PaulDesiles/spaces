@@ -1,8 +1,8 @@
 <template>
-	<Modal opened-state="new" small @validateModal="validate($event)">
+	<Modal opened-state="new" small @validateModal="modalValidation($event)">
 		<h1>New drawing</h1>
 
-		<form id="newDrawingForm" ref="form" action="#" />
+		<form id="newDrawingForm" ref="form" />
 
 		<div class="inputs">
 			<label>
@@ -15,6 +15,7 @@
 					max="9000"
 					required
 					@input="updateValidity()"
+					@keyup.enter.stop
 				/>
 			</label>
 
@@ -28,6 +29,7 @@
 					max="9000"
 					required
 					@input="updateValidity()"
+					@keyup.enter.stop
 				/>
 			</label>
 
@@ -41,26 +43,29 @@
 					max="900"
 					required
 					@input="updateValidity()"
+					@keyup.enter.stop
 				/>
 			</label>
 		</div>
 
 		<div class="lastLine">
-			<a
+			<button
 				class="buttonLink secondaryButton"
-				form="newDrawingForm"
 				@click="cancel()"
+				@keyup.enter.stop
 			>
 				cancel
-			</a>
+			</button>
 
-			<a
+			<button
+				type="submit"
 				:class="createButtonClass"
 				form="newDrawingForm"
-				@click="create()"
+				@click.prevent="create()"
+				@keyup.enter.stop
 			>
 				create
-			</a>
+			</button>
 		</div>
 	</Modal>
 </template>
@@ -106,7 +111,7 @@ export default {
 				gap: this.gap
 			});
 		},
-		validate(event) {
+		modalValidation(event) {
 			event.handled = true;
 			this.create();
 		}

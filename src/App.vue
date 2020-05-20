@@ -100,7 +100,7 @@ export default {
 			snapThreshold: 20,
 			mousePosition: new Point(),
 			currentPoint: new Point(),
-			downBeforeUp: false,
+			downBeforeUp: false
 		};
 	},
 	computed: {
@@ -126,18 +126,18 @@ export default {
 			'drawingState'
 		])
 	},
-	mounted() {
-		document.addEventListener('blur', this.windowLostFocus);
-	},
-	beforeDestroy() {
-		document.removeEventListener('blur', this.windowLostFocus);
-	},
 	watch: {
 		drawingState() {
 			const method = this.drawingState ? document.addEventListener : document.removeEventListener;
 			method('keydown', this.keyDown);
 			method('keyup', this.keyUp);
 		}
+	},
+	mounted() {
+		document.addEventListener('blur', this.windowLostFocus);
+	},
+	beforeDestroy() {
+		document.removeEventListener('blur', this.windowLostFocus);
 	},
 	methods: {
 		getPosition(event) {

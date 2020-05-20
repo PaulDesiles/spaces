@@ -65,10 +65,8 @@ export default {
 
 			if (key === 'enter') {
 				this.validate();
-				event.preventDefault();
 			} else if (key === 'escape') {
 				this.close();
-				event.preventDefault();
 			}
 		}
 	},

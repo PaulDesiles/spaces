@@ -105,11 +105,13 @@ export default {
 			this.$store.commit('setInteractionState', states.DRAWING);
 		},
 		create() {
-			this.$store.commit('newDrawing', {
-				width: this.width,
-				height: this.height,
-				gap: this.gap
-			});
+			if (this.isValid) {
+				this.$store.commit('newDrawing', {
+					width: this.width,
+					height: this.height,
+					gap: this.gap
+				});
+			}
 		},
 		modalValidation(event) {
 			event.handled = true;

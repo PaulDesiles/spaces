@@ -101,11 +101,6 @@ export default {
 			mousePosition: new Point(),
 			currentPoint: new Point(),
 			downBeforeUp: false,
-			eventListeners: [
-				{event: 'keydown', listener: this.keyDown},
-				{event: 'keyup', listener: this.keyUp},
-				{event: 'blur', listener: this.windowLostFocus}
-			]
 		};
 	},
 	computed: {
@@ -132,10 +127,17 @@ export default {
 		])
 	},
 	mounted() {
-		this.eventListeners.forEach(l => document.addEventListener(l.event, l.listener));
+		document.addEventListener('blur', this.windowLostFocus);
 	},
 	beforeDestroy() {
-		this.eventListeners.forEach(l => document.removeEventListener(l.event, l.listener));
+		document.removeEventListener('blur', this.windowLostFocus);
+	},
+	watch: {
+		drawingState() {
+			const method = this.drawingState ? document.addEventListener : document.removeEventListener;
+			method('keydown', this.keyDown);
+			method('keyup', this.keyUp);
+		}
 	},
 	methods: {
 		getPosition(event) {

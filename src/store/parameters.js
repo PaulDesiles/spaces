@@ -28,6 +28,11 @@ export default {
 			if (state.angleStep !== newValue) {
 				state.angleStep = newValue;
 			}
+		},
+		setDrawingProperties(state, properties) {
+			state.drawingSize.x = properties.width;
+			state.drawingSize.y = properties.height;
+			state.formsGap = properties.gap;
 		}
 	}
 };

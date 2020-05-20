@@ -54,7 +54,7 @@
 				@click="cancel()"
 				@keyup.enter.stop
 			>
-				cancel
+				Cancel
 			</button>
 
 			<button
@@ -64,7 +64,7 @@
 				@click.prevent="create()"
 				@keyup.enter.stop
 			>
-				create
+				Create
 			</button>
 		</div>
 	</Modal>
@@ -106,7 +106,7 @@ export default {
 		},
 		create() {
 			if (this.isValid) {
-				this.$store.commit('newDrawing', {
+				this.$store.dispatch('createNew', {
 					width: this.width,
 					height: this.height,
 					gap: this.gap

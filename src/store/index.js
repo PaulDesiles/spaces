@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import parameters from './parameters';
+import EventBus from '../EventBus';
 import {Shape} from '../core/Shape';
 import {Point} from '../core/Point';
 import {getContrainedSnappingElements} from '../core/Constraint';
@@ -120,18 +121,20 @@ export default new Vuex.Store({
 				}
 			}
 		},
-		newDrawing(state, parameters) {
+		reset(state) {
 			state.shapes = [];
 			state.currentShapePoints = [];
 			state.hoveredElement = undefined;
 			state.redoStack = [];
-
-			state.parameters.drawingSize.x = parameters.width;
-			state.parameters.drawingSize.y = parameters.height;
-			state.parameters.formsGap = parameters.gap;
-
-			state.interactionState = states.DRAWING;
 		}
 	},
-	getters
+	getters,
+	actions: {
+		createNew(context, parameters) {
+			context.commit('reset');
+			context.commit('parameters/setDrawingProperties', parameters);
+			EventBus.$emit('newDrawing');
+			context.commit('setInteractionState', states.DRAWING);
+		}
+	}
 });

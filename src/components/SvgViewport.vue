@@ -34,6 +34,9 @@
 </template>
 
 <script>
+
+import EventBus from '../EventBus';
+
 class PanHandler {
 	constructor(getDeltaRatio, getPan, setPan, registerMouseMove) {
 		if (getDeltaRatio) {
@@ -128,7 +131,8 @@ export default {
 			horizontalHandler: new PanHandler(this.hBarPanRatio, this.getPan, this.setPan, true),
 			verticalHandler: new PanHandler(this.vBarPanRatio, this.getPan, this.setPan, true),
 			mouseHandler: new PanHandler(undefined, this.getPan, this.setPan, false),
-			mousePanMode: false
+			mousePanMode: false,
+			newDrawingUnregisterer: undefined
 		};
 	},
 	mounted() {
@@ -136,9 +140,12 @@ export default {
 		window.addEventListener('resize', this, false);
 		this.onResize();
 		this.centerDrawing();
+
+		this.newDrawingUnregisterer = EventBus.$on('newDrawing', this.centerDrawing);
 	},
 	beforeDestroy() {
 		window.removeEventListener('resize', this, false);
+		this.newDrawingUnregisterer();
 	},
 	computed: {
 		drawingWidth() {

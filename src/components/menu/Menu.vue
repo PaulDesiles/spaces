@@ -28,15 +28,15 @@ import MenuItem from './MenuItem';
 import ParametersContent from '../parameters/ParametersContent';
 import * as states from '../../store/states';
 
-import iconNew from './assets/new.svg';
-import iconUndo from './assets/undo.svg';
-import iconRedo from './assets/redo.svg';
-import iconPreview from './assets/preview.svg';
-import iconExport from './assets/export.svg';
-import iconGuides from './assets/guides.svg';
-import iconCurrent from './assets/current.svg';
-import iconNext from './assets/next.svg';
-import iconParameters from './assets/parameters.svg';
+import IconNew from '../../icons/New';
+import IconUndo from '../../icons/Undo';
+import IconRedo from '../../icons/Redo';
+import IconPreview from '../../icons/Preview';
+import IconExport from '../../icons/Export';
+import IconGuides from '../../icons/Guides';
+import IconCurrent from '../../icons/Current';
+import IconNext from '../../icons/Next';
+import IconParameters from '../../icons/Parameters';
 
 export default {
 	name: 'Menu',
@@ -50,26 +50,26 @@ export default {
 			items: [
 				{
 					label: 'New',
-					icon: iconNew,
+					icon: IconNew,
 					onClick: this.new
 				},
 				{
 					label: 'Undo',
-					icon: iconUndo,
+					icon: IconUndo,
 					shortcut: 'ctrl+Z',
 					isEnabled: this.canUndo,
 					onClick: this.undo
 				},
 				{
 					label: 'Redo',
-					icon: iconRedo,
+					icon: IconRedo,
 					shortcut: 'ctrl+Y',
 					isEnabled: this.canRedo,
 					onClick: this.redo
 				},
 				{
 					label: 'Preview result',
-					icon: iconPreview,
+					icon: IconPreview,
 					shortcut: 'R',
 					isEnabled: this.hasShape,
 					onPress: this.preview,
@@ -77,13 +77,13 @@ export default {
 				},
 				{
 					label: 'Export',
-					icon: iconExport,
+					icon: IconExport,
 					isEnabled: this.hasShape,
 					onClick: this.export
 				},
 				{
 					label: 'Guides',
-					icon: iconGuides,
+					icon: IconGuides,
 					children: [
 						{
 							label: 'Add horizontal',
@@ -104,7 +104,7 @@ export default {
 				},
 				{
 					label: 'Current stroke',
-					icon: iconCurrent,
+					icon: IconCurrent,
 					children: [
 						{
 							label: 'Parallel to line',
@@ -125,7 +125,7 @@ export default {
 				},
 				{
 					label: 'Next stroke',
-					icon: iconNext,
+					icon: IconNext,
 					children: [
 						{
 							label: 'Parallel to line…',
@@ -137,7 +137,7 @@ export default {
 			],
 			parametersItem: {
 				label: 'Parameters',
-				icon: iconParameters,
+				icon: IconParameters,
 				invertArrow: true
 			}
 		};

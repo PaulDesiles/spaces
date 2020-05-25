@@ -7,12 +7,13 @@
 			@mouseup="onMouseUpOrLeave($event)"
 			@mouseleave="onMouseUpOrLeave($event)"
 		>
-			<img :src="icon" />
+			<Component :is="icon" class="icon" />
+
 			<span>{{ label }}</span>
 			<i v-if="shortcut" class="shortcut">
 				{{ shortcut }}
 			</i>
-			<img v-if="hasChildren" :class="arrowClass" src="./assets/arrow.svg" />
+			<Arrow v-if="hasChildren" :rotate="opened !== invertArrow" class="arrow" />
 		</a>
 		<CollapseTransition>
 			<div v-if="opened" class="children">
@@ -38,13 +39,15 @@
 
 <script>
 import {CollapseTransition} from 'vue2-transitions';
+import Arrow from '@/icons/Arrow';
 
-const emptyFunction = function() { };
+const emptyFunction = function () { };
 
 export default {
 	name: 'MenuItem',
 	components: {
-		CollapseTransition
+		CollapseTransition,
+		Arrow
 	},
 	props: {
 		label: {
@@ -52,8 +55,8 @@ export default {
 			default: () => ''
 		},
 		icon: {
-			type: String,
-			default: () => ''
+			type: Object,
+			default: () => undefined
 		},
 		shortcut: {
 			type: String,
@@ -92,9 +95,6 @@ export default {
 	computed: {
 		linkClass() {
 			return this.isEnabled() ? '' : 'disabledLink';
-		},
-		arrowClass() {
-			return (this.opened === this.invertArrow) ? 'arrow' : 'arrow turnedArrow';
 		},
 		hasChildren() {
 			return (this.children && this.children.length > 0) || this.$slots.default;
@@ -152,8 +152,7 @@ li {
 	list-style: none;
 	position: relative;
 
-	img {
-		width: 24px;
+	.icon {
 		margin-right: 8px;
 		vertical-align: middle;
 	}
@@ -213,11 +212,6 @@ a {
 	width: 10px;
 	margin: -5px 0 0 0;
 	top: 50%;
-	transition: transform .4s;
-}
-
-.turnedArrow {
-	transform: rotate(180deg);
 }
 
 #tip {

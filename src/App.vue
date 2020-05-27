@@ -113,10 +113,14 @@ export default {
 		currentPath() {
 			return getShapePath(this.currentShapePoints.concat(this.currentPoint), false);
 		},
+		shouldListenToKeyEvents() {
+			return this.interactionState === states.DRAWING || this.interactionState === states.PREVIEW;
+		},
 		...mapState([
 			'shapes',
 			'currentShapePoints',
-			'hoveredElement'
+			'hoveredElement',
+			'interactionState'
 		]),
 		...mapState('parameters', ['drawingSize']),
 		...mapGetters([
@@ -127,17 +131,17 @@ export default {
 		])
 	},
 	watch: {
-		drawingState() {
-			const method = this.drawingState ? document.addEventListener : document.removeEventListener;
+		shouldListenToKeyEvents() {
+			const method = this.shouldListenToKeyEvents ? document.addEventListener : document.removeEventListener;
 			method('keydown', this.keyDown);
 			method('keyup', this.keyUp);
 		}
 	},
 	mounted() {
-		document.addEventListener('blur', this.windowLostFocus);
+		window.addEventListener('blur', this.windowLostFocus);
 	},
 	beforeDestroy() {
-		document.removeEventListener('blur', this.windowLostFocus);
+		window.removeEventListener('blur', this.windowLostFocus);
 	},
 	methods: {
 		getPosition(event) {
@@ -263,7 +267,7 @@ export default {
 			if (key === 'control') {
 				this.toggleAngleSteps(true);
 			} else if (key === 'r' && !keyEvent.repeat) {
-				this.togglePreviewMode();
+				this.togglePreviewMode(true);
 			} else if (key === ' ' && !keyEvent.repeat) {
 				this.$refs.svgViewport.initMousePan();
 			}
@@ -283,7 +287,7 @@ export default {
 			} else if (key === 'd') {
 				this.debugMode = !this.debugMode;
 			} else if (key === 'r') {
-				this.togglePreviewMode();
+				this.togglePreviewMode(false);
 			} else if (key === 'enter') {
 				this.closeCurrentShape();
 			} else if (key === 'escape') {
@@ -294,21 +298,21 @@ export default {
 		},
 		windowLostFocus() {
 			this.toggleAngleSteps(false);
+			this.togglePreviewMode(false);
 		},
 		toggleAngleSteps(activate) {
-			this.$store.commit('parameters/toggleAngleSteps', activate);
-			this.updateCurrentPoint();
+			if (this.$store.state.parameters.toggleAngleSteps !== activate) {
+				this.$store.commit('parameters/toggleAngleSteps', activate);
+				this.updateCurrentPoint();
+			}
 		},
-		togglePreviewMode() {
-			switch (this.$store.state.interactionState) {
-				case states.DRAWING:
-					this.$store.commit('setInteractionState', states.PREVIEW);
-					break;
-				case states.PREVIEW:
-					this.$store.commit('setInteractionState', states.DRAWING);
-					break;
-				default:
-					break;
+		togglePreviewMode(activate) {
+			const state = this.$store.state.interactionState;
+
+			if (activate && state === states.DRAWING) {
+				this.$store.commit('setInteractionState', states.PREVIEW);
+			} else if (!activate && state === states.PREVIEW) {
+				this.$store.commit('setInteractionState', states.DRAWING);
 			}
 		}
 	}

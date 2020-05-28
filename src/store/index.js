@@ -59,7 +59,7 @@ const closeCurrentShape = function (state) {
 		state.currentShapePoints,
 		state.parameters.drawingSize.x,
 		state.parameters.drawingSize.y,
-		state.parameters.formsGap);
+		state.parameters.shapesGap);
 	newShape.updateIntersections(getters.lines(state));
 	state.currentShapePoints = [];
 	state.shapes.push(newShape);

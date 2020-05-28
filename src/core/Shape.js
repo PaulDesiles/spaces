@@ -1,16 +1,16 @@
 import {Point} from './Point';
 import {Intersection} from './Intersection';
 import {Line} from './Line';
-import {isFormClockwiseOriented, moveSegmentOutside, getIntersection} from './Helpers/GeometryHelpers';
+import {isShapeClockwiseOriented, moveSegmentOutside, getIntersection} from './Helpers/GeometryHelpers';
 import {mapConsecutive, forEachConsecutive, removeIfAny} from './Helpers/ArrayHelpers';
 
 let shapeCount = 0;
 export class Shape {
-	constructor(points, xmax, ymax, formsGap) {
+	constructor(points, xmax, ymax, shapesGap) {
 		this.points = [...points];
 
 		let clockwisePoints = this.points;
-		if (!isFormClockwiseOriented(clockwisePoints)) {
+		if (!isShapeClockwiseOriented(clockwisePoints)) {
 			clockwisePoints = [...points].reverse();
 		}
 
@@ -67,12 +67,12 @@ export class Shape {
 
 			if (B2 === undefined || C2 === undefined) {
 				if (Btemp === undefined || Ctemp === undefined) {
-					const movedBC = moveSegmentOutside(B, C, formsGap);
+					const movedBC = moveSegmentOutside(B, C, shapesGap);
 					Btemp = Btemp || movedBC.A2;
 					Ctemp = Ctemp || movedBC.B2;
 				}
 
-				// Get intersections with the form's previous and next segment
+				// Get intersections with the shape's previous and next segment
 				// to keep points that have more interest
 				if (B2 === undefined) {
 					const i = getIntersection(A, B, Btemp, Ctemp);

@@ -2,7 +2,7 @@ export default {
 	namespaced: true,
 	state: {
 		drawingSize: {x: 1000, y: 600},
-		formsGap: 10,
+		shapesGap: 10,
 		snapThreshold: 20,
 		minStroke: 0,
 		maxStroke: 1000,
@@ -32,7 +32,7 @@ export default {
 		setDrawingProperties(state, properties) {
 			state.drawingSize.x = properties.width;
 			state.drawingSize.y = properties.height;
-			state.formsGap = properties.gap;
+			state.shapesGap = properties.gap;
 		}
 	}
 };

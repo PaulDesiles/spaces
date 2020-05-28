@@ -4,7 +4,7 @@ import {Shape} from '../../src/core/Shape';
 const parameters = [
 	1000,	// Xmax
 	1000,	// Ymax
-	10		// FormsGap
+	10		// shapesGap
 ];
 
 describe('constructor', () => {

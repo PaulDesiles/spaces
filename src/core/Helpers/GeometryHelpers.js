@@ -1,12 +1,12 @@
 import {Point} from '../Point';
 import {equiv, resolve2ndDegreePolynom} from './MathHelpers';
 
-// To know which side of an edge is inside the form
+// To know which side of an edge is inside the shape
 // > the right side of an edge (points[i], points[i+1]) will be inside if clockwise is true
 // Sum over the edges, (x2-x1)(y2+y1)
 // http://en.wikipedia.org/wiki/Shoelace_formula
 // http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order/1165943#1165943
-export function isFormClockwiseOriented(points) {
+export function isShapeClockwiseOriented(points) {
 	let i;
 	let sum = 0;
 	for (i = 0; i < points.length - 1; i++) {

@@ -3,7 +3,7 @@ import {Intersection} from '../../../src/core/Intersection';
 import {Line} from '../../../src/core/Line';
 import * as Helper from '../../../src/core/Helpers/GeometryHelpers';
 
-describe('isFormClockwiseOriented', () => {
+describe('isShapeClockwiseOriented', () => {
 	const A = {x: 0, y: 0};
 	const B = {x: 30, y: 30};
 	const C = {x: 60, y: 40};
@@ -11,45 +11,45 @@ describe('isFormClockwiseOriented', () => {
 	const E = {x: 50, y: 15};
 
 	test('ABC convex', () => {
-		expect(Helper.isFormClockwiseOriented([A, B, C])).toBeFalsy();
-		expect(Helper.isFormClockwiseOriented([B, C, A])).toBeFalsy();
-		expect(Helper.isFormClockwiseOriented([C, A, B])).toBeFalsy();
+		expect(Helper.isShapeClockwiseOriented([A, B, C])).toBeFalsy();
+		expect(Helper.isShapeClockwiseOriented([B, C, A])).toBeFalsy();
+		expect(Helper.isShapeClockwiseOriented([C, A, B])).toBeFalsy();
 	});
 
 	test('ABCD convex', () => {
-		expect(Helper.isFormClockwiseOriented([A, B, C, D])).toBeFalsy();
-		expect(Helper.isFormClockwiseOriented([B, C, D, A])).toBeFalsy();
-		expect(Helper.isFormClockwiseOriented([C, D, A, B])).toBeFalsy();
-		expect(Helper.isFormClockwiseOriented([D, A, B, C])).toBeFalsy();
+		expect(Helper.isShapeClockwiseOriented([A, B, C, D])).toBeFalsy();
+		expect(Helper.isShapeClockwiseOriented([B, C, D, A])).toBeFalsy();
+		expect(Helper.isShapeClockwiseOriented([C, D, A, B])).toBeFalsy();
+		expect(Helper.isShapeClockwiseOriented([D, A, B, C])).toBeFalsy();
 	});
 
 	test('ABCDE concave', () => {
-		expect(Helper.isFormClockwiseOriented([A, B, C, D, E])).toBeFalsy();
-		expect(Helper.isFormClockwiseOriented([B, C, D, E, A])).toBeFalsy();
-		expect(Helper.isFormClockwiseOriented([C, D, E, A, B])).toBeFalsy();
-		expect(Helper.isFormClockwiseOriented([D, E, A, B, C])).toBeFalsy();
-		expect(Helper.isFormClockwiseOriented([E, A, B, C, D])).toBeFalsy();
+		expect(Helper.isShapeClockwiseOriented([A, B, C, D, E])).toBeFalsy();
+		expect(Helper.isShapeClockwiseOriented([B, C, D, E, A])).toBeFalsy();
+		expect(Helper.isShapeClockwiseOriented([C, D, E, A, B])).toBeFalsy();
+		expect(Helper.isShapeClockwiseOriented([D, E, A, B, C])).toBeFalsy();
+		expect(Helper.isShapeClockwiseOriented([E, A, B, C, D])).toBeFalsy();
 	});
 
 	test('CBA convex', () => {
-		expect(Helper.isFormClockwiseOriented([C, B, A])).toBeTruthy();
-		expect(Helper.isFormClockwiseOriented([B, A, C])).toBeTruthy();
-		expect(Helper.isFormClockwiseOriented([A, C, B])).toBeTruthy();
+		expect(Helper.isShapeClockwiseOriented([C, B, A])).toBeTruthy();
+		expect(Helper.isShapeClockwiseOriented([B, A, C])).toBeTruthy();
+		expect(Helper.isShapeClockwiseOriented([A, C, B])).toBeTruthy();
 	});
 
 	test('DCBA convex', () => {
-		expect(Helper.isFormClockwiseOriented([D, C, B, A])).toBeTruthy();
-		expect(Helper.isFormClockwiseOriented([C, B, A, D])).toBeTruthy();
-		expect(Helper.isFormClockwiseOriented([B, A, D, C])).toBeTruthy();
-		expect(Helper.isFormClockwiseOriented([A, D, C, B])).toBeTruthy();
+		expect(Helper.isShapeClockwiseOriented([D, C, B, A])).toBeTruthy();
+		expect(Helper.isShapeClockwiseOriented([C, B, A, D])).toBeTruthy();
+		expect(Helper.isShapeClockwiseOriented([B, A, D, C])).toBeTruthy();
+		expect(Helper.isShapeClockwiseOriented([A, D, C, B])).toBeTruthy();
 	});
 
 	test('EDCBA concave', () => {
-		expect(Helper.isFormClockwiseOriented([E, D, C, B, A])).toBeTruthy();
-		expect(Helper.isFormClockwiseOriented([D, C, B, A, E])).toBeTruthy();
-		expect(Helper.isFormClockwiseOriented([C, B, A, E, D])).toBeTruthy();
-		expect(Helper.isFormClockwiseOriented([B, A, E, D, C])).toBeTruthy();
-		expect(Helper.isFormClockwiseOriented([A, E, D, C, B])).toBeTruthy();
+		expect(Helper.isShapeClockwiseOriented([E, D, C, B, A])).toBeTruthy();
+		expect(Helper.isShapeClockwiseOriented([D, C, B, A, E])).toBeTruthy();
+		expect(Helper.isShapeClockwiseOriented([C, B, A, E, D])).toBeTruthy();
+		expect(Helper.isShapeClockwiseOriented([B, A, E, D, C])).toBeTruthy();
+		expect(Helper.isShapeClockwiseOriented([A, E, D, C, B])).toBeTruthy();
 	});
 });
 

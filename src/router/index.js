@@ -11,7 +11,7 @@ const routes = [
     component: Tutorial
   },
   {
-    path: '/draw/:id',
+    path: '/draw/:id?',
     name: 'draw',
     component() {
       return import(/* webpackChunkName: "drawingApp" */ '../DrawingApp.vue');

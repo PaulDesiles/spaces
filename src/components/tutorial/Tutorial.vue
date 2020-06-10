@@ -52,25 +52,28 @@ export default {
 		}
 	},
 	methods: {
-		start() {
-			fetch('http://localhost:4000/generateId')
-				.then(response => {
+		// Retrieve a new id from server to start a new drawing
+		// if for whatever reason we can't obtain an id, we start an "offline" drawing
+		async start() {
+			const newRoute = {name: 'draw'};
+			const urlBase = process.env.VUE_APP_BACKENDURL;
+			if (urlBase) {
+				try {
+					const response = await fetch(`${urlBase}/generateId`);
 					if (response.ok) {
-						response.json()
-							.then(deserialized => {
-								this.$router.push({
-									name: 'draw',
-									params: {
-										id: deserialized.id
-									}
-								});
-							})
-							.catch(error => console.log(error));
+						const deserialized = await response.json();
+						newRoute.params = {
+							id: deserialized.id
+						};
 					} else {
 						console.log(response);
 					}
-				})
-				.catch(error => console.log(error));
+				} catch (error) {
+					console.log(error);
+				}
+			}
+
+			this.$router.push(newRoute);
 		}
 	}
 };

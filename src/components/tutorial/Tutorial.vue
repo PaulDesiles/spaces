@@ -53,12 +53,24 @@ export default {
 	},
 	methods: {
 		start() {
-			this.$router.push({
-				name: 'draw',
-				params: {
-					id: 'test'
-				}
-			});
+			fetch('http://localhost:4000/generateId')
+				.then(response => {
+					if (response.ok) {
+						response.json()
+							.then(deserialized => {
+								this.$router.push({
+									name: 'draw',
+									params: {
+										id: deserialized.id
+									}
+								});
+							})
+							.catch(error => console.log(error));
+					} else {
+						console.log(response);
+					}
+				})
+				.catch(error => console.log(error));
 		}
 	}
 };

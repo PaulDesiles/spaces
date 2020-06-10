@@ -1,6 +1,6 @@
 <template>
 	<Transition name="fade">
-		<div v-if="opened" id="overlay" @click="close()">
+		<div v-if="opened" class="modalOverlay" @click="close()">
 			<div :class="panelClass" @click.stop>
 				<slot />
 				<img id="close" :src="closeIcon" @click="close()" />
@@ -30,7 +30,7 @@ export default {
 			return iconCross;
 		},
 		panelClass() {
-			const classes = ['contentPanel'];
+			const classes = ['modalPanel'];
 			if (this.small) {
 				classes.push('smallPanel');
 			}
@@ -86,27 +86,8 @@ export default {
 };
 </script>
 
-<style scoped>
-#overlay {
-	background: rgba(0, 0, 0, 0.2);
-	width: 100%;
-	height: 100%;
-	position: fixed;
-	top: 0;
-	left: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.contentPanel {
-	background: white;
-	width: 350px;
-	padding: 15px 20px;
-	box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.3);
-	border-radius: 3px;
-	position: relative;
-}
+<style lang="scss" scoped>
+@import '~@/global.scss';
 
 .smallPanel {
 	width: 220px;

@@ -1,9 +1,9 @@
 <template>
-	<Modal opened-state="tutorial">
-		<div>
+	<div class="modalOverlay">
+		<div class="modalPanel">
 			<div>
 				<img id="drawing" src="./assets/drawing.svg" />
-				<h1>SPACES is a vector drawing software with a focus on keeping a constant distance between all shapes.</h1>
+				<h1>SPACES is a vector drawing app with a focus on keeping a constant distance between all shapes.</h1>
 			</div>
 			<ul>
 				<li>
@@ -34,31 +34,31 @@
 			</template>
 
 			<div id="lastLine">
-				<a class="buttonLink" @click="close()">
+				<a class="buttonLink" @click="start()">
 					Start
 				</a>
 			</div>
 		</div>
-	</Modal>
+	</div>
 </template>
 
 <script>
-import Modal from '../modal/Modal';
-import * as states from '../../store/states';
 
 export default {
 	name: 'Tutorial',
-	components: {
-		Modal
-	},
 	computed: {
 		hasTactileScreen() {
 			return navigator.maxTouchPoints > 0;
 		}
 	},
 	methods: {
-		close() {
-			this.$store.commit('setInteractionState', states.DRAWING);
+		start() {
+			this.$router.push({
+				name: 'draw',
+				params: {
+					id: 'test'
+				}
+			});
 		}
 	}
 };

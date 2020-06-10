@@ -69,7 +69,7 @@ const debug = process.env.NODE_ENV !== 'production';
 export default new Vuex.Store({
 	strict: debug,
 	state: {
-		interactionState: states.TUTORIAL,
+		interactionState: states.DRAWING,
 		shapes: [],
 		currentShapePoints: [],
 		hoveredElement: undefined,

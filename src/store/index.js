@@ -69,7 +69,8 @@ const debug = process.env.NODE_ENV !== 'production';
 export default new Vuex.Store({
 	strict: debug,
 	state: {
-		interactionState: states.TUTORIAL,
+		drawingId: undefined,
+		interactionState: states.INIT,
 		shapes: [],
 		currentShapePoints: [],
 		hoveredElement: undefined,
@@ -79,6 +80,9 @@ export default new Vuex.Store({
 		parameters
 	},
 	mutations: {
+		setDrawingId(state, id) {
+			state.drawingId = id;
+		},
 		setInteractionState(state, uiState) {
 			state.interactionState = uiState;
 		},

@@ -81,6 +81,8 @@ import {Line} from './core/Line';
 import {constrainPointPosition} from './core/Constraint';
 import {getShapePath} from './core/Helpers/SvgHelpers';
 
+import * as backend from './connection/backend';
+
 export default {
 	name: 'App',
 	components: {
@@ -135,10 +137,14 @@ export default {
 			const method = this.shouldListenToKeyEvents ? document.addEventListener : document.removeEventListener;
 			method('keydown', this.keyDown);
 			method('keyup', this.keyUp);
+		},
+		$route() {
+			this.handleParamChange();
 		}
 	},
 	mounted() {
 		window.addEventListener('blur', this.windowLostFocus);
+		this.handleParamChange();
 	},
 	beforeDestroy() {
 		window.removeEventListener('blur', this.windowLostFocus);
@@ -314,24 +320,47 @@ export default {
 			} else if (!activate && state === states.PREVIEW) {
 				this.$store.commit('setInteractionState', states.DRAWING);
 			}
+		},
+		async handleParamChange() {
+			let id = this.$route.params.id;
+			if (id) {
+				if (id !== this.$store.state.drawingId) {
+					const drawing = await backend.retrieveDrawing(id);
+					if (drawing) {
+						await this.initializeDrawing(drawing);
+						this.$store.commit('setDrawingId', id);
+						this.$store.commit('setInteractionState', states.DRAWING);
+					}
+				}
+			} else {
+				this.$store.commit('setInteractionState', states.TUTORIAL);
+				id = await backend.generateDrawingId();
+				if (id) {
+					// Silently navigate to /id so as user can come back to this drawing
+					this.$store.commit('setDrawingId', id);
+					this.$router.push({
+						name: 'draw',
+						params: {id}
+					});
+				} else {
+					// Offline drawing : drawing will not be stored
+					if (this.$store.state.drawingId) {
+						this.$store.commit('setDrawingId', undefined);
+					}
+				}
+			}
+		},
+		async initializeDrawing(drawing) {
+
 		}
 	}
 };
 </script>
 
-<style >
-body {
-	margin: 0px;
-	font-family: Arial, Helvetica;
-	font-size: 10pt;
-}
-
-html, body, #app {
+<style scoped>
+#app {
 	width:100%;
 	height:100%;
-}
-
-#app {
 	display: grid;
 	grid-template-columns: 190px auto;
 }

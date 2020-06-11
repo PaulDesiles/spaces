@@ -139,12 +139,12 @@ export default {
 			method('keyup', this.keyUp);
 		},
 		$route() {
-			this.handleParamChange();
+			this.handleParamChangeAsync();
 		}
 	},
 	mounted() {
 		window.addEventListener('blur', this.windowLostFocus);
-		this.handleParamChange();
+		this.handleParamChangeAsync();
 	},
 	beforeDestroy() {
 		window.removeEventListener('blur', this.windowLostFocus);
@@ -321,20 +321,20 @@ export default {
 				this.$store.commit('setInteractionState', states.DRAWING);
 			}
 		},
-		async handleParamChange() {
+		async handleParamChangeAsync() {
 			let id = this.$route.params.id;
 			if (id) {
 				if (id !== this.$store.state.drawingId) {
-					const drawing = await backend.retrieveDrawing(id);
+					const drawing = await backend.getDrawingAsync(id);
 					if (drawing) {
-						await this.initializeDrawing(drawing);
+						this.$store.dispatch('recreateDrawing', drawing);
 						this.$store.commit('setDrawingId', id);
 						this.$store.commit('setInteractionState', states.DRAWING);
 					}
 				}
 			} else {
 				this.$store.commit('setInteractionState', states.TUTORIAL);
-				id = await backend.generateDrawingId();
+				id = await backend.getNewIdAsync();
 				if (id) {
 					// Silently navigate to /id so as user can come back to this drawing
 					this.$store.commit('setDrawingId', id);
@@ -349,9 +349,6 @@ export default {
 					}
 				}
 			}
-		},
-		async initializeDrawing(drawing) {
-
 		}
 	}
 };

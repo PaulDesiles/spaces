@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import parameters from './parameters';
 import EventBus from '../EventBus';
 import {Shape} from '../core/Shape';
+import {Intersection} from '../core/Intersection';
 import {Point} from '../core/Point';
 import {getContrainedSnappingElements} from '../core/Constraint';
 import {distinct} from '../core/Helpers/ArrayHelpers';
@@ -54,16 +55,20 @@ const getters = {
 	}
 };
 
-const closeCurrentShape = function (state) {
+const closeShape = function (state, points) {
 	const newShape = new Shape(
-		state.currentShapePoints,
+		points,
 		state.parameters.drawingSize.x,
 		state.parameters.drawingSize.y,
 		state.parameters.shapesGap);
 	newShape.updateIntersections(getters.lines(state));
-	state.currentShapePoints = [];
 	state.shapes.push(newShape);
 };
+
+const closeCurrentShape = function (state) {
+	closeShape(state, state.currentShapePoints);
+	state.currentShapePoints = [];
+}
 
 const debug = process.env.NODE_ENV !== 'production';
 export default new Vuex.Store({
@@ -93,6 +98,9 @@ export default new Vuex.Store({
 		validateCurrentShape(state) {
 			closeCurrentShape(state);
 			state.redoStack = [];
+		},
+		addShape(state, shapePoints) {
+			closeShape(state, shapePoints);
 		},
 		setHoveredElement(state, element) {
 			state.hoveredElement = element;
@@ -139,6 +147,16 @@ export default new Vuex.Store({
 			context.commit('parameters/setDrawingProperties', parameters);
 			EventBus.$emit('newDrawing');
 			context.commit('setInteractionState', states.DRAWING);
+		},
+		recreateDrawing(context, drawing) {
+			context.commit('reset');
+			context.commit('parameters/setDrawingProperties', drawing.parameters);
+			drawing.shapes.forEach(s => {
+				context.commit('addShape',
+					s.points.map(p => new Intersection(p.x, p.y))
+				);
+			});
+			EventBus.$emit('newDrawing');
 		}
 	}
 });

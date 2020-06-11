@@ -1,17 +1,12 @@
 // Backend api connections
 
-// Ask for a new drawing id
-export async function generateDrawingId() {
-	try {
-		const urlBase = process.env.VUE_APP_BACKENDURL;
-		if (urlBase) {
-			const response = await fetch(`${urlBase}/generateId`);
-			if (response.ok) {
-				const {id} = await response.json();
-				return id;
-			}
+// If the url is not defined, we'll run offline
+const urlBase = process.env.VUE_APP_BACKENDURL;
 
-			console.log(response);
+async function safelyRun(asyncAction) {
+	try {
+		if (urlBase) {
+			return await asyncAction();
 		}
 	} catch (error) {
 		console.log(error);
@@ -20,7 +15,29 @@ export async function generateDrawingId() {
 	return undefined;
 }
 
+// Ask for a new drawing id
+export async function getNewIdAsync() {
+	return safelyRun(async () => {
+		const response = await fetch(`${urlBase}/generateId`);
+		if (response.ok) {
+			const {id} = await response.json();
+			return id;
+		}
+
+		console.log(response);
+		return undefined;
+	});
+}
+
 // Retrieve drawing data from an id
-export async function retrieveDrawing(id) {
-	return undefined;
+export async function getDrawingAsync(id) {
+	return safelyRun(async () => {
+		const response = await fetch(`${urlBase}/drawing/${id}`);
+		if (response.ok) {
+			return await response.json();
+		}
+
+		console.log(response);
+		return undefined;
+	});
 }

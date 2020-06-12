@@ -140,6 +140,9 @@ export default {
 		},
 		$route() {
 			this.handleParamChangeAsync();
+		},
+		shapes() {
+			backend.alertShapeChangesAsync(this.$store.state.drawingId, this.shapes);
 		}
 	},
 	mounted() {

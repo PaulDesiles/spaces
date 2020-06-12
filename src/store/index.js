@@ -55,20 +55,21 @@ const getters = {
 	}
 };
 
-const closeShape = function (state, points) {
+const createShape = function (state, points) {
 	const newShape = new Shape(
 		points,
 		state.parameters.drawingSize.x,
 		state.parameters.drawingSize.y,
 		state.parameters.shapesGap);
 	newShape.updateIntersections(getters.lines(state));
-	state.shapes.push(newShape);
+	return newShape;
 };
 
 const closeCurrentShape = function (state) {
-	closeShape(state, state.currentShapePoints);
+	const newShape = createShape(state, state.currentShapePoints);
+	state.shapes.push(newShape);
 	state.currentShapePoints = [];
-}
+};
 
 const debug = process.env.NODE_ENV !== 'production';
 export default new Vuex.Store({
@@ -99,8 +100,10 @@ export default new Vuex.Store({
 			closeCurrentShape(state);
 			state.redoStack = [];
 		},
-		addShape(state, shapePoints) {
-			closeShape(state, shapePoints);
+		addShape(state, { points, remoteId }) {
+			const newShape = createShape(state, points);
+			newShape.remoteId = remoteId;
+			state.shapes.push(newShape);
 		},
 		setHoveredElement(state, element) {
 			state.hoveredElement = element;
@@ -152,9 +155,10 @@ export default new Vuex.Store({
 			context.commit('reset');
 			context.commit('parameters/setDrawingProperties', drawing.parameters);
 			drawing.shapes.forEach(s => {
-				context.commit('addShape',
-					s.points.map(p => new Intersection(p.x, p.y))
-				);
+				context.commit('addShape', {
+					points: s.points.map(p => new Intersection(p.x, p.y)),
+					remoteId: s._id
+				});
 			});
 			EventBus.$emit('newDrawing');
 		}

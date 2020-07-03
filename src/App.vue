@@ -325,7 +325,7 @@ export default {
 			}
 		},
 		async handleParamChangeAsync() {
-			let id = this.$route.params.id;
+			const id = this.$route.params.id;
 			if (id) {
 				if (id !== this.$store.state.drawingId) {
 					const drawing = await backend.getDrawingAsync(id);
@@ -336,20 +336,29 @@ export default {
 					}
 				}
 			} else {
-				this.$store.commit('setInteractionState', states.TUTORIAL);
-				id = await backend.getNewIdAsync();
-				if (id) {
-					// Silently navigate to /id so as user can come back to this drawing
-					this.$store.commit('setDrawingId', id);
-					this.$router.push({
-						name: 'draw',
-						params: {id}
-					});
-				} else {
-					// Offline drawing : drawing will not be stored
-					if (this.$store.state.drawingId) {
-						this.$store.commit('setDrawingId', undefined);
-					}
+				await this.createDrawingAsync();
+			}
+		},
+		async createDrawingAsync() {
+			this.$store.commit('setInteractionState', states.TUTORIAL);
+			const parameters = this.$store.state.parameters;
+			const id = await backend.createDrawingAsync({
+				width: parameters.drawingSize.x,
+				height: parameters.drawingSize.y,
+				gap: parameters.shapesGap
+			});
+
+			if (id) {
+				// Silently navigate to /id so as user can come back to this drawing
+				this.$store.commit('setDrawingId', id);
+				this.$router.push({
+					name: 'draw',
+					params: {id}
+				});
+			} else {
+				// Offline drawing : drawing will not be stored
+				if (this.$store.state.drawingId) {
+					this.$store.commit('setDrawingId', undefined);
 				}
 			}
 		}

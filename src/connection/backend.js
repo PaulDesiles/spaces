@@ -24,14 +24,24 @@ function delay(duration) {
 	return new Promise(resolve => setTimeout(resolve, duration));
 }
 
-// Ask for a new drawing id
-export async function getNewIdAsync() {
+// Create a new drawing for given parameters and return its id
+export async function createDrawingAsync(parameters) {
 	try {
 		if (urlBase) {
-			const response = await fetch(`${urlBase}/generateId`);
+			const response = await fetch(`${urlBase}/drawing`,
+				{
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({
+						shapes: [],
+						parameters
+					})
+				}
+			);
+
 			if (response.ok) {
-				const {id} = await response.json();
-				return id;
+				const {publicId} = await response.json();
+				return publicId;
 			}
 
 			console.log(response);
@@ -101,9 +111,7 @@ async function sendShapeChangesAsync(id, shapes) {
 				knownShapeIds.push(s.remoteId);
 			} else {
 				addShapes.push({
-					points: s.points.map(p => {
-						return {x: p.x, y: p.y};
-					})
+					points: s.points.map(p => ({x: p.x, y: p.y}))
 				});
 			}
 		});
@@ -112,7 +120,7 @@ async function sendShapeChangesAsync(id, shapes) {
 		if (addShapes.length > 0 || removeShapeIds.length > 0) {
 			const response = await fetch(`${urlBase}/drawing/${id}`,
 				{
-					method: 'PUT',
+					method: 'PATCH',
 					headers: {'Content-Type': 'application/json'},
 					body: JSON.stringify({
 						removeShapeIds,

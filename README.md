@@ -8,5 +8,7 @@ Give it a try at : https://pauldesiles.github.io/spaces/
 This demo page is a static version : a backend integration to save the drawings online is in progress.
 
 SPACES is powered by Vue.Js
+
 Icons are made with Inkscape and compressed with https://vecta.io/nano
+
 Core functions tested with Jest and the help of https://www.geogebra.org/classic

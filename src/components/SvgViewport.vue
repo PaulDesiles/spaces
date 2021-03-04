@@ -42,9 +42,7 @@ class PanHandler {
 		if (getDeltaRatio) {
 			this.getDeltaRatio = getDeltaRatio;
 		} else {
-			this.getDeltaRatio = function () {
-				return {x: 1, y: 1};
-			};
+			this.getDeltaRatio = () => ({x: 1, y: 1});
 		}
 
 		this.getPan = getPan;

@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import parameters from './parameters';
 import EventBus from '../EventBus';
 import {Shape} from '../core/Shape';
+import {Intersection} from '../core/Intersection';
 import {Point} from '../core/Point';
 import {getContrainedSnappingElements} from '../core/Constraint';
 import {distinct} from '../core/Helpers/ArrayHelpers';
@@ -54,22 +55,28 @@ const getters = {
 	}
 };
 
-const closeCurrentShape = function (state) {
+const createShape = function (state, points) {
 	const newShape = new Shape(
-		state.currentShapePoints,
+		points,
 		state.parameters.drawingSize.x,
 		state.parameters.drawingSize.y,
 		state.parameters.shapesGap);
 	newShape.updateIntersections(getters.lines(state));
-	state.currentShapePoints = [];
+	return newShape;
+};
+
+const closeCurrentShape = function (state) {
+	const newShape = createShape(state, state.currentShapePoints);
 	state.shapes.push(newShape);
+	state.currentShapePoints = [];
 };
 
 const debug = process.env.NODE_ENV !== 'production';
 export default new Vuex.Store({
 	strict: debug,
 	state: {
-		interactionState: states.TUTORIAL,
+		drawingId: undefined,
+		interactionState: states.INIT,
 		shapes: [],
 		currentShapePoints: [],
 		hoveredElement: undefined,
@@ -79,6 +86,9 @@ export default new Vuex.Store({
 		parameters
 	},
 	mutations: {
+		setDrawingId(state, id) {
+			state.drawingId = id;
+		},
 		setInteractionState(state, uiState) {
 			state.interactionState = uiState;
 		},
@@ -89,6 +99,11 @@ export default new Vuex.Store({
 		validateCurrentShape(state) {
 			closeCurrentShape(state);
 			state.redoStack = [];
+		},
+		addShape(state, { points, remoteId }) {
+			const newShape = createShape(state, points);
+			newShape.remoteId = remoteId;
+			state.shapes.push(newShape);
 		},
 		setHoveredElement(state, element) {
 			state.hoveredElement = element;
@@ -135,6 +150,17 @@ export default new Vuex.Store({
 			context.commit('parameters/setDrawingProperties', parameters);
 			EventBus.$emit('newDrawing');
 			context.commit('setInteractionState', states.DRAWING);
+		},
+		recreateDrawing(context, drawing) {
+			context.commit('reset');
+			context.commit('parameters/setDrawingProperties', drawing.parameters);
+			drawing.shapes.forEach(s => {
+				context.commit('addShape', {
+					points: s.points.map(p => new Intersection(p.x, p.y)),
+					remoteId: s._id
+				});
+			});
+			EventBus.$emit('newDrawing');
 		}
 	}
 });

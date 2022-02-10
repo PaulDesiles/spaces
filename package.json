@@ -22,7 +22,7 @@
     "eslint-config-xo-vue": "^3.1.10",
     "eslint-plugin-unicorn": "^17.2.0",
     "eslint-plugin-vue": "^6.2.2",
-    "node-sass": "^4.14.1",
+    "node-sass": "^7.0.0",
     "sass-loader": "^8.0.2",
     "vue-template-compiler": "^2.6.11",
     "xo": "^0.28.3"
